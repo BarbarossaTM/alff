@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# genAllServiceRules
+#
+# Generate an iptables chain an host/port rules for each configured
+# service. (as in run the service-setup-tool for every service)
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Thu, 27 Apr 2006 19:42:20 +0200
+#
+
+LIB_DIR="/usr/share/fwrbm/routines/"
+
+CONFIG_DIR="/etc/fwrbm"
+SERVICES_D="${CONFIG_DIR}/services.d"
+
+SERVICE_CHAINS="allowServicesFromInternalNets allowServicesFromFilteredNets allowWorldOpenServices"
+CALLBACK_CHAINS="allowCB_SrvToInternalNets allowCB_SrvToFilteredNets allowCB_SrvToWorld"
+
+if [ ! -d "${SERVICES_D}" ]; then
+	echo "Error: services.d directory ${SERVICES_D} does not exist." >&2
+	exit 1
+fi
+
+echo " * Creating callback service rules..."
+for cb_chain in ${CALLBACK_CHAINS}; do
+	if ! iptables -N ${cb_chain} >/dev/null 2>/dev/null; then
+		iptables -F ${cb_chain}
+	fi
+done
+
+echo " * Creating service rules..."
+for chain in ${SERVICE_CHAINS}; do
+	if ! iptables -N ${chain} >/dev/null 2>/dev/null; then
+		iptables -F ${chain}
+	fi
+done
+
+for srv in `find ${SERVICES_D} -type f -print | sort `; do
+	srv_name=`basename ${srv}`
+	echo -n "   - ${srv_name}: "
+
+	if "${LIB_DIR}/generateServiceRules" ${srv_name}; then
+		echo "done."
+	else
+		echo  "FAILED!"
+	fi
+done
+
+echo " done."

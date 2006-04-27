@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+#
+# tcp_pre-analysis
+#
+# Check the headers of TCP connections for unusual flag combinations
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 24 Apr 2006 20:04:15 +0200
+#
+
+##
+# Make sure there is (an empty) chain tcp_header_check
+if ! iptables -F tcp_header_check >/dev/null 2>&1; then
+	iptables -N tcp_header_check
+fi
+
+##
+# If packet has SYN/ACK set and is new to ct, someone is trying nasty things
+iptables -A tcp_header_check -p tcp --tcp-flags SYN,ACK SYN,ACK -m state --state NEW -m limit --limit 3/m --limit-burst 5 -j LOG --log-prefix "fwrbm syn-ack-but-new: "
+iptables -A tcp_header_check -p tcp --tcp-flags SYN,ACK SYN,ACK -m state --state NEW -j REJECT --reject-with tcp-reset 
+
+##
+# If the paket is new to conntrack but does not have 'syn' set, someone is trying nasty things, too
+iptables -A tcp_header_check -p tcp ! --syn -m state --state NEW -m limit --limit 3/m --limit-burst 5 -j LOG --log-prefix "fwrbm new-without-syn: "
+iptables -A tcp_header_check -p tcp ! --syn -m state --state NEW -j DROP

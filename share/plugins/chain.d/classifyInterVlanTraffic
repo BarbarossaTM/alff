@@ -1,0 +1,156 @@
+#!/usr/bin/perl -w
+#
+# classifyInterVlanTraffic
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Wed, 26 Apr 2006 18:08:15 +0200
+#
+
+use strict;
+use Fwrbm::Main;
+use Fwrbm::Config;
+#use XML::Simple;
+
+##
+# Some paths
+my $configfile = "/etc/fwrbm/fwrbm.conf";
+my $rules_d = "/etc/fwrbm/rules.d";
+my $iptables = "/sbin/iptables";
+
+##
+# Debugging
+#
+# Print out debug outbut
+my $debug = 0;
+# Set to 1 and nothing will really happend
+my $dry_run = 0;
+
+# Storage for parse configuraton
+my $fwrbm = Fwrbm::Main->new;
+my $config = Fwrbm::Config->new( $configfile )
+	or die "Error: could not load configuration from $configfile\n";
+
+# List of all known vlans
+my @vlans;
+
+my $default_chain_policy = $config->getDefaultChainPolicy;
+
+
+################################################################################
+#			    Some nifty functions			       #
+################################################################################
+
+##
+# classifyTraffic from $src_vlan to $dst_vlan
+sub classifyTrafficFromTo($$) { #{{{
+	my $src_vlan = shift;
+	my $dst_vlan = shift;
+
+	my $chain = $src_vlan . "_to_" . $dst_vlan;
+
+	# Try to get interface names
+	my $src_interface = $config->getVlanInterface( $src_vlan );
+	my $dst_interface = $config->getVlanInterface( $dst_vlan );
+	$src_interface = "-i " . $src_interface if ( $src_interface );
+	$dst_interface = "-o " . $dst_interface if ( $dst_interface );
+
+	# There might be multiple CIDR networks which describe a vlan...
+	# It´s no risk to asume this everytime.
+	my @src_networks = $config->getVlanNetworks( $src_vlan );
+	my @dst_networks = $config->getVlanNetworks( $dst_vlan );
+
+	# Not that good runtime(?), but ... XXX
+	foreach my $src_network ( @src_networks ) {
+		foreach my $dst_network ( @dst_networks ) {
+
+			# Little hack, because iptables -N might return with 1, which is not error here
+			unless ( $dry_run ) {
+				print STDERR "run \"$iptables -N $chain >/dev/null 2>/dev/null\"\n" if ( $debug );
+				if ( ! system("$iptables -N $chain >/dev/null 2>/dev/null") ) {
+					$fwrbm->run_cmd("$iptables -F $chain");
+				}
+			}
+			else {
+				if ( ! $fwrbm->run_cmd("$iptables -N $chain >/dev/null 2>/dev/null") ) {
+					$fwrbm->run_cmd("$iptables -F $chain");
+				}
+			}
+
+			$fwrbm->run_cmd("$iptables -A FORWARD -s $src_network $src_interface -d $dst_network $dst_interface -j $chain");
+		}
+	}
+
+} #}}}
+
+##
+# Load user defined rules into the chain for the given vlans if specified in rules.d/,
+# set $default_chain_policy else.
+sub loadChainRules($$) { # {{{
+	my $src_vlan = shift;
+	my $dst_vlan = shift;
+	my $chain = $src_vlan . "_to_" . $dst_vlan;
+
+	my $rules_file;
+
+	if ( -d $rules_d ) {
+		if ( -f "$rules_d/$chain" ) {
+			$rules_file = "$rules_d/$chain";
+		} elsif ( -f "$rules_d/$src_vlan" . "._to_default" ) {
+			$rules_file = "$rules_d/$src_vlan" . "._to_default";
+		} elsif ( -f "default_to" . "$rules_d/$src_vlan" ) {
+			$rules_file = "default_to" . "$rules_d/$src_vlan";
+		}
+		if ( $rules_file ) {
+			$fwrbm->run_cmd( "sh", "$rules_file" )
+				or print STDERR "Warning: Could not load rules for chain $chain";
+		}
+	} else {
+		$fwrbm->run_cmd( "$iptables -A $chain -j $default_chain_policy" );
+	}
+} #}}}
+
+
+################################################################################
+#				Let´s go				       #
+################################################################################
+
+##
+# Check if iptables can by found
+if ( ! -f $iptables ) {
+	print STDERR "Error: iptables was not found at $iptables, correct the path in $0\n";
+}
+
+
+##
+# Get a list of all known vlan ids
+@vlans = $config->getVlanList;
+
+
+##
+# Loop through all combinations of vlans and generate a vlan-matrix
+# (Skip x <-> x rules and rules for x <-> y for x,y \in unfiltered vlans
+#
+print " * Classifying inter vlan traffic... ";
+foreach my $src_vlan ( @vlans ) {
+
+	print ".";
+	foreach my $dst_vlan ( @vlans ) {
+		# Skip x <-> x rules.
+		if ( $src_vlan eq $dst_vlan ) {
+			next;
+		}
+
+		# If both vlans are *not* behind this firewall, there is nothing we could
+		# do for them...
+		if ( ! $config->isFilteredVlan( $src_vlan ) and ! $config->isFilteredVlan( $dst_vlan ) ) {
+			next;
+		}
+
+		# Ok, just do it[tm]
+		classifyTrafficFromTo( $src_vlan, $dst_vlan );
+		loadChainRules( $src_vlan, $dst_vlan );
+	}
+}
+print " done.\n";
+
+# vim:foldmethod=marker

@@ -1,0 +1,81 @@
+#!/bin/sh
+#
+# removeService <servicename>
+#
+# Maximilian Wilhelm <mwilhelm@math.uni-paderborn.de>
+#  -- Mon, 19 Dec 2005 14:01:30 +0100
+#
+
+set -e
+
+if ! which bc >/dev/null 2>/dev/null; then
+	echo "This programm needs 'bc' installed to work correctly. Exiting." >&2
+	exit 1
+fi
+
+BASE_DIR="/firewall/current"
+CONFIG_DIR="/etc/fwrbm"
+SERVICES_D="${CONFIG_DIR}/services.d"
+
+
+if [ -z "${1}" ]; then
+	echo "Usage: $0 service" >&2
+	exit 1
+fi
+
+SERVICE="${1}"
+echo "fwrbm: Removing service ${SERVICE}..."
+
+##
+# Check for service dir
+if [ ! -d "${SERVICES_D}" ]; then
+	echo "Error: services.d directory ${SERVICES_D} does not exists." >&2
+	exit 1
+fi
+
+if [ !  -f "${SERVICES_D}/${SERVICE}" ]; then
+	echo "Error: Configuration for service ${SERVICE} does not exists." >&2
+	exit 1
+fi
+
+# Check if service is still referenced by firewall rules
+echo -n " * Checking if service is still referenced... "
+
+SRV_REF_COUNT=`iptables -L -n | grep -c "^allowSrv${SERVICE}" || /bin/true`
+
+if [ ${SRV_REF_COUNT} -gt 0 ]; then
+	if [ `echo ${SRV_REF_COUNT} - \
+		$(iptables -L allowWorldOpenServices -n | grep -c "^allowSrv${SERVICE}") - \
+		$(iptables -L allowServicesFromInternalNets -n | grep -c "^allowSrv${SERVICE}") | bc` -gt 0 ]; then
+
+		echo "YES."
+		echo "   Error: Service ${SERVICE} is still referenced by firewall rules." >&2
+		echo "   You have to remove this rules before you can delete the service." >&2
+		exit 1
+	else
+		export INTERNAL_REF="true"
+		echo "YES."
+		echo "   Attention: Service ${SERVICE} is still referenced by fwrbm internal rules.">&2
+		echo "   You have to run  'fwrbm reload' to remove those references.">&2
+	fi
+else
+	echo "no."
+fi
+
+##
+# Let's go
+CHAIN="allowSrv${SERVICE}"
+
+# If chain exists, remove it
+if iptables -L ${CHAIN} -n > /dev/null 2>/dev/null; then
+	echo -n " * Flushing chain allowSrv${SERVICE}... "
+	iptables -F ${CHAIN} && echo "done." || echo "FAILED!"
+
+	if [ ! "${INTERNAL_REF}" ]; then
+		echo -n " * Remove chain allowSrv${SERVICE}... "
+		iptables -X ${CHAIN} && echo "done." || echo "FAILED!"
+	fi
+fi
+
+echo -n " * Removing configuration for service ${SERVICE}... "
+rm "${SERVICES_D}/${SERVICE}" && echo "done." || echo "FAILED!"

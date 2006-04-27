@@ -1,0 +1,36 @@
+#!/usr/bin/perl -w
+#
+# enable_DHCP_relay_FORWARD
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Thu, 27 Apr 2006 20:26:52 +0200
+#
+
+use strict;
+use Fwrbm::Main;
+use Fwrbm::Config;
+
+# Read config from default config file (/etc/fwrbm/fwrbm.conf);
+my $config = Fwrbm::Config->new;
+my $fwrbm = Fwrbm::Main->new;
+
+my $chain = "allowDHCP";
+
+my @dhcp_servers = $config->getDHCPServers;
+
+if ( scalar( @dhcp_servers ) > 0 ) {
+
+	print " * Allowing DHCP traffic to configured DHCP servers... ";
+	if ( system("/sbin/iptables -N $chain >/dev/null 2>/dev/null") ) {
+		$fwrbm->run_cmd("/sbin/iptables -F $chain");
+	}
+
+	$fwrbm->run_cmd("iptables -A FORWARD -p udp --sport 67:68 --dport 67:68 -j $chain");
+
+	foreach my $dhcp_server ( @dhcp_servers ) {
+		$fwrbm->run_cmd("/sbin/iptables -A $chain -d $dhcp_server -p udp --sport 68 --dport 67 -j ACCEPT");
+		$fwrbm->run_cmd("/sbin/iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 68 -j ACCEPT");
+			
+	}
+	print "done.\n";
+}

@@ -1,0 +1,69 @@
+#!/usr/bin/perl -w
+#
+# fwrbm_genshconf.pl
+#
+# Generate /etc/group like vlan configuration file from XML config
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 10 Apr 2006 13:45:54 +0200
+#
+
+use strict;
+use Data::Dumper;
+use Scalar::Util qw/blessed reftype/;
+use XML::Simple;
+
+# Configfile to be read
+my $xml_file = "/etc/fwrbm/fwrbm.conf";
+
+# Write the generated config to
+my $vlan_db = "/etc/fwrbm/.config/fwrbm.vlan.db";
+my $sh_config = "/etc/fwrbm/.config/sh_config";
+
+# Storage for XML hashtree
+my $xml_config;
+my %vlans;
+
+if ( $ARGV[0] ) {
+	$xml_file = $ARGV[0];
+}
+
+if ( -f $xml_file ) {
+	open( VLAN_DB, "> $vlan_db" ) or die "Error: Could not open outfile $vlan_db";
+	open( SH_CONFIG, "> $sh_config" ) or die "Error: Could not open outfile $sh_config";
+
+	$xml_config = XML::Simple::XMLin( $xml_file, NormalizeSpace => 2 )
+		or die "Error: Could not read XML file $xml_file\n";
+
+	foreach my $vlan ( sort keys %{$xml_config->{vlan}} ) {
+		my $vlan_hash = $xml_config->{vlan}->{$vlan};
+
+		my $filtered = "unfiltered";
+		my $trusted = "untrusted";
+		my $networks = "";
+		my $desc = "";
+
+		if ( exists $vlan_hash->{filtered} ) {
+			$filtered = "$vlan_hash->{filtered}" eq "yes" ? "filtered" : "unfiltered";
+		}
+
+		if ( exists $vlan_hash->{trusted} ) {
+			$trusted = "$vlan_hash->{trusted}" eq "yes" ? "trusted" : "untrusted";
+		}
+		
+		if ( ref($vlan_hash->{network}) ) {
+			$networks = join("," , @{$vlan_hash->{network}});
+		} else {
+			$networks = $vlan_hash->{network};
+		}
+
+		$desc = $vlan_hash->{desc};
+
+		print VLAN_DB "$vlan:$filtered:$trusted:$networks:$desc\n";
+	}
+	close( VLAN_DB );
+	close( SH_CONFIG );
+} else {
+	print STDERR "Error: File $xml_file does not exist!\n";
+	exit 1;
+}

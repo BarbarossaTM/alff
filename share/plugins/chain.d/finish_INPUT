@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+#
+# finish_INPUT
+#
+# Gracefully close the INPUT chain.
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 24 Apr 2006 20:19:50 +0200
+#
+
+iptables -A INPUT -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "fwrbm incoming: "
+iptables -A INPUT -p tcp -j REJECT --reject-with tcp-reset
+iptables -A INPUT -j REJECT --reject-with icmp-admin-prohibited

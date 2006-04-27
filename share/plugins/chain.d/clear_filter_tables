@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+#
+# clear_filter_tables
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Tue, 25 Apr 2006 15:29:18 +0200
+#
+
+iptables -t filter -F
+iptables -t filter -X
+iptables -t filter -Z

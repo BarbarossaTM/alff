@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+#
+# finish_FORWARD
+#
+# Gracefully close the FORWARD chain.
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 24 Apr 2006 20:22:38 +0200
+#
+
+iptables -A FORWARD -m limit --limit 5/sec -j LOG --limit-burst 10 --log-prefix "fwrbm rejected: "
+iptables -A FORWARD -p tcp -j REJECT --reject-with tcp-reset
+iptables -A FORWARD -j REJECT --reject-with icmp-admin-prohibited

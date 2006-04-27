@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+#
+# create_chain_log_and_reject
+#
+# Create (or recreate) a chain which logs a packet and drops it.
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 24 Apr 2006 19:34:30 +0200
+#
+
+##
+# Make sure we have (an empty) chain log_and_reject
+if ! iptables -F log_and_reject > /dev/null 2>&1; then
+	iptables -N log_and_reject
+fi
+
+# LOG the traffic to be rejected, but restrict the amount of logs...
+iptables -A log_and_reject -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "fwrbm rejected: "
+
+# REJECT tcp connections gently by sending a tcp-reset
+iptables -A log_and_reject -p tcp -j REJECT --reject-with tcp-reset
+
+# REJECT anything else via an ICMP message with icmp-admin-prohibited
+iptables -A log_and_reject -j REJECT --reject-with icmp-admin-prohibited

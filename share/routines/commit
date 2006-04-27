@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+#
+# fwrbm commit
+#
+# Commit the changes that have been done at the firewall config
+#
+# Maximilian Wilhelm <mwilhelm@math.uni-paderborn.de>
+#  -- Fri, 17 Mar 2006 00:31:26 +0100
+#
+
+CONFIG_DIR="/etc/fwrbm"
+MAILDOMAIN="math.uni-paderborn.de"
+
+# Kerberos machts moeglich
+username=`klist -5 -c | awk '/^Default principal/ { print $3 }' | sed -e 's/\([[:alnum:]]\+\)@.\+/\1/'`
+
+if [ -z "${username}" ]; then
+	username="root"
+fi
+
+pushd "${CONFIG_DIR}" >/dev/null
+
+find -type f ! -path '*.git*' -exec git-update-index {} \;
+
+git-commit --author "$username <${username}@${MAILDOMAIN}>"
+
+# vim:ft=sh:
