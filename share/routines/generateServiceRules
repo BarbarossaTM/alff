@@ -7,10 +7,11 @@
 # Joerg Jungermann <joju@math.uni-paderborn.de>
 #  -- Tue, 06 Dec 2005 17:48:00 +0100
 #
+# Updated by Maximilian Wilhelm <max@rfc2324.org>
+#  -- Thu, 27 Apr 2006 21:24:01 +0200
+#
 
-BASE_DIR="/firewall/current"
-CONFIG_DIR="/etc/fwrbm"
-SERVICES_D="${CONFIG_DIR}/services.d"
+SERVICES_D="/etc/fwrbm/services.d"
 
 # In case of trouble, at least, create the chain, or flush it,
 # if already existing
@@ -135,6 +136,5 @@ if [ "${CALLBACK_DST_PORTS}" -o "${CALLBACK_SRC_PORTS}" ]; then
 		iptables -A  allowCB_SrvToInternalNets  -j ${CALLBACK_CHAIN}
 	fi
 fi
-
 
 trap EXIT

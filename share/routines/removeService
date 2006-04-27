@@ -2,7 +2,7 @@
 #
 # removeService <servicename>
 #
-# Maximilian Wilhelm <mwilhelm@math.uni-paderborn.de>
+# Maximilian Wilhelm <max@rfc2324.org>
 #  -- Mon, 19 Dec 2005 14:01:30 +0100
 #
 
@@ -13,9 +13,7 @@ if ! which bc >/dev/null 2>/dev/null; then
 	exit 1
 fi
 
-BASE_DIR="/firewall/current"
-CONFIG_DIR="/etc/fwrbm"
-SERVICES_D="${CONFIG_DIR}/services.d"
+SERVICES_D="/etc/fwrbm/services.d"
 
 
 if [ -z "${1}" ]; then

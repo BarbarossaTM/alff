@@ -6,9 +6,7 @@
 #  -- Thu, 08 Dec 2005 15:42:50 +0100
 #
 
-BASE_DIR="/firewall/current"
-CONFIG_DIR="/etc/fwrbm"
-SERVICES_D="${CONFIG_DIR}/services.d"
+SERVICES_D="/etc/fwrbm/services.d"
 
 
 if [ -z "${1}" ]; then

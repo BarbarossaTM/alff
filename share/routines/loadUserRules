@@ -1,14 +1,12 @@
-#!/bin/sh
+#!/usr/bin/env sh
 #
 # loadUserRules
 #
-# Maximilian Wilhelm <mwilhelm@math.uni-paderborn.de>
+# Maximilian Wilhelm <max@rfc2324.org>
 #  -- Fri, 23 Dec 2005 20:15:54 +0100
 #
 
-BASE_DIR="/firewall/current"
-CONFIG_DIR="/etc/fwrbm"
-RULES_D="${CONFIG_DIR}/rules.d"
+RULES_D="/etc/fwrbm/rules.d"
 
 if [ ! -d "${RULES_D}" ]; then
 	echo "Error: rules.d ${RULES_D} does not exist."
@@ -16,7 +14,7 @@ if [ ! -d "${RULES_D}" ]; then
 fi
 
 echo -n " * Loading user defined rules... "
-for rules_file in `find "${RULES_D}" -type f ! -name \*_to_\* ! -name .\* ! -name \*default\* ! -name \*CVS\*`; do
+for rules_file in `find "${RULES_D}" -type f ! -name \*_to_\* ! -name .\* ! -name \*default\*`; do
 	echo -n "."
 	if ! sh "${rules_file}"; then
 		echo "Warning: Error while loading user rule file ${rules_file}!" >&2

@@ -69,25 +69,4 @@ function allowCBServicesToInternalNets() { #{{{
 #}}}
 
 ##
-# Create a 
-function allowDHCP() { #{{{
-	# The name of the allowDHCP chain
-	local CHAIN="allowDHCP"
-
-	echo -n " * Creating ACCEPT rules for DHCP traffic... "
-
-	if ! iptables -N ${CHAIN} >/dev/null 2>/dev/null; then
-		iptables -F ${CHAIN} >/dev/null 
-	fi
-	iptables -A FORWARD -p udp --sport 67:68 --dport 67:68 -j ${CHAIN}
-
-	for dhcp_server in ${DHCP_SERVERS}; do
-		iptables -A ${CHAIN} -d ${dhcp_server} -p udp --sport 68 --dport 67 -j ACCEPT
-		iptables -A ${CHAIN} -s ${dhcp_server} -p udp --sport 67 --dport 68 -j ACCEPT
-	done
-	echo "done."
-}
-#}}}
-
-##
 # vim:ft=sh:foldmethod=marker:
