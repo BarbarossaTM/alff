@@ -9,16 +9,40 @@
 #
 package Fwrbm::Main;
 
+$VERSION="1.0";
+$AUTHOR='Maximilian Wilhelm <max@rfc2324.org>';
+
 use strict;
 
-sub new() {
+##
+# Little bit of magic to simplify debugging
+sub _options(@) { #{{{
+        my %ret = @_;
+
+        if ( $ret{debug} ) {
+                foreach my $opt (keys %ret) {
+                        print STDERR "Fwrbm::Config->_options: $opt => $ret{$opt}\n";
+                }
+        }
+
+        return \%ret;
+} #}}}
+
+##
+# Constructor
+sub new() { #{{{
 	my $self = shift;
 	my $class = ref($self) || $self;
 
-	bless { debug => 0,
-		dry_run => 0
+	my $args = &_options;
+
+	my $debug = $args->{debug} || 0;
+	my $dry_run = $args->{dry_run} || 0;
+
+	bless { debug => $debug,
+		dry_run => $dry_run,
 		}, $class;
-}
+} #}}}
 
 ##
 # system-wrapper with error checking
@@ -39,21 +63,23 @@ sub run_cmd(@) { #{{{
 	return 0 if ( $self->{dry_run} );
 
 	my $ret = system( $cmd, @args );
-
+	
 	if ( $ret == -1 ) {
-		printf "Error: Failed to execute %s with args %s\"",
+		printf STDERR "Error: Failed to execute %s with args %s\"",
 			$cmd, join(" ", @args);
 	}
-	elsif ( $? & 127 ) {
-		printf "Error while executing %s, child died with signal %d, %s coredump\n",
+	elsif ( $ret & 127 ) {
+		printf STDERR "Error while executing %s, child died with signal %d, %s coredump\n",
 			$cmd, ($? & 127), ($? & 128) ? 'with' :  'without';
 	}
-	elsif ( $? ) {
-		printf "Error while executing %s with args %s, child exited with value %d\n",
+	elsif ( $ret ) {
+		printf STDERR "Error while executing %s with args %s, child exited with value %d\n",
 			$cmd, join(" ", @args), $? >> 8;
 	}
 
-	return $ret;
+	# Be aware of the different true/false idea between shell and perl
+	# Exit code 0 -> 1 in perl and vice versa.
+	return $ret == 0 ? 1 : 0 ;
 } #}}}
 
 1;

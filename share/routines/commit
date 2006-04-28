@@ -20,7 +20,7 @@ fi
 
 pushd "${CONFIG_DIR}" >/dev/null
 
-find -type f ! -path '*.git*' -exec git-update-index {} \;
+find . \( -type f -or -type l \) ! -path '*.git*' -exec git-update-index {} \;
 
 git-commit --author "$username <${username}@${MAILDOMAIN}>"
 

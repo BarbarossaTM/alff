@@ -1,6 +1,2 @@
- * Konfiguration sinnig restrukturieren
- * fwrbm commit
- * chain.d -> create chains before adding vlan_to_vlan and service chains
-  + spoof protection
-  + pre_analysis
+ * pre_analysis
  * Ganz am Ende in fwrbm nicht referenzierte chains loeschen

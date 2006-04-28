@@ -26,8 +26,8 @@ my $debug = 0;
 my $dry_run = 0;
 
 # Storage for parse configuraton
-my $fwrbm = Fwrbm::Main->new;
-my $config = Fwrbm::Config->new( $configfile )
+my $fwrbm = Fwrbm::Main->new( debug => $debug, dry_run => $dry_run );
+my $config = Fwrbm::Config->new( configfile => $configfile, debug => $debug )
 	or die "Error: could not load configuration from $configfile\n";
 
 # List of all known vlans
@@ -51,8 +51,6 @@ sub classifyTrafficFromTo($$) { #{{{
 	# Try to get interface names
 	my $src_interface = $config->getVlanInterface( $src_vlan );
 	my $dst_interface = $config->getVlanInterface( $dst_vlan );
-	$src_interface = "-i " . $src_interface if ( $src_interface );
-	$dst_interface = "-o " . $dst_interface if ( $dst_interface );
 
 	# There might be multiple CIDR networks which describe a vlan...
 	# It´s no risk to asume this everytime.
@@ -62,6 +60,7 @@ sub classifyTrafficFromTo($$) { #{{{
 	# Not that good runtime(?), but ... XXX
 	foreach my $src_network ( @src_networks ) {
 		foreach my $dst_network ( @dst_networks ) {
+
 
 			# Little hack, because iptables -N might return with 1, which is not error here
 			unless ( $dry_run ) {
@@ -76,7 +75,27 @@ sub classifyTrafficFromTo($$) { #{{{
 				}
 			}
 
-			$fwrbm->run_cmd("$iptables -A FORWARD -s $src_network $src_interface -d $dst_network $dst_interface -j $chain");
+			# Build up the command line
+			my $commandline = "$iptables -A FORWARD -s $src_network ";
+
+			if ( $config->getOption( "fw_type" ) eq "router" ) {
+				$commandline .= " -i $src_interface " if ( $src_interface );
+				$commandline .= " -o $dst_interface " if ( $dst_interface );
+			}	
+			elsif( $config->getOption( "fw_type" ) eq "bridge" ) {
+				if ( $src_interface || $dst_interface ) {
+					$commandline .= " -m physdev ";
+					$commandline .= " --physdev-in $src_interface " if ( $src_interface );
+					$commandline .= " --physdev-out $dst_interface " if ( $dst_interface );
+				}
+
+				$commandline .= " -m mark --mark $src_vlan ";
+					
+			}
+
+			$commandline .= " -d $dst_network -j $chain";
+
+			$fwrbm->run_cmd( $commandline );
 		}
 	}
 
@@ -101,7 +120,7 @@ sub loadChainRules($$) { # {{{
 			$rules_file = "default_to" . "$rules_d/$src_vlan";
 		}
 		if ( $rules_file ) {
-			$fwrbm->run_cmd( "sh", "$rules_file" )
+			$fwrbm->run_cmd( "sh", "$rules_file", "$chain" )
 				or print STDERR "Warning: Could not load rules for chain $chain";
 		}
 	} else {

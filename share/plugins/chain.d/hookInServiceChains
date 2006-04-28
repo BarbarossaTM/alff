@@ -1,0 +1,18 @@
+#!/usr/bin/perl -w
+#
+# hookInServiceChains
+#
+# Hook the chains for services now
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Fri, 28 Apr 2006 15:20:59 +0200
+#
+
+use strict;
+use Fwrbm::Services;
+
+my $services = Fwrbm::Services->new;
+
+$services->allowServiceFromNetworksOfSecurityClass( "trusted" );
+$services->allowServiceFromNetworksOfSecurityClass( "filtered" );
+$services->allowWorldOpenServices;

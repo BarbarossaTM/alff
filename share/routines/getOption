@@ -1,0 +1,31 @@
+#!/usr/bin/perl -w
+#
+# fwrbm getOption
+#
+# Get a specific option from the fwrbm.conf file
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Fri, 28 Apr 2006 13:35:56 +0200
+#
+
+use strict;
+use Fwrbm::Config;
+
+my $config_opt = $ARGV[0];
+
+if ( ! $config_opt ) {
+	print STDERR "Usage: fwrbm getOption [option]\n";
+	exit 1;
+}
+
+# Load configuration
+my $config = Fwrbm::Config->new;
+
+my $config_entry = $config->getOption( $config_opt );
+
+if ( $config_entry ) {
+	print "$config_entry\n";
+} else {
+	print STDERR "Error: No config entry for $config_opt\n";
+	exit 1;
+}

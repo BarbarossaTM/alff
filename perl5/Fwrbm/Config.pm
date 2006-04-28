@@ -10,36 +10,61 @@
 
 package Fwrbm::Config;
 
+my $VERSION="1.0";
+
 use strict;
 use XML::Simple;
 
 my $default_configfile = "/etc/fwrbm/fwrbm.conf";
 
-sub new {
+
+##
+# Little bit of magic to simplify debugging
+sub _options(@) { #{{{
+	my %ret = @_;
+
+	if ( $ret{debug} ) {
+		foreach my $opt (keys %ret) {
+			print STDERR "Fwrbm::Config->_options: $opt => $ret{$opt}\n";
+		}
+	}
+
+	return \%ret;
+} #}}}
+
+##
+# Constructor
+sub new { #{{{
 	my $self = shift;
 	my $class = ref($self) || $self;
 
-	# TODO FIXME, argument handling!
-	my $configfile = $default_configfile;
+	# Put arguments into ref(hashtable);
+	my $args = &_options ;
 
-	my $obj = bless { debug => 0
+	my $configfile = $args->{configfile} || $default_configfile;
+	my $debug = $args->{debug} || 0;
+
+	my $obj = bless { 
+		args => $args,
+		configfile => $configfile,
+		debug => $debug,
 		}, $class;
 	
 	
-	my $config = $obj->loadConfig( $configfile, 1 );
+	my $config = $obj->loadConfig( $configfile  );
 
-	$obj->{configfile} = $configfile;
 	$obj->{config} = $config;
 	$obj->checkConfig;
 
 	return $obj;
-}
+} #}}}
 
 ##
 # Load the configuration from given $configfile
 sub loadConfig($) { #{{{
 	my $self = shift;
 	my $configfile = shift;
+
 	my $config;
 
 	# Load the configuration
@@ -132,6 +157,15 @@ sub getDHCPServers() { #{{{
 	return @dhcp_servers;
 } #}}}
 
+##
+# Get option $option from the configuration
+sub getOption($) { #{{{
+	my $self = shift;
+	my $conf_opt = shift;
+
+	return $self->{config}->{options}->{$conf_opt};
+} #}}}
+
 ################################################################################
 #				Vlan handling				       #
 ################################################################################
@@ -142,6 +176,40 @@ sub getVlanList() { #{{{
 	my $self = shift;
 
 	return sort keys %{$self->{config}->{vlan}};
+} #}}}
+
+##
+# Return a list of all vlans of the specified security class
+sub getVlansOfSecurityClass($) { #{{{
+	my $self = shift;
+	my $security_class = shift;
+
+	my @allvlans = $self->getVlanList;
+	my @vlans = ( );
+
+	foreach my $vlan ( @allvlans ) {
+		if ( defined $self->{config}->{vlan}->{$vlan}->{$security_class} ) {
+			if ( $self->{config}->{vlan}->{$vlan}->{$security_class} eq "yes" ) {
+				push @vlans, $vlan;
+			}
+		}
+	}
+
+	return @vlans;
+} #}}}
+
+##
+# Wrapper for getVlansOfSecurityClass for filtered vlans
+sub getFilteredVlans() { #{{{
+	my $self = shift;
+	return $self->getVlansOfSecurityClass( "filtered" );
+} #}}}
+
+##
+# Wrapper for getVlansOfSecurityClass for trusted vlans
+sub getTrustedVlans() { #{{{
+	my $self = shift;
+	return $self->getVlansOfSecurityClass( "trusted" );
 } #}}}
 
 ##

@@ -15,7 +15,7 @@
 # (Thanks to the munin if_ plugin coders for this idea)
 CHAIN=`basename $0 | awk -F_ '{ print $NF }'`
 
-if ${CHAIN}; then
+if [ "${CHAIN}" ]; then
 
 	if iptables -L spoofcheck -n > /dev/null 2>/dev/null; then
 		echo " * Creating rule to DROP spoofed packets... "
