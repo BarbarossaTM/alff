@@ -16,7 +16,7 @@ drop_scans="1"
 
 ##
 # Make sure there is (an empty) chain tcp_scan_handling
-if ! iptables -F tcp_scan_handling; then
+if ! iptables -F tcp_scan_handling >/dev/null 2>/dev/null; then
 	iptables -N tcp_scan_handling
 fi
 

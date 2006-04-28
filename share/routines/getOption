@@ -11,7 +11,20 @@
 use strict;
 use Fwrbm::Config;
 
-my $config_opt = $ARGV[0];
+my $configfile = "/etc/fwrbm/fwrbm.conf";
+
+my $config_opt;
+my $nocheck = 0;
+
+foreach my $arg ( @ARGV ) {
+
+	if ( $arg eq "-nocheck" ) {
+		$nocheck = 1;
+		next
+	}
+
+	$config_opt = $arg;
+}
 
 if ( ! $config_opt ) {
 	print STDERR "Usage: fwrbm getOption [option]\n";
@@ -19,7 +32,7 @@ if ( ! $config_opt ) {
 }
 
 # Load configuration
-my $config = Fwrbm::Config->new;
+my $config = Fwrbm::Config->new( configfile => $configfile, nocheck => $nocheck  );
 
 my $config_entry = $config->getOption( $config_opt );
 

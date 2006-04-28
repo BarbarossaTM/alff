@@ -14,8 +14,8 @@ LIB_DIR="/usr/share/fwrbm/routines/"
 CONFIG_DIR="/etc/fwrbm"
 SERVICES_D="${CONFIG_DIR}/services.d"
 
-SERVICE_CHAINS="allowServicesFromInternalNets allowServicesFromFilteredNets allowWorldOpenServices"
-CALLBACK_CHAINS="allowCB_SrvToInternalNets allowCB_SrvToFilteredNets allowCB_SrvToWorld"
+SERVICE_CHAINS="allowServicesFromTrustedNets allowServicesFromFilteredNets allowWorldOpenServices"
+CALLBACK_CHAINS="allowCB_SrvToTrustedNets allowCB_SrvToFilteredNets allowCB_SrvToWorld"
 
 if [ ! -d "${SERVICES_D}" ]; then
 	echo "Error: services.d directory ${SERVICES_D} does not exist." >&2

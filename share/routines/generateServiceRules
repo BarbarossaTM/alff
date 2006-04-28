@@ -91,8 +91,8 @@ for server in ${SERVERS}; do
 	done
 done
 
-if [ "${ALLOW_FROM_INTERNAL_NETWORKS}" == "yes" ]; then
-	iptables -A allowServicesFromInternalNets -j ${CHAIN}
+if [ "${ALLOW_FROM_TRUSTED_NETWORKS}" == "yes" ]; then
+	iptables -A allowServicesFromTrustedNets -j ${CHAIN}
 fi
 
 if [ "${ALLOW_FROM_FILTERED_NETWORKS}" == "yes" ]; then
@@ -132,8 +132,8 @@ if [ "${CALLBACK_DST_PORTS}" -o "${CALLBACK_SRC_PORTS}" ]; then
 		done
 	done
 
-	if [ "${ALLOW_CALLBACK_TO_INTERNAL_NETWORKS}" == "yes" ]; then
-		iptables -A  allowCB_SrvToInternalNets  -j ${CALLBACK_CHAIN}
+	if [ "${ALLOW_CALLBACK_TO_TRUSTED_NETWORKS}" == "yes" ]; then
+		iptables -A  allowCB_SrvToTrustedNets  -j ${CALLBACK_CHAIN}
 	fi
 fi
 

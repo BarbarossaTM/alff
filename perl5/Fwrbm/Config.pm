@@ -54,7 +54,8 @@ sub new { #{{{
 	my $config = $obj->loadConfig( $configfile  );
 
 	$obj->{config} = $config;
-	$obj->checkConfig;
+
+	$obj->checkConfig unless ( $args->{nocheck} );
 
 	return $obj;
 } #}}}
