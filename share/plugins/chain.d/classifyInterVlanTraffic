@@ -122,6 +122,9 @@ sub loadChainRules($$) { # {{{
 		if ( $rules_file ) {
 			$fwrbm->run_cmd( "sh", "$rules_file", "$chain" )
 				or print STDERR "Warning: Could not load rules for chain $chain";
+		} else {
+			$fwrbm->run_cmd( "$iptables -A $chain -j $default_chain_policy" );
+			
 		}
 	} else {
 		$fwrbm->run_cmd( "$iptables -A $chain -j $default_chain_policy" );
