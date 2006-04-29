@@ -1,0 +1,13 @@
+#
+# /etc/default/fwrbm
+#
+
+# Control wether fwrbm should be started on bootup
+START_FWRBM="false"
+
+# If you want fwrbm to be a bit verbose on what´s going on, say "true"
+FWRBM_INIT_VERBOSE="false"
+
+# If you want to get mail if /etc/init.d/fwrbm is used, specify a comma
+# separated list of email addresses.
+MAIL_LOG_TO=""
