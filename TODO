@@ -1,2 +1,2 @@
- * pre_analysis
- * Ganz am Ende in fwrbm nicht referenzierte chains loeschen
+ * Fiddle around with tcp_pre_analysis and improve scan detection/prevention
+ * Remove empty chains in chain.d/99...
