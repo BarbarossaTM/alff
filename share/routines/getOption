@@ -1,17 +1,17 @@
 #!/usr/bin/perl -w
 #
-# fwrbm getOption
+# alff getOption
 #
-# Get a specific option from the fwrbm.conf file
+# Get a specific option from the alff.conf file
 #
 # Maximilian Wilhelm <max@rfc2324.org>
 #  -- Fri, 28 Apr 2006 13:35:56 +0200
 #
 
 use strict;
-use Fwrbm::Config;
+use Alff::Config;
 
-my $configfile = "/etc/fwrbm/fwrbm.conf";
+my $configfile = "/etc/alff/alff.conf";
 
 my $config_opt;
 my $nocheck = 0;
@@ -27,12 +27,12 @@ foreach my $arg ( @ARGV ) {
 }
 
 if ( ! $config_opt ) {
-	print STDERR "Usage: fwrbm getOption [option]\n";
+	print STDERR "Usage: alff getOption [option]\n";
 	exit 1;
 }
 
 # Load configuration
-my $config = Fwrbm::Config->new( configfile => $configfile, nocheck => $nocheck  );
+my $config = Alff::Config->new( configfile => $configfile, nocheck => $nocheck  );
 
 my $config_entry = $config->getOption( $config_opt );
 

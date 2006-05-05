@@ -11,7 +11,7 @@
 #  -- Thu, 27 Apr 2006 21:24:01 +0200
 #
 
-SERVICES_D="/etc/fwrbm/services.d"
+SERVICES_D="/etc/alff/services.d"
 
 # In case of trouble, at least, create the chain, or flush it,
 # if already existing

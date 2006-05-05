@@ -13,7 +13,7 @@ if ! which bc >/dev/null 2>/dev/null; then
 	exit 1
 fi
 
-SERVICES_D="/etc/fwrbm/services.d"
+SERVICES_D="/etc/alff/services.d"
 
 
 if [ -z "${1}" ]; then
@@ -22,7 +22,7 @@ if [ -z "${1}" ]; then
 fi
 
 SERVICE="${1}"
-echo "fwrbm: Removing service ${SERVICE}..."
+echo "alff: Removing service ${SERVICE}..."
 
 ##
 # Check for service dir
@@ -53,8 +53,8 @@ if [ ${SRV_REF_COUNT} -gt 0 ]; then
 	else
 		export INTERNAL_REF="true"
 		echo "YES."
-		echo "   Attention: Service ${SERVICE} is still referenced by fwrbm internal rules.">&2
-		echo "   You have to run  'fwrbm reload' to remove those references.">&2
+		echo "   Attention: Service ${SERVICE} is still referenced by alff internal rules.">&2
+		echo "   You have to run  'alff reload' to remove those references.">&2
 	fi
 else
 	echo "no."

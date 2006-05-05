@@ -6,7 +6,7 @@
 #  -- Fri, 23 Dec 2005 20:15:54 +0100
 #
 
-RULES_D="/etc/fwrbm/rules.d"
+RULES_D="/etc/alff/rules.d"
 
 if [ ! -d "${RULES_D}" ]; then
 	echo "Error: rules.d ${RULES_D} does not exist."

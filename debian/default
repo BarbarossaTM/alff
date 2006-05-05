@@ -1,13 +1,13 @@
 #
-# /etc/default/fwrbm
+# /etc/default/alff
 #
 
-# Control wether fwrbm should be started on bootup
-START_FWRBM="false"
+# Control wether alff should be started on bootup
+START_ALFF="false"
 
-# If you want fwrbm to be a bit verbose on what´s going on, say "true"
-FWRBM_INIT_VERBOSE="false"
+# If you want alff to be a bit verbose on what´s going on, say "true"
+ALFF_INIT_VERBOSE="false"
 
-# If you want to get mail if /etc/init.d/fwrbm is used, specify a comma
+# If you want to get mail if /etc/init.d/alff is used, specify a comma
 # separated list of email addresses.
 MAIL_LOG_TO=""

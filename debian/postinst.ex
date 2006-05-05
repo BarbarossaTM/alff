@@ -1,5 +1,5 @@
 #! /bin/sh
-# postinst script for fwrbm
+# postinst script for alff
 #
 # see: dh_installdeb(1)
 

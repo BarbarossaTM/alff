@@ -7,14 +7,14 @@
 #
 
 use strict;
-use Fwrbm::Main;
-use Fwrbm::Config;
+use Alff::Main;
+use Alff::Config;
 #use XML::Simple;
 
 ##
 # Some paths
-my $configfile = "/etc/fwrbm/fwrbm.conf";
-my $rules_d = "/etc/fwrbm/rules.d";
+my $configfile = "/etc/alff/alff.conf";
+my $rules_d = "/etc/alff/rules.d";
 my $iptables = "/sbin/iptables";
 
 ##
@@ -26,8 +26,8 @@ my $debug = 0;
 my $dry_run = 0;
 
 # Storage for parse configuraton
-my $fwrbm = Fwrbm::Main->new( debug => $debug, dry_run => $dry_run );
-my $config = Fwrbm::Config->new( configfile => $configfile, debug => $debug )
+my $alff = Alff::Main->new( debug => $debug, dry_run => $dry_run );
+my $config = Alff::Config->new( configfile => $configfile, debug => $debug )
 	or die "Error: could not load configuration from $configfile\n";
 
 # List of all known vlans
@@ -66,12 +66,12 @@ sub classifyTrafficFromTo($$) { #{{{
 			unless ( $dry_run ) {
 				print STDERR "run \"$iptables -N $chain >/dev/null 2>/dev/null\"\n" if ( $debug );
 				if ( ! system("$iptables -N $chain >/dev/null 2>/dev/null") ) {
-					$fwrbm->run_cmd("$iptables -F $chain");
+					$alff->run_cmd("$iptables -F $chain");
 				}
 			}
 			else {
-				if ( ! $fwrbm->run_cmd("$iptables -N $chain >/dev/null 2>/dev/null") ) {
-					$fwrbm->run_cmd("$iptables -F $chain");
+				if ( ! $alff->run_cmd("$iptables -N $chain >/dev/null 2>/dev/null") ) {
+					$alff->run_cmd("$iptables -F $chain");
 				}
 			}
 
@@ -95,7 +95,7 @@ sub classifyTrafficFromTo($$) { #{{{
 
 			$commandline .= " -d $dst_network -j $chain";
 
-			$fwrbm->run_cmd( $commandline );
+			$alff->run_cmd( $commandline );
 		}
 	}
 
@@ -120,14 +120,14 @@ sub loadChainRules($$) { # {{{
 			$rules_file = "default_to" . "$rules_d/$src_vlan";
 		}
 		if ( $rules_file ) {
-			$fwrbm->run_cmd( "sh", "$rules_file", "$chain" )
+			$alff->run_cmd( "sh", "$rules_file", "$chain" )
 				or print STDERR "Warning: Could not load rules for chain $chain";
 		} else {
-			$fwrbm->run_cmd( "$iptables -A $chain -j $default_chain_policy" );
+			$alff->run_cmd( "$iptables -A $chain -j $default_chain_policy" );
 			
 		}
 	} else {
-		$fwrbm->run_cmd( "$iptables -A $chain -j $default_chain_policy" );
+		$alff->run_cmd( "$iptables -A $chain -j $default_chain_policy" );
 	}
 } #}}}
 

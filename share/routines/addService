@@ -6,11 +6,11 @@
 #  -- Thu, 08 Dec 2005 15:42:50 +0100
 #
 
-SERVICES_D="/etc/fwrbm/services.d"
+SERVICES_D="/etc/alff/services.d"
 
 
 if [ -z "${1}" ]; then
-	echo "Usage: fwrbm addService [service]" >&2
+	echo "Usage: alff addService [service]" >&2
 	echo "Beware, that service has to be max. 21 chars."
 	exit 1
 fi

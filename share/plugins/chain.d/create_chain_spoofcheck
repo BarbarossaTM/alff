@@ -16,26 +16,26 @@ fi
 ##
 # RFC1918 networks
 #
-iptables -A spoofcheck -p all -i eth+ -s 10.0.0.0/8 -j LOG --log-prefix "fwrbm spoofed: "
+iptables -A spoofcheck -p all -i eth+ -s 10.0.0.0/8 -j LOG --log-prefix "alff spoofed: "
 iptables -A spoofcheck -p all -i eth+ -s 10.0.0.0/8 -j DROP
 #
-iptables -A spoofcheck -p all -i eth+ -s 172.16.0.0/12 -j LOG --log-prefix "fwrbm spoofed: "
+iptables -A spoofcheck -p all -i eth+ -s 172.16.0.0/12 -j LOG --log-prefix "alff spoofed: "
 iptables -A spoofcheck -p all -i eth+ -s 172.16.0.0/12 -j DROP
 #
-iptables -A spoofcheck -p all -i eth+ -s 192.168.0.0/16 -j LOG --log-prefix "fwrbm spoofed: "
+iptables -A spoofcheck -p all -i eth+ -s 192.168.0.0/16 -j LOG --log-prefix "alff spoofed: "
 iptables -A spoofcheck -p all -i eth+ -s 192.168.0.0/16 -j DROP
 
 ##
 # RFC 3330 networks
 #
 # documentation network
-iptables -A spoofcheck -p all -i eth+ -s 192.0.2.0/24 -j LOG --log-prefix "fwrbm spoofed: "
+iptables -A spoofcheck -p all -i eth+ -s 192.0.2.0/24 -j LOG --log-prefix "alff spoofed: "
 iptables -A spoofcheck -p all -i eth+ -s 192.0.2.0/24 -j DROP
 # link local
-iptables -A spoofcheck -p all -i eth+ -s 169.254.0.0/16 -j LOG --log-prefix "fwrbm spoofed: "
+iptables -A spoofcheck -p all -i eth+ -s 169.254.0.0/16 -j LOG --log-prefix "alff spoofed: "
 iptables -A spoofcheck -p all -i eth+ -s 169.254.0.0/16 -j DROP
 
 ##
 # Loopback address on eth* is probably not right
-iptables -A spoofcheck -p all -i eth+ -s 127.0.0.0/8 -j LOG --log-prefix "fwrbm spoofed: "
+iptables -A spoofcheck -p all -i eth+ -s 127.0.0.0/8 -j LOG --log-prefix "alff spoofed: "
 iptables -A spoofcheck -p all -i eth+ -s 127.0.0.0/8 -j DROP

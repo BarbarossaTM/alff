@@ -1,11 +1,11 @@
-Source: fwrbm
+Source: alff
 Section: admin
 Priority: optional
 Maintainer: Maximilian Wilhelm <max@rfc2324.org>
 Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.6.2
 
-Package: fwrbm
+Package: alff
 Architecture: all
 Depends: perl, libxml-simple-perl, gawk, bc, bash, iptables
 Description: The RBM firewall framework

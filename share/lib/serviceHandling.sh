@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 #
-# /usr/share/fwrbm/routines/serviceHandling.sh
+# /usr/share/alff/routines/serviceHandling.sh
 #
-# fwrbm routines for service handlung
+# alff routines for service handlung
 #
 # Maximilian Wilhelm <mwilhelm@math.uni-paderborn.de>
 #  -- Mon, 10 Apr 2006 18:12:03 +0200

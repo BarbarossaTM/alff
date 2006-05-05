@@ -15,7 +15,7 @@ if ! iptables -F log_and_reject > /dev/null 2>&1; then
 fi
 
 # LOG the traffic to be rejected, but restrict the amount of logs...
-iptables -A log_and_reject -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "fwrbm rejected: "
+iptables -A log_and_reject -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "alff rejected: "
 
 # REJECT tcp connections gently by sending a tcp-reset
 iptables -A log_and_reject -p tcp -j REJECT --reject-with tcp-reset

@@ -52,16 +52,16 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 
-	# Add here commands to install the package into debian/fwrbm.
-	mkdir -p $(CURDIR)/debian/fwrbm/usr/share/perl5
-	mkdir -p $(CURDIR)/debian/fwrbm/usr/share
-	mkdir -p $(CURDIR)/debian/fwrbm/usr/sbin
-	mkdir -p $(CURDIR)/debian/fwrbm/etc/fwrbm
+	# Add here commands to install the package into debian/alff.
+	mkdir -p $(CURDIR)/debian/alff/usr/share/perl5
+	mkdir -p $(CURDIR)/debian/alff/usr/share
+	mkdir -p $(CURDIR)/debian/alff/usr/sbin
+	mkdir -p $(CURDIR)/debian/alff/etc/alff
 
-	cp -a $(CURDIR)/share $(CURDIR)/debian/fwrbm/usr/share/fwrbm
-	cp -a $(CURDIR)/perl5/Fwrbm $(CURDIR)/debian/fwrbm/usr/share/perl5
-	cp -a $(CURDIR)/fwrbm $(CURDIR)/debian/fwrbm/usr/sbin
-	cp $(CURDIR)/fwrbm.conf $(CURDIR)/debian/fwrbm/etc/fwrbm/
+	cp -a $(CURDIR)/share $(CURDIR)/debian/alff/usr/share/alff
+	cp -a $(CURDIR)/perl5/Alff $(CURDIR)/debian/alff/usr/share/perl5
+	cp -a $(CURDIR)/alff $(CURDIR)/debian/alff/usr/sbin
+	cp $(CURDIR)/alff.conf $(CURDIR)/debian/alff/etc/alff/
 
 
 # Build architecture-independent files here.

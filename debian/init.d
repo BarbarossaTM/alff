@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# /etc/init.d/fwrbm
+# /etc/init.d/alff
 #
 # Firewall start/stop script for init
 #
@@ -18,27 +18,27 @@ function interactive_run() { #{{{
 	fi
 } #}}}
 
-if [ -f /etc/default/fwrbm ]; then
-	. /etc/default/fwrbm
+if [ -f /etc/default/alff ]; then
+	. /etc/default/alff
 fi
 
-NAME="fwrbm"
+NAME="alff"
 DATE="`date +%Y-%m-%d_%H%M`"
 		
 case "${1}" in
-	# Startup fwrbm
+	# Startup alff
 	start)
 		echo -n "Starting firewall: "
 		LOGFILE="/var/log/${NAME}.startup.${DATE}"
 
-		if interactive_run && [ "${FWRBM_INIT_VERBOSE}" == 'true' ]; then
-			fwrbm start 2>&1 | tee "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
+		if interactive_run && [ "${ALFF_INIT_VERBOSE}" == 'true' ]; then
+			alff start 2>&1 | tee "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
 		else
-			fwrbm start 2>&1 > "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
+			alff start 2>&1 > "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
 		fi
 
 		if [ "${MAIL_LOG}" ]; then
-			mail -s "Fwrbm startup log" ${MAIL_LOG} < "${LOGFILE}"
+			mail -s "Alff startup log" ${MAIL_LOG} < "${LOGFILE}"
 		fi
 		;;
 
@@ -47,14 +47,14 @@ case "${1}" in
 		echo -n "Stopping firewall: "
 		LOGFILE="/var/log/${NAME}.shutdown.${DATE}"
 
-		if interactive_run && [ "${FWRBM_INIT_VERBOSE}" == 'true' ]; then
-			fwrbm stop 2>&1 | tee "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
+		if interactive_run && [ "${ALFF_INIT_VERBOSE}" == 'true' ]; then
+			alff stop 2>&1 | tee "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
 		else
-			fwrbm stop 2>&1 > "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
+			alff stop 2>&1 > "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
 		fi
 
 		if [ "${MAIL_LOG}" ]; then
-			mail -s "Fwrbm shutdown!" ${MAIL_LOG} < "${LOGFILE}"
+			mail -s "Alff shutdown!" ${MAIL_LOG} < "${LOGFILE}"
 		fi
 		;;
 
@@ -69,10 +69,10 @@ case "${1}" in
 		echo -n "Reload firewall rules: "
 		LOGFILE="/var/log/${NAME}.reload.${DATE}"
 
-		if interactive_run && [ "${FWRBM_INIT_VERBOSE}" == 'true' ]; then	
-			fwrbm reload 2&>1 | tee "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
+		if interactive_run && [ "${ALFF_INIT_VERBOSE}" == 'true' ]; then	
+			alff reload 2&>1 | tee "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
 		else
-			fwrbm reload 2>&1 > "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
+			alff reload 2>&1 > "${LOGFILE}" && echo "${NAME}." || echo "FAILED!"
 		fi
 		;;
 	*)

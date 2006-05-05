@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #
-# fwrbm commit
+# alff commit
 #
 # Commit the changes that have been done at the firewall config
 #
@@ -8,7 +8,7 @@
 #  -- Fri, 17 Mar 2006 00:31:26 +0100
 #
 
-CONFIG_DIR="/etc/fwrbm"
+CONFIG_DIR="/etc/alff"
 MAILDOMAIN="math.uni-paderborn.de"
 
 # Kerberos machts moeglich

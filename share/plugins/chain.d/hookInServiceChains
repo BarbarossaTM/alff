@@ -9,9 +9,9 @@
 #
 
 use strict;
-use Fwrbm::Services;
+use Alff::Services;
 
-my $services = Fwrbm::Services->new;
+my $services = Alff::Services->new;
 
 $services->allowServiceFromNetworksOfSecurityClass( "trusted" );
 $services->allowServiceFromNetworksOfSecurityClass( "filtered" );

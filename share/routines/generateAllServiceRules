@@ -9,9 +9,9 @@
 #  -- Thu, 27 Apr 2006 19:42:20 +0200
 #
 
-LIB_DIR="/usr/share/fwrbm/routines/"
+LIB_DIR="/usr/share/alff/routines/"
 
-CONFIG_DIR="/etc/fwrbm"
+CONFIG_DIR="/etc/alff"
 SERVICES_D="${CONFIG_DIR}/services.d"
 
 SERVICE_CHAINS="allowServicesFromTrustedNets allowServicesFromFilteredNets allowWorldOpenServices"
