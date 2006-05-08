@@ -11,7 +11,6 @@
 package Alff::Services;
 
 $VERSION = "1.0";
-$AUTHOR='Maximilian Wilhelm <max@rfc2324.org>';
 
 use strict;
 use Alff::Config;
