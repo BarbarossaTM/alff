@@ -41,11 +41,19 @@ echo -n " * Checking if service is still referenced... "
 
 SRV_REF_COUNT=`iptables -L -n | grep -c "^allowSrv${SERVICE}" || /bin/true`
 
-if [ ${SRV_REF_COUNT} -gt 0 ]; then
-	if [ `echo ${SRV_REF_COUNT} - \
-		$(iptables -L allowWorldOpenServices -n | grep -c "^allowSrv${SERVICE}") - \
-		$(iptables -L allowServicesFromInternalNets -n | grep -c "^allowSrv${SERVICE}") | bc` -gt 0 ]; then
+# Check for references in service chains
+SERVICE_CHAINS=`echo $(iptables -L -n  | grep '^Chain allowServices' | cut -d' ' -f2)`
+SERVICES_CHAINS_REF_COUNT="0"
 
+for srv_chain in ${SERVICE_CHAINS}; do
+	# || /bin/true to work around return code '1' of grep or let if the value would be 0
+	let SERVICES_CHAINS_REF_COUNT=${SERVICES_CHAINS_REF_COUNT}+`iptables -n -L ${srv_chain} | grep -c "^allowSrv${SERVICE}" || /bin/true` || /bin/true
+done
+
+let SRV_REF_COUNT_MISC=${SRV_REF_COUNT}-${SERVICES_CHAINS_REF_COUNT} || /bin/true
+
+if [ ${SRV_REF_COUNT} -gt 0 ]; then
+	if [ ${SRV_REF_COUNT_MISC} -gt 0 ]; then
 		echo "YES."
 		echo "   Error: Service ${SERVICE} is still referenced by firewall rules." >&2
 		echo "   You have to remove this rules before you can delete the service." >&2
