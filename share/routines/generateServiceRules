@@ -30,7 +30,6 @@ trap cleanup 1 2 15 EXIT
 
 if [ -z "$1" ]; then
 	echo "Usage: $0 <servicename>" >&2
-	trap EXIT
 	exit 1
 fi
 
@@ -136,5 +135,3 @@ if [ "${CALLBACK_DST_PORTS}" -o "${CALLBACK_SRC_PORTS}" ]; then
 		iptables -A  allowCB_SrvToTrustedNets  -j ${CALLBACK_CHAIN}
 	fi
 fi
-
-trap EXIT
