@@ -1,0 +1,3 @@
+The following features are planned to be implemented in ALFF:
+ * export genereated ruleset as a shellscript
+ * provide ruleset update rollback tool

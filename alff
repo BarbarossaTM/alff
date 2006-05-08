@@ -125,25 +125,23 @@ case "$1" in
 
 		# Create user defined chains and hook them in where they belong to
 		# (each script has to do this itself!)
-		run-parts "${CHAIN_D}" && echo "done." || echo "FAILED!"
+		if run-parts "${CHAIN_D}"; then	
+			echo "Successfully set up ALFF."
+		else
+			echo "FAILED to set up ALFF." >&2
+		fi
+
 
 		# Use vlan 114 for ct_sync as it will more or less disable eth1.101
 		# if we use eth1.101 for syncing...
 #		iptables -A INPUT -p udp -s 131.234.114.41 -d 224.0.0.0/4 -j ACCEPT
 #		iptables -A INPUT -p udp -s 131.234.114.42 -d 224.0.0.0/4 -j ACCEPT
 
-
-		# FORWARD configuration 
-#		enableConnTrackFeatures
-
 #		# BRIDGE ONLY
 #		acceptUnfilteredTraffic
 
 
-#		allowCBServicesToInternalNets
-
-	
-		"$0" loadUserRules
+#		"$0" loadUserRules
 
 		;;
 
