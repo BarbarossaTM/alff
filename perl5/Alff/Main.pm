@@ -50,6 +50,26 @@ sub new() { #{{{
 } #}}}
 
 ##
+# Write out the content of the given file
+sub write_filecontent($) { #{{{
+	my $self = shift;
+	my $file = shift;
+	my $output_fh = $self->{output_fh};
+
+	unless ( open ( FILE, "<$file" ) ) {
+		print STDERR "Error: Could not open file $file for reading...\n";
+		return 0;
+	}
+
+	while ( my $line = <FILE> ) {
+		print $output_fh "$line";
+	}
+	close( FILE );
+
+	return 1;
+} #}}}
+
+##
 # Write out the given command line to fd3
 sub write_cmd($) { #{{{
 	my $self = shift;

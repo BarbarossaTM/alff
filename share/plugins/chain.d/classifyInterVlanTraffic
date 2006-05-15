@@ -103,14 +103,20 @@ sub loadChainRules($$) { # {{{
 	if ( -d $rules_d ) {
 		if ( -f "$rules_d/$chain" ) {
 			$rules_file = "$rules_d/$chain";
+			if ( ! $alff->write_filecontent( $rules_file ) ) {
+				print STDERR "INFO: Setting the default_chain_policy for chain $chain\n";
+				$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
+			}
+				
+
 		} elsif ( -f "$rules_d/$src_vlan" . "._to_default" ) {
 			$rules_file = "$rules_d/$src_vlan" . "._to_default";
 		} elsif ( -f "default_to" . "$rules_d/$src_vlan" ) {
 			$rules_file = "default_to" . "$rules_d/$src_vlan";
 		}
 		if ( $rules_file ) {
-			$alff->write_cmd( "sh", "$rules_file", "$chain" )
-				or print STDERR "Warning: Could not load rules for chain $chain";
+			$alff->run_cmd( "sh", "$rules_file", "$chain" )
+				or print STDERR "Warning: Could not load rules for chain $chain\n";
 		} else {
 			$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
 			
