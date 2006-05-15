@@ -37,8 +37,8 @@ touch "${CACHE_DIR_CHAINS}/${chain}"
 ##
 # If not already there, create ${chain}
 cat << EOF >&3
+
 if ! iptables -t filter -F ${chain} >/dev/null 2>&1; then
 	iptables -t filter -N ${chain}
 fi
-
 EOF
