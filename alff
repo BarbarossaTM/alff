@@ -103,8 +103,6 @@ checkTools
 
 preload "/usr/share/alff/lib/routines"
 
-echo "The ALFF Linux Firewall Framework awakes ..."
-echo ""
 
 case "$1" in 
 	-h|--help)
@@ -117,14 +115,17 @@ case "$1" in
 		;;
 
 	generate)
+		echo "The ALFF Linux Firewall Framework awakes ..."
+		echo ""
+
 		echo -n  "Cleaning up cache dirs... "
 		find "${CACHE_DIR}/chains/" -type f -exec rm {} \;	&& echo -n "chains "
 		find "${CACHE_DIR_BUILD}" -type f -exec rm {} \;	&& echo -n "`basename ${CACHE_DIR_BUILD}` "
 		echo "done."
 		echo ""
 
-		echo "Generation system configuration"
- 		configureFirewallNetworkOptions > "${CACHE_DIR_BUILD}/000_proc_options"
+ 		configureFirewallNetworkOptions 3> "${CACHE_DIR_BUILD}/000_proc_options"
+		echo ""
 
 		echo "Generating rules... "
 		##
