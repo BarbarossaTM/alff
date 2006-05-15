@@ -57,11 +57,6 @@ sub classifyTrafficFromTo($$) { #{{{
 	foreach my $src_network ( @src_networks ) {
 		foreach my $dst_network ( @dst_networks ) {
 
-			# Little hack, because iptables -N might return with 1, which is not error here
-#			print STDERR "run \"$iptables -N $chain >/dev/null 2>/dev/null\"\n" if ( $debug );
-#			if ( ! system("$iptables -N $chain >/dev/null 2>/dev/null") ) {
-#				$alff->run_cmd("$iptables -F $chain");
-#			}
 			$alff->create_chain( $chain );
 
 			# Build up the command line
@@ -77,9 +72,7 @@ sub classifyTrafficFromTo($$) { #{{{
 					$commandline .= " --physdev-in $src_interface " if ( $src_interface );
 					$commandline .= " --physdev-out $dst_interface " if ( $dst_interface );
 				}
-
 				$commandline .= " -m mark --mark $src_vlan ";
-					
 			}
 
 			$commandline .= " -d $dst_network -j $chain";
@@ -90,42 +83,6 @@ sub classifyTrafficFromTo($$) { #{{{
 
 } #}}}
 
-##
-# Load user defined rules into the chain for the given vlans if specified in rules.d/,
-# set $default_chain_policy else.
-sub loadChainRules($$) { # {{{
-	my $src_vlan = shift;
-	my $dst_vlan = shift;
-	my $chain = $src_vlan . "_to_" . $dst_vlan;
-
-	my $rules_file;
-
-	if ( -d $rules_d ) {
-		if ( -f "$rules_d/$chain" ) {
-			$rules_file = "$rules_d/$chain";
-			if ( ! $alff->write_filecontent( $rules_file ) ) {
-				print STDERR "INFO: Setting the default_chain_policy for chain $chain\n";
-				$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
-			}
-				
-
-		} elsif ( -f "$rules_d/$src_vlan" . "._to_default" ) {
-			$rules_file = "$rules_d/$src_vlan" . "._to_default";
-		} elsif ( -f "default_to" . "$rules_d/$src_vlan" ) {
-			$rules_file = "default_to" . "$rules_d/$src_vlan";
-		}
-		if ( $rules_file ) {
-			$alff->run_cmd( "sh", "$rules_file", "$chain" )
-				or print STDERR "Warning: Could not load rules for chain $chain\n";
-		} else {
-			$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
-			
-		}
-	} else {
-		$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
-	}
-} #}}}
-
 
 ################################################################################
 #				Let´s go				       #
@@ -134,7 +91,6 @@ sub loadChainRules($$) { # {{{
 ##
 # Get a list of all known vlan ids
 @vlans = $config->getVlanList;
-
 
 ##
 # Loop through all combinations of vlans and generate a vlan-matrix
@@ -158,7 +114,6 @@ foreach my $src_vlan ( @vlans ) {
 
 		# Ok, just do it[tm]
 		classifyTrafficFromTo( $src_vlan, $dst_vlan );
-		loadChainRules( $src_vlan, $dst_vlan );
 	}
 }
 print " done.\n";
