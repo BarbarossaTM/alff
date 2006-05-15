@@ -15,15 +15,15 @@ SERVICES_D="/etc/alff/services.d"
 
 # In case of trouble, at least, create the chain, or flush it,
 # if already existing
-cleanup() {
-	# If there is trouble before getting the service name, do nothing
-	if [ "${CHAIN}" ]; then
-		"${CHAIND_PLUGIN_DIR}/create_chain_" ${CHAIN}
-	fi
-}
-
-set -e
-trap cleanup 1 2 15 EXIT 
+#cleanup() {
+#	# If there is trouble before getting the service name, do nothing
+#	if [ "${CHAIN}" ]; then
+#		"${CHAIND_PLUGIN_DIR}/create_chain_" ${CHAIN}
+#	fi
+#}
+#
+#set -e
+#trap cleanup 1 2 15 EXIT 
 
 
 if [ -z "$1" ]; then
