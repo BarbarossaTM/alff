@@ -48,7 +48,7 @@ function checkTools() { # check for needed tooles #{{{
 } #}}}
 
 function usage() { # print usage #{{{
-	echo "Usage: ${MY_NAME} { -list | start | stop | reload | restart | <function> [ <param> ] }"
+	echo "Usage: ${MY_NAME} { -list | generate | push | <function> [ <param> ] }"
 	echo ""
 	echo "${MY_NAME} is the main firewall management tool."
 	echo "It is used for starting, stopping and reloading the firewall rules"
