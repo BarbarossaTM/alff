@@ -8,7 +8,7 @@
 # Maximilian Wilhelm <max@rfc2324.org>
 #  -- Mon, 24 Apr 2006 20:05:49 +0200
 # 
-# 
+set -e 
 
 loglevel="info"
 log_scans="1"
@@ -16,15 +16,14 @@ drop_scans="1"
 
 ##
 # Make sure there is (an empty) chain tcp_scan_handling
-if ! iptables -F tcp_scan_handling >/dev/null 2>/dev/null; then
-	iptables -N tcp_scan_handling
-fi
+"${CHAIND_PLUGIN_DIR}/create_chain_" tcp_scan_handling
 
 ##
 # Log scanning of nmap etc.
 if [ "${log_scans}" != "0" ]; then
 	echo " * Logging of stealth scans (nmap probes etc.) enabled."
 
+cat <<- EOF >&3
 	# (NMAP) FIN/URG/PSH
 	iptables -A tcp_scan_handling -p tcp --tcp-flags ALL FIN,URG,PSH \
 	  -m limit --limit 3/m --limit-burst 5 -j LOG --log-level ${loglevel} --log-prefix "Stealth XMAS scan: "
@@ -53,6 +52,8 @@ if [ "${log_scans}" != "0" ]; then
 	iptables -A tcp_scan_handling -p tcp --tcp-flags ALL NONE \
 	  -m limit --limit 3/m --limit-burst 5 -j LOG --log-level ${loglevel} --log-prefix "Stealth Null scan: "
 
+EOF
+
 else
 	echo " * Logging of stealth scans (nmap probes etc.) disabled."
 fi
@@ -61,6 +62,8 @@ fi
 # Drop (NMAP) scan packets:
 if [ "${drop_scans}" != '0' ]; then
 	echo " * stealth scans (nmap probes etc.) will be DROPed."
+
+cat <<- EOF >&3
 	# NMAP FIN/URG/PSH
 	##################
 	iptables -A tcp_scan_handling -p tcp --tcp-flags ALL FIN,URG,PSH -j DROP
@@ -88,6 +91,8 @@ if [ "${drop_scans}" != '0' ]; then
 	# NMAP Null Scan
 	################
 	iptables -A tcp_scan_handling -p tcp --tcp-flags ALL NONE -j DROP
+
+EOF
 
 else
 	echo " * stealth scans (nmap probes etc.) will *not* be DROPed."

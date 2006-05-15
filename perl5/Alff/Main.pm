@@ -10,9 +10,10 @@
 package Alff::Main;
 
 $VERSION="1.0";
-$AUTHOR='Maximilian Wilhelm <max@rfc2324.org>';
 
 use strict;
+use File::Basename;
+use IO::Handle;
 
 ##
 # Little bit of magic to simplify debugging
@@ -21,7 +22,7 @@ sub _options(@) { #{{{
 
         if ( $ret{debug} ) {
                 foreach my $opt (keys %ret) {
-                        print STDERR "Alff::Config->_options: $opt => $ret{$opt}\n";
+                        print STDERR "Alff::Main->_options: $opt => $ret{$opt}\n";
                 }
         }
 
@@ -37,50 +38,62 @@ sub new() { #{{{
 	my $args = &_options;
 
 	my $debug = $args->{debug} || 0;
-	my $dry_run = $args->{dry_run} || 0;
+	my $cache_dir_chains = $args->{cache_dir_chains} || "/var/cache/alff/chains";
+
+	my $fh = IO::Handle->new();
+	$fh->fdopen( 3, "w" );			# open fd 3 for writing
 
 	bless { debug => $debug,
-		dry_run => $dry_run,
+		output_fh => $fh,
+		cache_dir_chains => $cache_dir_chains,
 		}, $class;
 } #}}}
 
 ##
-# system-wrapper with error checking
-sub run_cmd(@) { #{{{
+# Write out the given command line to fd3
+sub write_cmd($) { #{{{
 	my $self = shift;
 	my $cmd = shift;
-	my @args = shift || ();
+	my $output_fh = $self->{output_fh};
 
-	if ( $self->{debug} ) {
-		if ( @args ) {
-			print STDERR "run \"$cmd\" with args " . join(" ", @args ) . "\n";
-		} else {
-			print STDERR "run \"$cmd\"\n";
-			
-		}
-	}
-	
-	return 0 if ( $self->{dry_run} );
-
-	my $ret = system( $cmd, @args );
-	
-	if ( $ret == -1 ) {
-		printf STDERR "Error: Failed to execute %s with args %s\"",
-			$cmd, join(" ", @args);
-	}
-	elsif ( $ret & 127 ) {
-		printf STDERR "Error while executing %s, child died with signal %d, %s coredump\n",
-			$cmd, ($? & 127), ($? & 128) ? 'with' :  'without';
-	}
-	elsif ( $ret ) {
-		printf STDERR "Error while executing %s with args %s, child exited with value %d\n",
-			$cmd, join(" ", @args), $? >> 8;
-	}
-
-	# Be aware of the different true/false idea between shell and perl
-	# Exit code 0 -> 1 in perl and vice versa.
-	return $ret == 0 ? 1 : 0 ;
+	print $output_fh "$cmd\n";
 } #}}}
+
+##
+# Create a chain and make it known to alff
+sub create_chain($) { #{{{
+	my $self = shift;
+	my $chain = shift;
+	my $table = shift || "filter";
+
+	my $output_fh = $self->{output_fh};
+
+	unless ( $self->chain_exists( $chain, $table ) ) {
+		my $chain_file = "$self->{cache_dir_chains}/$table/$chain";
+		open ( CHAINFILE, ">$chain_file" )
+			or die "Cannot create file $chain in $self->{cache_dir_chains}/$table";
+		print CHAINFILE "exists";
+		close( CHAINFILE );
+	}
+
+	print $output_fh 
+"if ! iptables -t $table -F $chain >/dev/null 2>/dev/null; then
+iptables -t $table -N $chain
+fi\n";
+
+} #}}}
+
+##
+# Check if chain $arg1 exists in table ($arg2 || filter)
+sub chain_exists($) { #{{{
+	my $self = shift;
+	my $chain = shift;
+	my $table = shift || "filter";
+
+	my $chain_file = "$self->{cache_dir_chains}/$table/$chain";
+
+	return ( -f $chain_file );
+}
 
 1;
 # vim:foldmethod=marker:

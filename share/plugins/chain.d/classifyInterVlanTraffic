@@ -9,24 +9,20 @@
 use strict;
 use Alff::Main;
 use Alff::Config;
-#use XML::Simple;
 
 ##
 # Some paths
 my $configfile = "/etc/alff/alff.conf";
 my $rules_d = "/etc/alff/rules.d";
-my $iptables = "/sbin/iptables";
 
 ##
 # Debugging
 #
 # Print out debug outbut
 my $debug = 0;
-# Set to 1 and nothing will really happend
-my $dry_run = 0;
 
 # Storage for parse configuraton
-my $alff = Alff::Main->new( debug => $debug, dry_run => $dry_run );
+my $alff = Alff::Main->new( debug => $debug );
 my $config = Alff::Config->new( configfile => $configfile, debug => $debug )
 	or die "Error: could not load configuration from $configfile\n";
 
@@ -57,26 +53,19 @@ sub classifyTrafficFromTo($$) { #{{{
 	my @src_networks = $config->getVlanNetworks( $src_vlan );
 	my @dst_networks = $config->getVlanNetworks( $dst_vlan );
 
-	# Not that good runtime(?), but ... XXX
+	# Not that good runtime(?), but...
 	foreach my $src_network ( @src_networks ) {
 		foreach my $dst_network ( @dst_networks ) {
 
-
 			# Little hack, because iptables -N might return with 1, which is not error here
-			unless ( $dry_run ) {
-				print STDERR "run \"$iptables -N $chain >/dev/null 2>/dev/null\"\n" if ( $debug );
-				if ( ! system("$iptables -N $chain >/dev/null 2>/dev/null") ) {
-					$alff->run_cmd("$iptables -F $chain");
-				}
-			}
-			else {
-				if ( ! $alff->run_cmd("$iptables -N $chain >/dev/null 2>/dev/null") ) {
-					$alff->run_cmd("$iptables -F $chain");
-				}
-			}
+#			print STDERR "run \"$iptables -N $chain >/dev/null 2>/dev/null\"\n" if ( $debug );
+#			if ( ! system("$iptables -N $chain >/dev/null 2>/dev/null") ) {
+#				$alff->run_cmd("$iptables -F $chain");
+#			}
+			$alff->create_chain( $chain );
 
 			# Build up the command line
-			my $commandline = "$iptables -A FORWARD -s $src_network ";
+			my $commandline = "iptables -A FORWARD -s $src_network ";
 
 			if ( $config->getOption( "fw_type" ) eq "router" ) {
 				$commandline .= " -i $src_interface " if ( $src_interface );
@@ -95,7 +84,7 @@ sub classifyTrafficFromTo($$) { #{{{
 
 			$commandline .= " -d $dst_network -j $chain";
 
-			$alff->run_cmd( $commandline );
+			$alff->write_cmd( $commandline );
 		}
 	}
 
@@ -120,14 +109,14 @@ sub loadChainRules($$) { # {{{
 			$rules_file = "default_to" . "$rules_d/$src_vlan";
 		}
 		if ( $rules_file ) {
-			$alff->run_cmd( "sh", "$rules_file", "$chain" )
+			$alff->write_cmd( "sh", "$rules_file", "$chain" )
 				or print STDERR "Warning: Could not load rules for chain $chain";
 		} else {
-			$alff->run_cmd( "$iptables -A $chain -j $default_chain_policy" );
+			$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
 			
 		}
 	} else {
-		$alff->run_cmd( "$iptables -A $chain -j $default_chain_policy" );
+		$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
 	}
 } #}}}
 
@@ -135,13 +124,6 @@ sub loadChainRules($$) { # {{{
 ################################################################################
 #				Let´s go				       #
 ################################################################################
-
-##
-# Check if iptables can by found
-if ( ! -f $iptables ) {
-	print STDERR "Error: iptables was not found at $iptables, correct the path in $0\n";
-}
-
 
 ##
 # Get a list of all known vlan ids

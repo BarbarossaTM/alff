@@ -18,9 +18,7 @@ SERVICES_D="/etc/alff/services.d"
 cleanup() {
 	# If there is trouble before getting the service name, do nothing
 	if [ "${CHAIN}" ]; then
-		if ! iptables -N ${CHAIN} 2>/dev/null; then
-			iptables -F ${CHAIN}
-		fi
+		"${CHAIND_PLUGIN_DIR}/create_chain_" ${CHAIN}
 	fi
 }
 
@@ -68,10 +66,7 @@ fi
 
 #}}}
 
-if ! iptables -N ${CHAIN} 2>/dev/null; then
-	[ "${VERBOSE}" ] && echo "Chain ${CHAIN} does already exist, flushing..." >&2
-	iptables -F ${CHAIN}
-fi
+"${CHAIND_PLUGIN_DIR}/create_chain_" ${CHAIN}
 
 # Create rules matchting traffic to the servers(s) with the given port(s)
 for server in ${SERVERS}; do
@@ -82,7 +77,7 @@ for server in ${SERVERS}; do
 		protocol="${service_port##*/}"		# get value after /
 		
 		if [ "${port}" -a "${protocol}" ]; then
-			iptables -A ${CHAIN} -p ${protocol} -d ${server} --dport ${port} -j ACCEPT
+			echo "iptables -A ${CHAIN} -p ${protocol} -d ${server} --dport ${port} -j ACCEPT" >&3
 		else
 			echo "Error: in port definition for service ${SERVICE}." >&2
 			exit 1
@@ -91,47 +86,47 @@ for server in ${SERVERS}; do
 done
 
 if [ "${ALLOW_FROM_TRUSTED_NETWORKS}" == "yes" ]; then
-	iptables -A allowServicesFromTrustedNets -j ${CHAIN}
+	echo "iptables -A allowServicesFromTrustedNets -j ${CHAIN}" >&3
 fi
 
 if [ "${ALLOW_FROM_FILTERED_NETWORKS}" == "yes" ]; then
-	iptables -A allowServicesFromFilteredNets -j ${CHAIN}
+	echo "iptables -A allowServicesFromFilteredNets -j ${CHAIN}" >&3
 fi
 
 if [ "${ALLOW_FROM_WORLD}" == "yes" ]; then
-	iptables -A allowWorldOpenServices -j ${CHAIN}
+	echo "iptables -A allowWorldOpenServices -j ${CHAIN}" >&3
 fi
 
 
-##
-# Callback stuff
-if [ "${CALLBACK_DST_PORTS}" -o "${CALLBACK_SRC_PORTS}" ]; then
-	CALLBACK_CHAIN="allowSrvCB_${SERVICE}"
-
-	if ! iptables -N ${CALLBACK_CHAIN} 2>/dev/null; then
-		iptables -F ${CALLBACK_CHAIN}
-	fi
-
-	for server in ${SERVERS}; do
-
-		for cb_dst_port in ${CALLBACK_DST_PORTS}; do
-			# $service_port is set like "80/tcp", so we have to "crack" it.
-			port="${cb_dst_port%%/*}"		# get value before /
-			protocol="${cb_dst_port##*/}"		# get value after /
-
-			iptables -A ${CALLBACK_CHAIN} -p ${protocol} -s ${server} --dport ${port} -j ACCEPT
-		done
-
-		for cb_src_port in ${CALLBACK_SRC_PORTS}; do
-			# $service_port is set like "80/tcp", so we have to "crack" it.
-			port="${cb_src_port%%/*}"		# get value before /
-			protocol="${cb_src_port##*/}"		# get value after /
-			
-			iptables -A ${CALLBACK_CHAIN} -p ${protocol} -s ${server} --sport ${port} -j ACCEPT
-		done
-	done
-
-	if [ "${ALLOW_CALLBACK_TO_TRUSTED_NETWORKS}" == "yes" ]; then
-		iptables -A  allowCB_SrvToTrustedNets  -j ${CALLBACK_CHAIN}
-	fi
-fi
+# ##
+# # Callback stuff
+# if [ "${CALLBACK_DST_PORTS}" -o "${CALLBACK_SRC_PORTS}" ]; then
+# 	CALLBACK_CHAIN="allowSrvCB_${SERVICE}"
+# 
+# 	if ! iptables -N ${CALLBACK_CHAIN} 2>/dev/null; then
+# 		iptables -F ${CALLBACK_CHAIN}
+# 	fi
+# 
+# 	for server in ${SERVERS}; do
+# 
+# 		for cb_dst_port in ${CALLBACK_DST_PORTS}; do
+# 			# $service_port is set like "80/tcp", so we have to "crack" it.
+# 			port="${cb_dst_port%%/*}"		# get value before /
+# 			protocol="${cb_dst_port##*/}"		# get value after /
+# 
+# 			iptables -A ${CALLBACK_CHAIN} -p ${protocol} -s ${server} --dport ${port} -j ACCEPT
+# 		done
+# 
+# 		for cb_src_port in ${CALLBACK_SRC_PORTS}; do
+# 			# $service_port is set like "80/tcp", so we have to "crack" it.
+# 			port="${cb_src_port%%/*}"		# get value before /
+# 			protocol="${cb_src_port##*/}"		# get value after /
+# 			
+# 			iptables -A ${CALLBACK_CHAIN} -p ${protocol} -s ${server} --sport ${port} -j ACCEPT
+# 		done
+# 	done
+# 
+# 	if [ "${ALLOW_CALLBACK_TO_TRUSTED_NETWORKS}" == "yes" ]; then
+# 		iptables -A  allowCB_SrvToTrustedNets  -j ${CALLBACK_CHAIN}
+# 	fi
+# fi

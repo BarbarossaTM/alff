@@ -1,0 +1,44 @@
+#!/usr/bin/env sh
+#
+# create_chain_${chain}
+#
+# Create a chain 
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 15 May 2006 14:59:27 +0200
+#
+
+if [ -z "${CACHE_DIR_CHAINS}" ]; then
+	echo "Error: You have to export CACHE_DIR_CHAINS before running this script!" >&2
+	exit 1
+fi
+
+if [ ! -d "${CACHE_DIR_CHAINS}" ]; then
+	echo "Error: CACHE_DIR_CHAINS ${CACHE_DIR_CHAINS} does not exist!" >&2
+	exit 1
+fi
+
+##
+# Get the chain name
+chain=`basename $0 | cut -d_ -f3-`
+if [ -z "${chain}" ]; then
+	chain="$1"
+fi
+
+if [ -z "${chain}" ]; then
+	echo "Error: No chain name specified..." >&2
+	echo " Either create a symlink with the name create_chain_YourChainName" >&2
+	echo " to this file or specify the YourChainName as command line parameter." >&2
+	exit 1
+fi
+
+touch "${CACHE_DIR_CHAINS}/${chain}"
+
+##
+# If not already there, create ${chain}
+cat << EOF >&3
+if ! iptables -t filter -F ${chain} >/dev/null 2>&1; then
+	iptables -t filter -N ${chain}
+fi
+
+EOF

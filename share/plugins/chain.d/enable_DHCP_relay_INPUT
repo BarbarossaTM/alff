@@ -19,10 +19,10 @@ my @dhcp_servers = $config->getDHCPServers;
 if ( scalar( @dhcp_servers ) > 0 ) {
 
 	print " * Allowing DHCP traffic to local DHCP relay... ";
-	$alff->run_cmd("iptables -A INPUT -p udp -d 255.255.255.255 --sport 68 --dport 67 -j ACCEPT");
+	$alff->write_cmd("iptables -A INPUT -p udp -d 255.255.255.255 --sport 68 --dport 67 -j ACCEPT");
 
 	foreach my $dhcp_server ( @dhcp_servers ) {
-		$alff->run_cmd("/sbin/iptables  -A INPUT -p udp -s $dhcp_server --sport 67 -j ACCEPT");
+		$alff->write_cmd("/sbin/iptables  -A INPUT -p udp -s $dhcp_server --sport 67 -j ACCEPT");
 	}
 	print "done.\n";
 }

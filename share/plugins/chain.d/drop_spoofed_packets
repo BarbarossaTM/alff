@@ -17,9 +17,9 @@ CHAIN=`basename $0 | awk -F_ '{ print $NF }'`
 
 if [ "${CHAIN}" ]; then
 
-	if iptables -L spoofcheck -n > /dev/null 2>/dev/null; then
-		echo -n " * Creating rule to DROP spoofed packets... "
-		iptables -A ${CHAIN} -j spoofcheck && echo "done." || echo "FAILED!"
+	if [ -f "${CACHE_DIR_CHAINS}/spoofcheck"  ]; then
+		echo " * Creating rule to DROP spoofed packets... "
+		echo "iptables -A ${CHAIN} -j spoofcheck" >&3
 	else
 		echo "Error: Chain \"spoofcheck\" does not exist, but should be hooked in into ${CHAIN}!">&2
 	fi

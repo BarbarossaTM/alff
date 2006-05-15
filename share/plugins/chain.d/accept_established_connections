@@ -17,8 +17,8 @@
 CHAIN=`basename $0 | awk -F_ '{ print $NF }'`
 
 if [ "${CHAIN}" ]; then
-	echo -n " * Creating rule to ACCEPT established connections... "
-	iptables -A ${CHAIN} -m state --state RELATED,ESTABLISHED -j ACCEPT && echo "done." || echo "FAILED!"
+	echo " * Creating rule to ACCEPT established connections... "
+	echo "iptables -A ${CHAIN} -m state --state RELATED,ESTABLISHED -j ACCEPT" >&3
 else
 	echo "Error: You did not specify the chain in which established connection should be hooked in" >&2
 fi

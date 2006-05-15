@@ -8,13 +8,20 @@
 #  -- Thu, 08 Dec 2005 18:01:52 +0100
 #
 
-BASE_DIR="/firewall/current"
-
 FUNCTION_DIR="/usr/share/alff/routines/"
+
+CHAIND_PLUGIN_DIR="/usr/share/alff/plugins/chain.d/"
+
+##
+# Some caches used at runtime
+CACHE_DIR="/var/cache/alff/"
+CACHE_DIR_BUILD="${CACHE_DIR}/ruleset.build"
+CACHE_DIR_CHAINS="${CACHE_DIR}/chains"
 
 CONFIG_FILE="/etc/alff/alff.conf"
 CONFIG_DIR="/etc/alff"
 CHAIN_D="${CONFIG_DIR}/chain.d"
+
 
 MY_NAME="alff"
 
@@ -96,6 +103,9 @@ checkTools
 
 preload "/usr/share/alff/lib/routines"
 
+echo "The ALFF Linux Firewall Framework awakes ..."
+echo ""
+
 case "$1" in 
 	-h|--help)
 		usage
@@ -106,59 +116,43 @@ case "$1" in
 		exit 0
 		;;
 
-	start|restart)
-		echo "${MY_NAME}: Enable the firewall system..."
-
-		# TODO FIXME ConfigCheck in PERL
-#		if ! checkConfig; then 
-#			echo "Error: Mystic problems in config detected." >&2
-#			echo "alff will STOP now to even more avoid trouble..." >&2
-#			exit 1
-#		fi
-
-		configureFirewallNetworkOptions
-
-		# Set up INPUT before FORWARD as there are be some nasy side effects,
-		# if INPUT policy is set to DROP and FORWARD has to be set up.
-		# (This should be fixed now, but...)
-		# See README.devel for details
-
-		# Create user defined chains and hook them in where they belong to
-		# (each script has to do this itself!)
-		if run-parts "${CHAIN_D}"; then	
-			echo "Successfully set up ALFF."
-		else
-			echo "FAILED to set up ALFF." >&2
-		fi
-
-
-		# Use vlan 114 for ct_sync as it will more or less disable eth1.101
-		# if we use eth1.101 for syncing...
-#		iptables -A INPUT -p udp -s 131.234.114.41 -d 224.0.0.0/4 -j ACCEPT
-#		iptables -A INPUT -p udp -s 131.234.114.42 -d 224.0.0.0/4 -j ACCEPT
-
-#		# BRIDGE ONLY
-#		acceptUnfilteredTraffic
-
-
-#		"$0" loadUserRules
-
-		;;
-
-	stop)
-		echo -n "${MY_NAME}: Disabling the whole firewall system... "
-		iptables -P INPUT ACCEPT
-		iptables -P FORWARD ACCEPT
-		iptables -P OUTPUT ACCEPT
-		iptables -F
-		iptables -X
+	generate)
+		echo -n  "Cleaning up cache dirs... "
+		find "${CACHE_DIR}/chains/" -type f -exec rm {} \;	&& echo -n "chains "
+		find "${CACHE_DIR_BUILD}" -type f -exec rm {} \;	&& echo -n "`basename ${CACHE_DIR_BUILD}` "
 		echo "done."
+		echo ""
+
+		echo "Generation system configuration"
+ 		configureFirewallNetworkOptions > "${CACHE_DIR_BUILD}/000_proc_options"
+
+		echo "Generating rules... "
+		##
+		# pimp my "run-parts"
+		#
+		# Create fd3 (all script should output there stuff to fd3, which is redirected to a proper outfile
+		exec 3>&1
+		# export environment variables which will be used by the plugins
+		export CHAIND_PLUGIN_DIR
+		export CACHE_DIR_CHAINS
+		find "${CHAIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
+			if [ -x "${CHAIN_D}/${plugin}" ]; then
+				sh -c "${CHAIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"
+			fi
+		done
+
+		"$0" loadUserRules 3> "${CACHE_DIR_BUILD}/999_user_rules"
+
+		echo ""
+		echo "Generating ruleset... "
+		cat "${CACHE_DIR_BUILD}"/* > "${CACHE_DIR}/alff.rules"
+		
 		;;
 
-	reload)
-		echo "${MY_NAME}: Reloading services configuration and user rules..."
-		"$0" generateAllServiceRules
-		"$0" loadUserRules
+
+	push)
+		echo "Pushing the ruleset to your firewalls..."
+		echo "To be done..."
 		;;
 
 	*)

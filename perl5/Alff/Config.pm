@@ -13,6 +13,7 @@ package Alff::Config;
 my $VERSION="1.0";
 
 use strict;
+use Alff::Main;
 use XML::Simple;
 
 my $default_configfile = "/etc/alff/alff.conf";
@@ -44,7 +45,10 @@ sub new { #{{{
 	my $configfile = $args->{configfile} || $default_configfile;
 	my $debug = $args->{debug} || 0;
 
+	my $alff = Alff::Main->new();
+
 	my $obj = bless { 
+		alff => $alff,
 		args => $args,
 		configfile => $configfile,
 		debug => $debug,
@@ -120,7 +124,7 @@ sub checkConfig() { #{{{
 		# have a detailed look at the policy, if not.
 		# (Don't check end-of-word at REJECT and LOG because of possible options)
 		if ( ! ( $policy =~ m/^ACCEPT$|^DROP$|^LOG|^REJECT/ ) ) {
-			if ( system( "/sbin/iptables -n -L $policy >/dev/null 2>/dev/null" ) ) {
+			if ( ! $self->{alff}->chain_exists( $policy ) ) {
 				print STDERR "Error: Invalid default_chain_policy $policy, defaulting to REJECT\n";
 				$self->{config}->{options}->{default_chain_policy} = "REJECT";
 			}

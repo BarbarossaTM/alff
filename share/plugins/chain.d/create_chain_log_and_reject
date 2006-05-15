@@ -7,13 +7,13 @@
 # Maximilian Wilhelm <max@rfc2324.org>
 #  -- Mon, 24 Apr 2006 19:34:30 +0200
 #
+set -e
 
 ##
 # Make sure we have (an empty) chain log_and_reject
-if ! iptables -F log_and_reject > /dev/null 2>&1; then
-	iptables -N log_and_reject
-fi
+"${CHAIND_PLUGIN_DIR}/create_chain_" log_and_reject
 
+cat << EOF >&3
 # LOG the traffic to be rejected, but restrict the amount of logs...
 iptables -A log_and_reject -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "alff rejected: "
 
@@ -22,3 +22,5 @@ iptables -A log_and_reject -p tcp -j REJECT --reject-with tcp-reset
 
 # REJECT anything else via an ICMP message with icmp-admin-prohibited
 iptables -A log_and_reject -j REJECT --reject-with icmp-admin-prohibited
+
+EOF

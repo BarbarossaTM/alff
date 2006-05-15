@@ -51,7 +51,7 @@ sub allowServiceFromNetworksOfSecurityClass($) { #{{{
 
 	if ( scalar( @vlans ) > 0 ) {
 		# Check if chain exists...
-		if ( system("/sbin/iptables -L $chain -n >/dev/null 2>/dev/null") ) {
+		if ( ! $main->chain_exists( $chain, "filter" ) ) {
 			print STDERR "Error: There is no service chain for security class $securityClass\n";
 			return;
 		}
@@ -62,7 +62,7 @@ sub allowServiceFromNetworksOfSecurityClass($) { #{{{
 			my @networks = $config->getVlanNetworks( $vlan );
 
 			foreach my $network ( @networks ) { 
-				$main->run_cmd("/sbin/iptables -A FORWARD -s ${network} -j $chain");
+				$main->write_cmd("iptables -A FORWARD -s ${network} -j $chain");
 			}
 			print ".";
 
@@ -82,7 +82,7 @@ sub allowWorldOpenServices() { #{{{
 	my $main = $self->{alff_main};
 
 	print " * Creating rule to allow access to services configured to be world-wide available...";
-	print $main->run_cmd("/sbin/iptables -A FORWARD -j allowWorldOpenServices") ? "done.\n" : "FAILED\n";
+	print $main->write_cmd("iptables -A FORWARD -j allowWorldOpenServices") ? "done.\n" : "FAILED\n";
 } #}}}
 
 1;

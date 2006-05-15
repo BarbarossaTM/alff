@@ -22,18 +22,19 @@ if [ ! -d "${SERVICES_D}" ]; then
 	exit 1
 fi
 
-echo " * Creating callback service rules..."
-for cb_chain in ${CALLBACK_CHAINS}; do
-	if ! iptables -N ${cb_chain} >/dev/null 2>/dev/null; then
-		iptables -F ${cb_chain}
-	fi
-done
+#echo " * Creating callback service rules..."
+#for cb_chain in ${CALLBACK_CHAINS}; do
+#	if ! iptables -N ${cb_chain} >/dev/null 2>/dev/null; then
+#		iptables -F ${cb_chain}
+#	fi
+#done
 
 echo " * Creating service rules..."
 for chain in ${SERVICE_CHAINS}; do
-	if ! iptables -N ${chain} >/dev/null 2>/dev/null; then
-		iptables -F ${chain}
-	fi
+#	if ! iptables -N ${chain} >/dev/null 2>/dev/null; then
+#		iptables -F ${chain}
+#	fi
+	"${CHAIND_PLUGIN_DIR}/create_chain_" ${chain}
 done
 
 for srv in `find ${SERVICES_D} -type f -print | sort `; do
