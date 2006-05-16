@@ -8,11 +8,6 @@
 
 set -e
 
-if ! which bc >/dev/null 2>/dev/null; then
-	echo "This programm needs 'bc' installed to work correctly. Exiting." >&2
-	exit 1
-fi
-
 SERVICES_D="/etc/alff/services.d"
 
 
