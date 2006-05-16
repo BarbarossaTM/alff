@@ -40,7 +40,7 @@ function checkConfigDir() { # Check the configuration (environment) #{{{
 } #}}}
 
 function checkTools() { # check for needed tooles #{{{
-	for tool in awk bc find grep iptables sh run-parts; do
+	for tool in awk find grep sh; do
 		if ! command -v ${tool} >/dev/null 2>/dev/null; then
 			echo "Error: \"${tool}\" is needed by ${MY_NAME}, but was not found on your system." >&2
 		fi
