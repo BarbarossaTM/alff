@@ -7,6 +7,6 @@ Standards-Version: 3.6.2
 
 Package: alff
 Architecture: all
-Depends: perl, libxml-simple-perl, gawk, bc, bash, iptables
+Depends: perl, libxml-simple-perl, gawk, bash
 Description: The RBM firewall framework
  This package provides the RBM firewall framework.
