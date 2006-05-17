@@ -32,7 +32,7 @@ if [ -z "${chain}" ]; then
 	exit 1
 fi
 
-touch "${CACHE_DIR_CHAINS}/${chain}"
+touch "${CACHE_DIR_CHAINS}/filter/${chain}"
 
 ##
 # If not already there, create ${chain}
