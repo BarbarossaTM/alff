@@ -102,27 +102,40 @@ sub loadChainRules($$) { # {{{
 				$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
 			}
 
+			print STDERR "Found and loaded rules file $rules_file\n" if ( $debug );
+
 		# defaulted configuration which fits to this chains
 		} else {
-			print STDERR "no explicit configuration, looking for default...\n";
+			print STDERR "No explicit configuration found for chain $chain, lookin for a default config fitting to this vlan... " if ( $debug );
 
-			if ( -f "$rules_d/$src_vlan" . "._to_default" ) {
-				$rules_file = "$rules_d/$src_vlan" . "._to_default";
+			if ( -f "$rules_d/$src_vlan" . "_to_default" ) {
+				$rules_file = "$rules_d/$src_vlan" . "_to_default";
 
-			} elsif ( -f "default_to" . "$rules_d/$src_vlan" ) {
-				$rules_file = "default_to" . "$rules_d/$src_vlan";
+			} elsif ( -f "default_to" . "$rules_d/$dst_vlan" ) {
+				$rules_file = "default_to" . "$rules_d/$dst_vlan";
 			}
 
 			if ( $rules_file ) {
-				print STDERR "Found $rules_file\n";
+				print STDERR "found one at $rules_file...\n" if ( $debug );
 
-#				$alff->write_cmdoutput( "sh", "$rules_file", "$chain" )
-#					or print STDERR "Warning: Could not load rules for chain $chain\n";
-#				TODO FIXME
-#				Build some way of defaulting method.
-#				e.g. use _CHAIN_ as chain name in the default-file and set it to te correct chain
-#				name via regexp...
+				if ( open ( RULES, "<$rules_file" ) ) {
+					while ( <RULES> ) {
+						# skip comments and empty lines
+						next if ( m/^#|^$/ );
+
+						# replace 'default' with the current chain
+						s/default_/${src_vlan}_/;
+						s/_default/_${dst_vlan}/;
+
+						$alff->write_cmd( $_ );
+					}
+					close( RULES );
+				} else {
+					print STDERR "Error while loading rules from $rules_file, setting default_chain_policy for chain $chain\n";
+					$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
+				}
 			} else {
+				print "nothing found, use default_chain_policy.\n" if ( $debug );
 				$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
 				
 			}
