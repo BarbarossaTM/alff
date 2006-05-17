@@ -17,7 +17,7 @@ CHAIN=`basename $0 | awk -F_ '{ print $NF }'`
 
 if [ "${CHAIN}" ]; then
 
-	if [ -f "${CACHE_DIR_CHAINS}/spoofcheck"  ]; then
+	if [ -f "${CACHE_DIR_CHAINS}/filter/spoofcheck"  ]; then
 		echo " * Creating rule to DROP spoofed packets... "
 		echo "iptables -A ${CHAIN} -j spoofcheck" >&3
 	else
