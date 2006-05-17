@@ -53,11 +53,12 @@ sub classifyTrafficFromTo($$) { #{{{
 	my @src_networks = $config->getVlanNetworks( $src_vlan );
 	my @dst_networks = $config->getVlanNetworks( $dst_vlan );
 
+	# Create the chain for this network transition
+	$alff->create_chain( $chain );
+
 	# Not that good runtime(?), but...
 	foreach my $src_network ( @src_networks ) {
 		foreach my $dst_network ( @dst_networks ) {
-
-			$alff->create_chain( $chain );
 
 			# Build up the command line
 			my $commandline = "iptables -A FORWARD -s $src_network ";
