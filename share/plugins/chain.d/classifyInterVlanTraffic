@@ -111,8 +111,8 @@ sub loadChainRules($$) { # {{{
 			if ( -f "$rules_d/$src_vlan" . "_to_default" ) {
 				$rules_file = "$rules_d/$src_vlan" . "_to_default";
 
-			} elsif ( -f "default_to_" . "$rules_d/$dst_vlan" ) {
-				$rules_file = "default_to_" . "$rules_d/$dst_vlan";
+			} elsif ( -f "$rules_d/default_to_" . "$dst_vlan" ) {
+				$rules_file = "$rules_d/default_to_" . "$dst_vlan";
 			}
 
 			if ( $rules_file ) {
