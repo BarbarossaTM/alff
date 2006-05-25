@@ -1,0 +1,91 @@
+#!/ussr/bin/env sh
+#
+# The Alff Cat
+#
+# alff Configuration Acceptor Tool
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Thu, 25 May 2006 20:56:01 +0200
+#
+
+##
+# ATTENTION:
+# Do never ever add
+#       || echo "FAILED!"
+# anywhere in this tool, because we want 'set -e' do handle this case!!
+set -e
+
+OLD_RULES_DIR="/var/cache/alff/backup"
+OLD_RULES_FILE="${OLD_RULES_DIR}/rules.dump"
+
+# The DELETE_ME_FILE has to be deleted within SLEEP_TIME to prevent
+# restore of the saved rules.
+DELETE_ME_FILE="${OLD_RULES_DIR}/.current_rules_dont_work"
+# The time to wait for deletion of DELETE_ME_FILE in seconds
+SLEEP_TIME=180
+
+MY_NAME="alff-cat"
+
+
+# Check for root privileges
+if [ `id -u` != 0 ]; then
+	echo "Error: ${MY_NAME} has to be run as root!" >&2
+	exit 1
+fi
+
+# Check args
+if [ -z "${1}" ]; then
+	echo "usage: ${MY_NAME} [ - | filename ]" >&2
+	exit 1
+fi
+
+# Check if rules file is readable, if not reading from stdin
+RULES_FILE="${1}"
+if [ "${RULES_FILE}" != '-' ]; then
+	if [ ! -r "${RULES_FILE}" ]; then
+		echo "Error: Rules file ${RULES_FLIE} does not exist or is not readable!" >&2
+		exit 1
+	fi
+fi
+
+# Check for some needed binaries
+for tool in iptables-save iptables-restore; do
+	if ! command -v ${tool} >/dev/null; then
+		echo "Error: '${tool}' is required by ${MY_NAME}, but was not found!" >&2
+		exit 2
+	fi
+done
+
+# Create rules backup dir, if not there
+if [ ! -d "${OLD_RULES_DIR}" ]; then
+	mkdir -p "${OLD_RULES_DIR}"
+fi
+
+
+##
+# Ok, let´s go
+
+echo "The Alff-cat awakes..."
+# Save the current ruleset to $OLD_RULES_FILE
+echo -n " 1. Dumping current ruleset to ${OLD_RULES_DIR}... "
+iptables-save > "${OLD_RULES_FILE}" && echo "done."
+
+# Just execute $RULES_FILE
+# The shell will handle both, a filename as parameter and
+# reading command from stdin
+echo -n " 2. Loading new rules from ${RULES_FILE}... "
+sh "${RULES_FILE}" && echo "done."
+
+# Wait for the admin to delete DELETE_ME_FILE
+echo -n " 3. Wait ${SLEEP_TIME:-180} seconds for delete of the token..."
+sleep ${SLEEP_TIME:-180} && echo "done."
+
+# Do we have to do a restore?
+if [ -f "${DELETE_ME_FILE}" ]; then
+	# Oh, something went wrong... Let´s restore the old rules
+	echo -n " Damn, alff-cat token has not been deleted, restoring old ruleset... "
+	iptables -F
+	iptables-restore < "${OLD_RULES_FILE}" && echo "done."
+fi
+
+echo "Have a nice day."
