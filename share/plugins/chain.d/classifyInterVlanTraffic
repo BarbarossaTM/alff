@@ -27,7 +27,7 @@ my $config = Alff::Config->new( configfile => $configfile, debug => $debug )
 	or die "Error: could not load configuration from $configfile\n";
 
 # List of all known vlans
-my @vlans;
+my @vlans = $config->getVlanList;
 
 my $default_chain_policy = $config->getDefaultChainPolicy;
 
@@ -92,34 +92,19 @@ sub loadChainRules($$) { # {{{
 	my $dst_vlan = shift;
 	my $chain = $src_vlan . "_to_" . $dst_vlan;
 
-	my $rules_file;
-
 	if ( -d $rules_d ) {
-		# Configuration for exactly this chain
-		if ( -f "$rules_d/$chain" ) {
-			$rules_file = "$rules_d/$chain";
-			if ( ! $alff->write_filecontent( $rules_file ) ) {
-				print STDERR "INFO: Setting the default_chain_policy for chain $chain\n";
-				$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
-			}
+		##
+		# Load default rules from the following files in this order
+		my @default_files = (  "${src_vlan}_to_default", "default_to_${dst_vlan}" );
+		# How many files have been loaded?
+		my $load_count = 0;
+		
+		for my $default_file ( @default_files ) {
+			# Prepend path of rules.d/
+			$default_file = "$rules_d/$default_file";
 
-			print STDERR "Found and loaded rules file $rules_file\n" if ( $debug );
-
-		# defaulted configuration which fits to this chains
-		} else {
-			print STDERR "No explicit configuration found for chain $chain, lookin for a default config fitting to this vlan... " if ( $debug );
-
-			if ( -f "$rules_d/$src_vlan" . "_to_default" ) {
-				$rules_file = "$rules_d/$src_vlan" . "_to_default";
-
-			} elsif ( -f "$rules_d/default_to_" . "$dst_vlan" ) {
-				$rules_file = "$rules_d/default_to_" . "$dst_vlan";
-			}
-
-			if ( $rules_file ) {
-				print STDERR "found one at $rules_file...\n" if ( $debug );
-
-				if ( open ( RULES, "<$rules_file" ) ) {
+			if ( -f "$default_file" ) {
+				if ( open ( RULES, "<$default_file" ) ) {
 					while ( <RULES> ) {
 						# skip comments and empty lines
 						next if ( m/^#|^$/ );
@@ -128,18 +113,35 @@ sub loadChainRules($$) { # {{{
 						s/default_/${src_vlan}_/;
 						s/_default/_${dst_vlan}/;
 
+						chomp;
+
 						$alff->write_cmd( $_ );
 					}
 					close( RULES );
+
+					print STDERR "INFO: Found and loaded default rules for chain $chain from $default_file\n" if ( $debug );
+					$load_count++;
 				} else {
-					print STDERR "Error while loading rules from $rules_file, setting default_chain_policy for chain $chain\n";
-					$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
+					print STDERR "Error: Could not load default rules for chain $chain from $default_file\n";
 				}
-			} else {
-				print "nothing found, use default_chain_policy.\n" if ( $debug );
-				$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
-				
 			}
+		}
+
+		##
+		# Load explicit chain configuration
+		if ( -f "$rules_d/$chain" ) {
+			my $rules_file = "$rules_d/$chain";
+			if (  $alff->write_filecontent( $rules_file ) ) {
+				print STDERR "INFO: Found and loaded rules file $rules_file\n" if ( $debug );
+				$load_count++;
+			} else {
+				print STDERR "ERROR: Could not load chain rules for chain $rules_file\n";
+			}
+		}
+
+		if ( $load_count == 0 ) {
+			print STDERR "INFO: No rules found for chain $chain, setting the default_chain_policy...\n" if ( $debug );
+			$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
 		}
 	} else {
 		$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
@@ -150,10 +152,6 @@ sub loadChainRules($$) { # {{{
 ################################################################################
 #				Let´s go				       #
 ################################################################################
-
-##
-# Get a list of all known vlan ids
-@vlans = $config->getVlanList;
 
 ##
 # Loop through all combinations of vlans and generate a vlan-matrix
@@ -178,6 +176,8 @@ foreach my $src_vlan ( @vlans ) {
 		# Ok, just do it[tm]
 		classifyTrafficFromTo( $src_vlan, $dst_vlan );
 		loadChainRules( $src_vlan, $dst_vlan );
+		# create empty line after each network traversal in rules file
+		$alff->write_cmd(" ");
 	}
 }
 print " done.\n";
