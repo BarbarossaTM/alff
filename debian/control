@@ -8,5 +8,18 @@ Standards-Version: 3.6.2
 Package: alff
 Architecture: all
 Depends: perl, libxml-simple-perl, gawk, bash
-Description: The RBM firewall framework
- This package provides the RBM firewall framework.
+Description: A Linux Firewall Framework - rule generation
+ This package is part of the "A Linux Firewall Framework".
+ .
+ This package contains the tools for managing firewall configuration and
+ generating rulesets for your firewalls.
+
+Package: alff-cat
+Architecture: all
+Depends: iptables
+Description: A Linux Firewall Framework - Config Acceptor Tool
+ This package is part of the "A Linux Firewall Framework".
+ .
+ This package contains tools to load new rules to your firewall machines.
+ It provides support for easy and automated roll-back if the new ruleset
+ does not work as expected.
