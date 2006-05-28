@@ -20,12 +20,13 @@ function configureFirewallNetworkOptions() { # {{{
 		bridge)
 			# If we are running as a bridge, 
 			#- enable hooks only for used filter features
-			cat << EOCONF >&3
-echo 0 > /proc/sys/net/bridge/bridge-nf-call-arptables
-echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
-echo 0 > /proc/sys/net/bridge/bridge-nf-call-ip6tables
-echo 1 > /proc/sys/net/bridge/bridge-nf-filter-vlan-tagged
-EOCONF
+			cat <<- EOCONF >&3
+			echo 0 > /proc/sys/net/bridge/bridge-nf-call-arptables
+			echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
+			echo 0 > /proc/sys/net/bridge/bridge-nf-call-ip6tables
+			echo 1 > /proc/sys/net/bridge/bridge-nf-filter-vlan-tagged
+			
+			EOCONF
 
 			echo "" >&2
 			echo "" >&2
@@ -36,10 +37,10 @@ EOCONF
 			;;
 
 		router)
-			cat << EOCONF >&3
-echo 1 > /proc/sys/net/ipv4/ip_forward
-
-EOCONF
+			cat <<- EOCONF >&3
+			echo 1 > /proc/sys/net/ipv4/ip_forward
+			
+			EOCONF
 			;;
 
 	esac
