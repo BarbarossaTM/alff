@@ -94,7 +94,7 @@ sub run_cmd(@) { #{{{
 
 ##
 # Write out the content of the given file
-sub write_filecontent($) { #{{{
+sub write_filecontent($) { # write_filecontent( file_name ) #{{{
 	my $self = shift;
 	my $file = shift;
 	my $output_fh = $self->{output_fh};
@@ -114,7 +114,7 @@ sub write_filecontent($) { #{{{
 
 ##
 # Write out the given command line to fd3
-sub write_cmd($) { #{{{
+sub write_cmd($) { # write_cmd( command_string ) #{{{
 	my $self = shift;
 	my $cmd = shift;
 	my $output_fh = $self->{output_fh};
@@ -129,7 +129,7 @@ sub write_cmd($) { #{{{
 
 ##
 # Create a chain and make it known to alff
-sub create_chain($) { #{{{
+sub create_chain($) { # create_chain( chain_name [, table_name] ) #{{{
 	my $self = shift;
 	my $chain = shift;
 	my $table = shift || "filter";
@@ -153,7 +153,7 @@ fi\n";
 
 ##
 # Check if chain $arg1 exists in table ($arg2 || filter)
-sub chain_exists($) { #{{{
+sub chain_exists($) { # chain_exists( chain_name [, table_name] ) #{{{
 	my $self = shift;
 	my $chain = shift;
 	my $table = shift || "filter";

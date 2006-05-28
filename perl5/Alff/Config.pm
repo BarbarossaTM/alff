@@ -148,7 +148,6 @@ sub checkConfig() { #{{{
 sub getDefaultChainPolicy() { #{{{
 	my $self = shift;
 
-	# Just in case...
 	return $self->{config}->{options}->{default_chain_policy};
 } #}}}
 
@@ -255,7 +254,7 @@ sub getVlanInterface($) { # $vlan_id -> string  {{{
 
 ##
 # return the list of networks for the given vlan
-sub getVlanNetworks($) { # $vlan_id -> ( list of network ) {{{
+sub getVlanNetworks($) { # $vlan_id -> ( list of networks ) {{{
 	my $self = shift;
 
 	my $vlan_id = shift;
