@@ -52,17 +52,22 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 
-	# Add here commands to install the package into debian/alff.
-	mkdir -p $(CURDIR)/debian/alff/usr/share/perl5
-	mkdir -p $(CURDIR)/debian/alff/usr/share
-	mkdir -p $(CURDIR)/debian/alff/usr/sbin
-	mkdir -p $(CURDIR)/debian/alff/etc/alff
+	##
+	# alff
+	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share/perl5
+	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share
+	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/sbin
+	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff
 
-	cp -a $(CURDIR)/share $(CURDIR)/debian/alff/usr/share/alff
-	cp -a $(CURDIR)/perl5/Alff $(CURDIR)/debian/alff/usr/share/perl5
-	cp -a $(CURDIR)/alff $(CURDIR)/debian/alff/usr/sbin
-	cp $(CURDIR)/alff.conf $(CURDIR)/debian/alff/etc/alff/
+	cp -a $(CURDIR)/share $(CURDIR)/debian/alff-rulegen/usr/share/alff
+	cp -a $(CURDIR)/perl5/Alff $(CURDIR)/debian/alff-rulegen/usr/share/perl5
+	cp -a $(CURDIR)/alff $(CURDIR)/debian/alff-rulegen/usr/sbin
+	cp $(CURDIR)/alff.conf $(CURDIR)/debian/alff-rulegen/etc/alff/
 
+	##
+	# alff-cat
+	mkdir -p mkdir -p $(CURDIR)/debian/alff-agent/usr/sbin
+	cp $(CURDIR)/cat/alff-cat $(CURDIR)/debian/alff-agent/usr/sbin/alff-cat
 
 # Build architecture-independent files here.
 binary-indep: build install

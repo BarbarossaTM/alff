@@ -5,7 +5,7 @@ Maintainer: Maximilian Wilhelm <max@rfc2324.org>
 Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.6.2
 
-Package: alff
+Package: alff-rulegen
 Architecture: all
 Depends: perl, libxml-simple-perl, gawk, bash
 Description: A Linux Firewall Framework - rule generation
@@ -14,12 +14,12 @@ Description: A Linux Firewall Framework - rule generation
  This package contains the tools for managing firewall configuration and
  generating rulesets for your firewalls.
 
-Package: alff-cat
+Package: alff-agent
 Architecture: all
 Depends: iptables
-Description: A Linux Firewall Framework - Config Acceptor Tool
+Description: A Linux Firewall Framework - rule loading agent
  This package is part of the "A Linux Firewall Framework".
  .
- This package contains tools to load new rules to your firewall machines.
+ This package contains tools to load new rules on your firewall machines.
  It provides support for easy and automated roll-back if the new ruleset
  does not work as expected.
