@@ -66,7 +66,7 @@ install: build
 
 	##
 	# alff-cat
-	mkdir -p mkdir -p $(CURDIR)/debian/alff-agent/usr/sbin
+	mkdir -p $(CURDIR)/debian/alff-agent/usr/sbin
 	cp $(CURDIR)/cat/alff-cat $(CURDIR)/debian/alff-agent/usr/sbin/alff-cat
 
 # Build architecture-independent files here.
