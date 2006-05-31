@@ -78,6 +78,7 @@ sh "${RULES_FILE}" && echo "done."
 
 # Wait for the admin to delete DELETE_ME_FILE
 echo -n " 3. Wait ${SLEEP_TIME:-180} seconds for delete of the token..."
+touch "${DELETE_ME_FILE}"
 sleep ${SLEEP_TIME:-180} && echo "done."
 
 # Do we have to do a restore?
@@ -88,4 +89,4 @@ if [ -f "${DELETE_ME_FILE}" ]; then
 	iptables-restore < "${OLD_RULES_FILE}" && echo "done."
 fi
 
-echo "Have a nice day."
+echo "Have a nice day..."
