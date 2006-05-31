@@ -1,0 +1,13 @@
+#
+# /etc/default/alff-agent
+#
+
+# Control wether alff-agent should load rules on bootup
+START_ALFF="false"
+
+# If you want alff-agent to be a bit verbose on what´s going on, say "true"
+ALFF_INIT_VERBOSE="false"
+
+# If you want to get mail if /etc/init.d/alff-agent is used, specify a comma
+# separated list of email addresses.
+MAIL_LOG_TO=""
