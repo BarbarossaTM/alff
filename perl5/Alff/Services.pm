@@ -119,20 +119,20 @@ sub allowWorldOpenServices() { #{{{
 # Read
 sub readServiceNames() { #{{{
 	my $self = shift;
-	my $service_d = $self->{serivce_d};
+	my $services_d = $self->{services_d};
 	my @services;
 
-	return undef if ( ! -d $service_d );
+	return undef if ( ! -d $services_d );
 
-	if ( ! opendir( SERVICE_D, $service_d ) ) {
-		print STDERR "Error: Cannot read content of $service_d\n";
+	if ( ! opendir( SERVICE_D, $services_d ) ) {
+		print STDERR "Error: Cannot read content of $services_d\n";
 		return undef;
 	}
 
 	@services = grep { ! /^\.{1,2}$/ } readdir(SERVICE_D);		# weed out "." and ".."
 	closedir( SERVICE_D );
 
-	return @services;
+	return sort @services;
 } #}}}
 
 ##
@@ -204,13 +204,13 @@ sub generateServiceChain($) { #{{{
 	foreach my $config_key ( keys %{$serviceconfig} ) {
 		# search for 
 		if ( m/allow_from_(\w+)_networks/ ) {
-			my $srv_class = $1;
-			my $srv_class_chain = "allowServicesFrom${srv_class}Nets";
+			my $sec_class = $1;
+			my $sec_class_chain = "allowServicesFrom${sec_class}Nets";
 
-			if ( $alff->chain_exists( $srv_class_chain ) ) {
-				$alff->write_cmd( "iptables -A $srv_class_chain -j $srv_chain" );
+			if ( $alff->chain_exists( $sec_class_chain ) ) {
+				$alff->write_cmd( "iptables -A $sec_class_chain -j $srv_chain" );
 			} else {
-				print STDERR "Error: Service $service should be accessable from undefined security class $srv_class, skipping...\n";
+				print STDERR "Error: Service $service should be accessable from undefined security class $sec_class, skipping...\n";
 			}
 		}
 	}
