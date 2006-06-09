@@ -50,10 +50,10 @@ sub new { #{{{
 
 	# Create instances for used objects
 	my $config = Alff::Config->new( debug => $debug );
-	my $alff = Alff::Main->new( debug => $debug );
+	my $alff_main = $args->{alff_main} || Alff::Main->new( debug => $debug );
 
 	my $obj = bless {
-		alff_main => $alff,
+		alff_main => $alff_main,
 		config => $config,
 		debug => $debug,
 		services_d => $services_d,
