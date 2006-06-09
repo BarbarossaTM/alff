@@ -170,6 +170,32 @@ sub getOption($) { #{{{
 	return $self->{config}->{options}->{$conf_opt};
 } #}}}
 
+# Get a list of all known securityClasses
+sub getSecurityClasses() { #{{{
+	my $self = shift;
+
+	my %securityClasses = ( "filtered" => 1 , "trusted" => 1 );
+
+	# Look at each defined vlan for security classes
+	foreach my $vlan_id ( keys %{$self->{config}->{vlan}} ) {
+		my $vlan_ref = $self->{config}->{vlan};
+
+		if ( defined $vlan_ref->{securityClass} ) {
+			# There may be multiple securityClasses, check for a list
+			if ( ref( $vlan_ref->{securityClass})  ) {
+				# Put all securityClass names into the securityClasses hash
+				foreach my $secClass ( @{$vlan_ref->{securityClass}} ) {
+					$securityClasses{$secClass} = 1;
+				}
+			} else {
+				$securityClasses{$vlan_ref->{securityClass}} = 1;
+			}
+		}
+	}
+
+	return sort keys %securityClasses;
+} #}}}
+
 ################################################################################
 #				Vlan handling				       #
 ################################################################################
