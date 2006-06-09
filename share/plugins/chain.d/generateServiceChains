@@ -27,11 +27,12 @@ my $alff_main = Alff::Main->new();
 my $alff_srv = Alff::Service->new( alff_main => $alff_main, services_d => $services_d, debug => $debug );
 
 my @securityClasses = $alff_config->getSecurityClasses();
-print STDERR "INFO: Found securityClasses: " . join( ', ', @securityClasses ) . "\n" if ( $debug );
-
 my @services = $alff_srv->readServiceNames();
-print STDERR "INFO: Found services: " . join( ', ', @services ) . "\n" if ( $debug );
 
+if ( $debug ) {
+	print STDERR "INFO: Found securityClasses: " . join( ', ', @securityClasses ) . "\n";
+	print STDERR "INFO: Found services: " . join( ', ', @services ) . "\n";
+}
 
 print " * Creating security class chains...\n";
 foreach my $secClass ( @securityClasses ) {
@@ -39,6 +40,7 @@ foreach my $secClass ( @securityClasses ) {
 	print "  - $chain\n" if ( $debug );
 	$alff_main->create_chain( $chain );
 }
+$alff_main->create_chain( "allowWorldOpenServices" );
 
 print " * Creating service rules...\n";
 foreach my $srv ( @services ) {
