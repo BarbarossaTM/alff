@@ -8,7 +8,7 @@
 #  -- Fri, 28 Apr 2006 15:44:02 +0200
 #
 
-package Alff::Services;
+package Alff::Service;
 
 $VERSION = "1.0";
 
@@ -116,7 +116,7 @@ sub allowWorldOpenServices() { #{{{
 ################################################################################
 
 ##
-# Read
+# Read the names of all configured services and return a sort list of them
 sub readServiceNames() { #{{{
 	my $self = shift;
 	my $services_d = $self->{services_d};
@@ -129,7 +129,7 @@ sub readServiceNames() { #{{{
 		return undef;
 	}
 
-	@services = grep { ! /^\.{1,2}$/ } readdir(SERVICE_D);		# weed out "." and ".."
+	@services = grep { ! m/^\./ and -f "$services_d/$_" } readdir( SERVICE_D );		# read only files and weed out ".*"
 	closedir( SERVICE_D );
 
 	return sort @services;
@@ -148,10 +148,10 @@ sub readServiceConfiguration($) { #{{{
 	return undef if ( ! -f $service_file );
 
 	# Read $service_config from config file
-	my $service_config = undef;
-	require "$service_file";
+	my %service_config;
+	require ($service_file);
 
-	return $service_config;
+	return $Alff::Service::Config::service_config;
 } #}}}
 
 ##
@@ -184,16 +184,18 @@ sub generateServiceChain($) { #{{{
 	}
 
 	# Create a chain for this service
+	$alff->write_cmd( "" );
 	$alff->create_chain( $srv_chain, "filter" );
 
-	my @servers = split( /\ /, $serviceconfig->{servers} );
-	my @ports = split(/\ /, $serviceconfig->{ports} );
-
+	my @servers = split( /\s+/, $serviceconfig->{servers} );
+	my @ports = split(/\s+/, $serviceconfig->{ports} );
 	my @valid_ports = $self->validate_ports( $service, @ports );
 
+	# Fill the service chain with a server/port matrix
 	foreach my $server ( @servers ) {
 		foreach my $service_port ( @valid_ports ) {
-			if ( m/(\d+)\/(tcp|udp)/ ) {
+
+			if ( $service_port =~ m/([[:digit:]:]+)\/(tcp|udp)/ ) {
 				my ( $port, $proto ) = ( $1, $2 );
 				$alff->write_cmd( "iptables -A $srv_chain -p $proto -d $server --dport $port -j ACCEPT" );
 			}
@@ -202,8 +204,8 @@ sub generateServiceChain($) { #{{{
 
 	# Allow service for configured security classes
 	foreach my $config_key ( keys %{$serviceconfig} ) {
-		# search for 
-		if ( m/allow_from_(\w+)_networks/ ) {
+		# search for security classes
+		if ( $config_key =~ m/allow_from_(\w+)_networks/ ) {
 			my $sec_class = $1;
 			my $sec_class_chain = "allowServicesFrom${sec_class}Nets";
 
@@ -231,8 +233,10 @@ sub validate_ports($@) { #{{{
 	my @valid_ports;
 
 	foreach my $port_spec ( @ports ) {
-		if ( m/(\d+)\/(tcp|udp)/ and $1 ge 0 and $1 le 65535 ) {
-			push @valid_ports, $port_spec;
+		if ( $port_spec =~ m/(\d+)\/(tcp|udp)/ ) {
+			if ( $1 ge 0 and $1 le 65535 ) {
+				push @valid_ports, $port_spec;
+			}
 		} else {
 			print STDERR "Error in service configuration for $service, invalid port $port_spec, removing from list...\n";
 		}
