@@ -218,7 +218,7 @@ sub generateServiceChain($) { #{{{
 		# search for security classes
 		if ( $config_key =~ m/allow_from_(\w+)_networks/ ) {
 			my $sec_class = $1;
-			my $sec_class_chain = "allowServicesFrom${sec_class}Nets";
+			my $sec_class_chain = "allowServicesFrom" . ucfirst( $sec_class ) . "Nets";
 
 			if ( $alff->chain_exists( $sec_class_chain ) ) {
 				$alff->write_cmd( "iptables -A $sec_class_chain -j $srv_chain" );

@@ -60,6 +60,7 @@ sub new { #{{{
 	$obj->{config} = $config;
 
 	$obj->checkConfig unless ( $args->{nocheck} );
+	$obj->sanitizeSecurityClasses;
 
 	return $obj;
 } #}}}
@@ -137,7 +138,52 @@ sub checkConfig() { #{{{
 	print STDERR "INFO: default_chain_policy is set to \"$self->{config}->{options}->{default_chain_policy}\"\n" if ( $self->{debug} );
 
 	#}}}
+
 } #}}}
+
+##
+# Collect and sanitize securityClasses
+sub sanitizeSecurityClasses() { #{{{
+	my $self = shift;
+	my @vlans = $self->getVlanList();
+	my %allSecurityClasses;
+
+	foreach my $vlan_id ( @vlans ) {
+		my $vlan_ref = $self->{config}->{vlan}->{$vlan_id};
+		my @securityClasses = ();
+
+		# Check for standard security classes
+		for my $stdSecClass ( "filtered", "trusted" ) {
+			if ( defined $vlan_ref->{$stdSecClass} ) {
+				if ( $vlan_ref->{$stdSecClass} eq "yes" ) {
+					push @securityClasses, $stdSecClass
+				}
+			}
+		}
+
+		# Check for additional security_classes
+		if ( defined $vlan_ref->{security_class} ) {
+			# There maybe a list of additional security classes
+			if ( ref ( $vlan_ref->{security_class} )  ) {
+				push @securityClasses, @{$vlan_ref->{security_class}};
+			} else {
+				push @securityClasses, $vlan_ref->{security_class};
+			}
+		}
+
+		# Store reference to all security classes of this vlan in the vlan object
+		$vlan_ref->{securityClasses} = \@securityClasses;
+
+		# Store all security classes of this vlan in the global security class list
+		foreach my $vlanSecClass ( @securityClasses ) {
+			$allSecurityClasses{$vlanSecClass} = 1;
+		}
+	}
+
+	my @allSecurityClassesList = keys %allSecurityClasses;
+	$self->{config}->{allSecurityClasses} = \@allSecurityClassesList;
+}
+#}}}
 
 ################################################################################
 #			    Basic config options			       #
@@ -174,26 +220,7 @@ sub getOption($) { #{{{
 sub getSecurityClasses() { #{{{
 	my $self = shift;
 
-	my %securityClasses = ( "filtered" => 1 , "trusted" => 1 );
-
-	# Look at each defined vlan for security classes
-	foreach my $vlan_id ( keys %{$self->{config}->{vlan}} ) {
-		my $vlan_ref = $self->{config}->{vlan};
-
-		if ( defined $vlan_ref->{securityClass} ) {
-			# There may be multiple securityClasses, check for a list
-			if ( ref( $vlan_ref->{securityClass})  ) {
-				# Put all securityClass names into the securityClasses hash
-				foreach my $secClass ( @{$vlan_ref->{securityClass}} ) {
-					$securityClasses{$secClass} = 1;
-				}
-			} else {
-				$securityClasses{$vlan_ref->{securityClass}} = 1;
-			}
-		}
-	}
-
-	return sort keys %securityClasses;
+	return sort @{$self->{config}->{allSecurityClasses}};
 } #}}}
 
 ################################################################################
@@ -212,16 +239,19 @@ sub getVlanList() { #{{{
 # Return a list of all vlans of the specified security class
 sub getVlansOfSecurityClass($) { #{{{
 	my $self = shift;
-	my $security_class = shift;
+	my $securityClass = shift;
+	my @allSecurityClasses = @{$self->{config}->{allSecurityClasses}};
+
+	# Check if the given $securityClass is valid
+	return ( ) unless grep { /^$securityClass$/ } @allSecurityClasses;
 
 	my @allvlans = $self->getVlanList;
 	my @vlans = ( );
 
-	foreach my $vlan ( @allvlans ) {
-		if ( defined $self->{config}->{vlan}->{$vlan}->{$security_class} ) {
-			if ( $self->{config}->{vlan}->{$vlan}->{$security_class} eq "yes" ) {
-				push @vlans, $vlan;
-			}
+	foreach my $vlanId ( @allvlans ) {
+		my $vlan_ref = $self->{config}->{vlan}->{$vlanId};
+		if ( grep { /^$securityClass$/ } @{$vlan_ref->{securityClasses}} ) {
+			push @vlans, $vlanId;
 		}
 	}
 
