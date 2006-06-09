@@ -191,9 +191,20 @@ sub generateServiceChain($) { #{{{
 	my @ports = split(/\s+/, $serviceconfig->{ports} );
 	my @valid_ports = $self->validate_ports( $service, @ports );
 
+	if ( $self->{debug} ) {
+		print STDERR "INFO: Service $service, found servers " . join( ', ', @servers ) . " and ports " . join(', ', @valid_ports) . "...\n";
+	}
+
 	# Fill the service chain with a server/port matrix
 	foreach my $server ( @servers ) {
+		# Beware of to much spaces in config file...
+		chomp $server;
+		next if ( $server eq "" );
+
 		foreach my $service_port ( @valid_ports ) {
+			# Beware of to much spaces in config file...
+			chomp $service_port;
+			next if ( $service_port eq "" );
 
 			if ( $service_port =~ m/([[:digit:]:]+)\/(tcp|udp)/ ) {
 				my ( $port, $proto ) = ( $1, $2 );
@@ -234,8 +245,10 @@ sub validate_ports($@) { #{{{
 
 	foreach my $port_spec ( @ports ) {
 		if ( $port_spec =~ m/(\d+)\/(tcp|udp)/ ) {
-			if ( $1 ge 0 and $1 le 65535 ) {
+			if ( $1 >= 0 and $1 <= 65535 ) {
 				push @valid_ports, $port_spec;
+			} else {
+				print STDERR "Error in service configuration for $service, invalid port number $1 in $port_spec, removing from list...\n";
 			}
 		} else {
 			print STDERR "Error in service configuration for $service, invalid port $port_spec, removing from list...\n";
