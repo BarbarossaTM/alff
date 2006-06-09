@@ -9,10 +9,16 @@
 #
 
 use strict;
-use Alff::Services;
+use Alff::Config;
+use Alff::Service;
 
-my $services = Alff::Services->new;
+my $config = Alff::Config->new( configfile => "/etc/alff/alff.conf" );
+my $services = Alff::Service->new;
 
-$services->allowServiceFromNetworksOfSecurityClass( "trusted" );
-$services->allowServiceFromNetworksOfSecurityClass( "filtered" );
 $services->allowWorldOpenServices;
+
+my @securityClasses = $config->getSecurityClasses();
+foreach my $secClass ( @securityClasses ) {
+	$services->allowServiceFromNetworksOfSecurityClass( $secClass );
+}
+
