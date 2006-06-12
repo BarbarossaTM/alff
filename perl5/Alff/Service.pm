@@ -15,6 +15,7 @@ $VERSION = "1.0";
 use strict;
 use Alff::Config;
 use Alff::Main;
+use Alff::Validator;
 
 ##
 # Little bit of magic to simplify debugging
@@ -51,9 +52,11 @@ sub new { #{{{
 	# Create instances for used objects
 	my $config = Alff::Config->new( debug => $debug );
 	my $alff_main = $args->{alff_main} || Alff::Main->new( debug => $debug );
+	my $alff_validator = $args{alff_validator} || Alff::Validator->new( debug => $debug );
 
 	my $obj = bless {
 		alff_main => $alff_main,
+		alff_validator => $alff_validator,
 		config => $config,
 		debug => $debug,
 		services_d => $services_d,
@@ -189,7 +192,14 @@ sub generateServiceChain($) { #{{{
 
 	my @servers = split( /\s+/, $serviceconfig->{servers} );
 	my @ports = split(/\s+/, $serviceconfig->{ports} );
-	my @valid_ports = $self->validate_ports( $service, @ports );
+	my @valid_ports = ();
+	foreach my $port ( @ports ) {
+		if ( $self->{alff_validator}->validate_port( $port ) ) {
+			push @valid_ports, $port;
+		} else {
+			print STDERR "ERROR: Invalid port specification $port for service $service, skipping...\n";
+		}
+	}
 
 	if ( $self->{debug} ) {
 		print STDERR "INFO: Service $service, found servers " . join( ', ', @servers ) . " and ports " . join(', ', @valid_ports) . "...\n";
@@ -233,31 +243,6 @@ sub generateServiceChain($) { #{{{
 		$alff->write_cmd( "iptables -A allowWorldOpenServices -j $srv_chain" );
 	}
 } #}}}
-
-##
-# validate_ports( @ports )
-sub validate_ports($@) { #{{{
-	my $self = shift;
-	my $service = shift;	# the service name (used for error message)
-	my @ports = @_;		# the ports
-
-	my @valid_ports;
-
-	foreach my $port_spec ( @ports ) {
-		if ( $port_spec =~ m/(\d+)\/(tcp|udp)/ ) {
-			if ( $1 >= 0 and $1 <= 65535 ) {
-				push @valid_ports, $port_spec;
-			} else {
-				print STDERR "Error in service configuration for $service, invalid port number $1 in $port_spec, removing from list...\n";
-			}
-		} else {
-			print STDERR "Error in service configuration for $service, invalid port $port_spec, removing from list...\n";
-		}
-	}
-
-	return @valid_ports;
-} #}}}
-
 
 1;
 # vim:foldmethod=marker
