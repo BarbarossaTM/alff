@@ -52,7 +52,7 @@ sub new { #{{{
 	# Create instances for used objects
 	my $config = Alff::Config->new( debug => $debug );
 	my $alff_main = $args->{alff_main} || Alff::Main->new( debug => $debug );
-	my $alff_validator = $args{alff_validator} || Alff::Validator->new( debug => $debug );
+	my $alff_validator = $args->{alff_validator} || Alff::Validator->new( debug => $debug );
 
 	my $obj = bless {
 		alff_main => $alff_main,
