@@ -1,0 +1,187 @@
+#!/usr/bin/perl -w
+#
+# addService <servicename>
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Wed, 14 Jun 2006 18:35:03 +0200
+#
+
+use strict;
+use Alff::Validator;			# Port validation
+use Net::CIDR;				# IP validation
+use Net::DNS;				# DNS Resolver
+
+
+my $service_d = "/etc/alff/services.d/";
+my $resolver = Net::DNS::Resolver->new();
+my $validator = Alff::Validator->new();
+
+sub readYesNo($) { # {{{
+	my $default = shift || "no";
+	my $input = <STDIN>;
+
+	return $default if ( $input eq "\r" || $input eq "\n" );
+	return "yes" if ( $input =~ m/^[yY][eE][sS]$/ );
+	return "no" if ( $input =~ m/^[nN][oO]$/ );
+
+	print STDERR "Invalid option: \"$input\"\n";
+	exit 1;
+} #}}}
+
+# Maybe we got a service name as parameter
+my $service = $ARGV[0];
+
+# Check for command line parameter
+unless ( defined $service  ) {
+	print STDERR "Usage: alff addService [service]\n";
+	print STDERR "Beware, that service has to be max. 21 chars.\n";
+	exit 1;
+}
+
+# Check service name length
+if ( length( $service ) > 21 ) {
+	print STDERR "Error: Given service name is to long. Max. 21 chars allowed.\n";
+	exit 1;
+}
+
+my $server_names = "";				# server names to be read later
+my $ips = "";					# resolved IPs of the servers
+my $ports = "";					# ports for this service
+my $allow_from_trusted_networks = "no";		# service accessability options
+my $allow_from_filtered_networks = "no";	# ..
+my $allow_from_world = "no";			# ..
+
+##
+# Check for service dir
+if ( ! -d $service_d ) {
+	print STDERR "Error: services.d directory ${service_d} does not exists.\n";
+	exit 1;
+}
+
+# Check if service is allready defined
+if ( -f "$service_d/$service" ) {
+	print STDERR "Error: Configuration for service ${service} already exists.\n";
+	exit 1;
+}
+
+
+##
+# Read configuration data #{{{
+print "Enter a space separated list of host names or IP address: ";
+$server_names = <STDIN>;
+chomp $server_names;
+
+print "Enter a space separated list of port/proto (e.g 80/tcp): ";
+$ports = <STDIN>;
+chomp $ports;
+
+# Read "accessability" options
+print "Should this service be reachable from all trusted networks? (yes/no): [no]";
+$allow_from_trusted_networks = readYesNo( "no" );
+
+print "Should this service be reachable from all filtered networks? (yes/no): [no]";
+$allow_from_filtered_networks = readYesNo( "no" );
+
+print "Should this service be accessable from all the world[tm]? (yes/no): [no]";
+$allow_from_world = readYesNo( "no" );
+#}}}
+
+
+##
+# Validate input #{{{
+if ( length( $server_names ) == 0 || length( $ports ) == 0 ) {
+	print STDERR "Error: You did not specify at least one server and port...\n";
+	exit 1;
+}
+
+if ( $allow_from_filtered_networks ne "yes" && $allow_from_filtered_networks ne "no" ) {
+	print STDERR "Error: Invalid option \"$allow_from_filtered_networks\" for accessibility from filtered networks\n";
+	exit 1;
+}
+
+if ( $allow_from_trusted_networks ne "yes" && $allow_from_trusted_networks ne "no" ) {
+	print STDERR "Error: Invalid option \"$allow_from_trusted_networks\" for accessibility from trusted networks\n";
+	exit 1;
+}
+
+if ( $allow_from_world ne "yes" && $allow_from_world ne "no" ) {
+	print STDERR "Error: Invalid option \"$allow_from_world\" for accessibility from the world[tm]\n";
+	exit 1;
+}
+
+
+# Check ports/protocols #{{{
+foreach my $port ( split /\s+/, $ports ) {
+	if ( ! $validator->validate_port( $port ) ) {
+		print STDERR "Error: Invalid port definition: $port\n";
+		exit 1;
+	}
+} #}}}
+
+
+# Resolv hostnames to IPs #{{{
+foreach my $server_name ( split /\s+/, $server_names ) {
+	# Check for the keyword 'any'
+	if ( $server_name eq "any" ) {
+		$ips .= " 0.0.0.0/0.0.0.0";
+	}
+
+	# Got an IP?
+	elsif ( Net::CIDR::cidrvalidate( $server_name ) ) {
+		$ips .= " $server_name";
+	}
+
+	# Try to resolve $server_name
+	else {
+		my $query = $resolver->query( $server_name , 'A');
+		if ( $query ) {
+			my @dns_answers = $query->answer;
+			if ( scalar( @dns_answers ) > 1 ) {
+				print STDERR "INFO: Attention: Found multiple IPs for host $server_name, using all.\n";
+			}
+
+			foreach my $answer ( @dns_answers ) {
+				my $host_ip = $answer->address;
+				if ( Net::CIDR::cidrvalidate( $host_ip ) ) {
+					$ips .= " " . $host_ip;
+				} else {
+					print STDERR "Error: Got invalid IP $host_ip from DNS for host $server_name.\n";
+					exit 1;
+				}
+			}
+		} else {
+			print STDERR "Error: No DNS entry found for $server_name.\n";
+			exit 1;
+		}
+		
+	}
+} #}}}
+
+#}}}
+
+
+open ( SERVICE_FILE, "> $service_d/$service" )
+	or die "Cannot open $service_d/$service for writing";
+
+print SERVICE_FILE "
+#
+# $service Servers
+#
+
+package Alff::Service::Config;
+
+\$service_config = {
+
+	servers => \"$ips\",		# $server_names
+	ports => \"$ports\",
+
+	allow_from_trusted_networks => \"$allow_from_trusted_networks\",
+	allow_from_filtered_networks => \"$allow_from_filtered_networks\",
+	allow_from_world => \"$allow_from_world\",
+
+# vim:ft=perl:
+";
+
+
+
+# vim:foldmethod=marker
