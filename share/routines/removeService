@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# removeService <servicename>
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 19 Dec 2005 14:01:30 +0100
+#
+
+set -e
+
+SERVICES_D="/etc/alff/services.d"
+
+
+if [ -z "${1}" ]; then
+	echo "Usage: $0 service" >&2
+	exit 1
+fi
+
+SERVICE="${1}"
+echo "alff: Removing service ${SERVICE}..."
+
+##
+# Check for service dir
+if [ ! -d "${SERVICES_D}" ]; then
+	echo "Error: services.d directory ${SERVICES_D} does not exists." >&2
+	exit 1
+fi
+
+if [ !  -f "${SERVICES_D}/${SERVICE}" ]; then
+	echo "Error: Configuration for service ${SERVICE} does not exists." >&2
+	exit 1
+fi
+
+echo -n " * Removing configuration for service ${SERVICE}... "
+rm "${SERVICES_D}/${SERVICE}" && echo "done." || echo "FAILED!"
