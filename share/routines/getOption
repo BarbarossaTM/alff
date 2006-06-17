@@ -27,14 +27,19 @@ foreach my $arg ( @ARGV ) {
 }
 
 if ( ! $config_opt ) {
-	print STDERR "Usage: alff getOption [option]\n";
+	print STDERR "Usage: alff getOption { security_classes , [option] }\n";
 	exit 1;
 }
 
 # Load configuration
 my $config = Alff::Config->new( configfile => $configfile, nocheck => $nocheck  );
+my $config_entry;
 
-my $config_entry = $config->getOption( $config_opt );
+if ( $config_opt eq "security_classes" ) {
+	$config_entry = join " ", $config->getSecurityClasses();
+} else {
+	$config_entry = $config->getOption( $config_opt );
+}
 
 if ( $config_entry ) {
 	print "$config_entry\n";
