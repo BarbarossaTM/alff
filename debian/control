@@ -7,9 +7,9 @@ Standards-Version: 3.6.2
 
 Package: alff-rulegen
 Architecture: all
-Depends: perl, libxml-simple-perl, gawk, bash
+Depends: perl, libnet-cidr-perl, libnet-dns-perl, libxml-simple-perl, gawk, bash
 Description: A Linux Firewall Framework - rule generation
- This package is part of the "A Linux Firewall Framework".
+ This package is part of "A Linux Firewall Framework".
  .
  This package contains the tools for managing firewall configuration and
  generating rulesets for your firewalls.
@@ -18,7 +18,7 @@ Package: alff-agent
 Architecture: all
 Depends: iptables
 Description: A Linux Firewall Framework - rule loading agent
- This package is part of the "A Linux Firewall Framework".
+ This package is part of "A Linux Firewall Framework".
  .
  This package contains tools to load new rules on your firewall machines.
  It provides support for easy and automated roll-back if the new ruleset
