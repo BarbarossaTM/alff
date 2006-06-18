@@ -65,9 +65,9 @@ install: build
 	cp $(CURDIR)/alff.conf $(CURDIR)/debian/alff-rulegen/etc/alff/
 
 	##
-	# alff-cat
+	# alff-agent
 	mkdir -p $(CURDIR)/debian/alff-agent/usr/sbin
-	cp $(CURDIR)/cat/alff-cat $(CURDIR)/debian/alff-agent/usr/sbin/alff-cat
+	cp $(CURDIR)/agent/alff-cat $(CURDIR)/debian/alff-agent/usr/sbin/alff-cat
 
 # Build architecture-independent files here.
 binary-indep: build install
