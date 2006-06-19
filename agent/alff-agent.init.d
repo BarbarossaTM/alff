@@ -32,7 +32,7 @@ function flush_all() { #{{{
 	# Reset nat chains #{{{
 	iptables -t nat -P PREROUTING ACCEPT
 	iptables -t nat -P POSTROUTING ACCEPT
-	iptables -t nat -P FORWARD ACCEPT
+	iptables -t nat -P OUTPUT ACCEPT
 	iptables -t nat -F
 	iptables -t nat -X
 	iptables -t nat -Z
@@ -54,7 +54,7 @@ function load_rules() { #{{{
 		echo "It seems that this machine was rebooted while loading new rules." >&2
 		echo "Trying to load the old rules to avoid trouble..." >&2
 		if [ -f "${OLD_RULES_FILE}" ]; then
-			sh "${OLD_RULES_FILE}"
+			iptables-restore < "${OLD_RULES_FILE}"
 		fi
 
 	# OK, everything looks good, just load the ruleset if there is any
@@ -78,7 +78,7 @@ check_config() { #{{{
 
 if [ -f /etc/alff/alff-agent.conf ]; then
 	. /etc/alff/alff-agent.conf
-else
+fi
 
 
 NAME="alff-agent"
@@ -131,6 +131,7 @@ case "${1}" in
 
 	# Reload services definitions and rules
 	reload)
+		$0 start
 		;;
 	*)
 		echo "Usage: $0 { start | stop | reload | restart }" >&2
