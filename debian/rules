@@ -67,7 +67,11 @@ install: build
 	##
 	# alff-agent
 	mkdir -p $(CURDIR)/debian/alff-agent/usr/sbin
+	mkdir -p $(CURDIR)/debian/alff-agent/etc/alff
+	mkdir -p $(CURDIR)/debian/alff-agent/etc/init.d
 	cp $(CURDIR)/agent/alff-cat $(CURDIR)/debian/alff-agent/usr/sbin/alff-cat
+	cp $(CURDIR)/agent/alff-agent.init.d $(CURDIR)/debian/alff-agent/etc/init.d/alff-agent
+	cp $(CURDIR)/agent/alff-agent.conf $(CURDIR)/debian/alff-agent/etc/alff/alff-agent.conf
 
 # Build architecture-independent files here.
 binary-indep: build install

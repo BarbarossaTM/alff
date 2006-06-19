@@ -1,3 +1,9 @@
+alff (1.1-2) unstable; urgency=low
+
+  * Added alff-agent to provide a framework to load the rules on your firewall.
+
+ -- Maximilian Wilhelm <max@rfc2324.org>  Mon, 19 Jun 2006 15:48:33 +0200
+
 alff (1.1-1) unstable; urgency=high
 
   * Complete rewrite of service chain handling.

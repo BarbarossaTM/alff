@@ -1,4 +1,4 @@
-#!/ussr/bin/env sh
+#!/usr/bin/env sh
 #
 # The Alff Cat
 #
@@ -15,17 +15,21 @@
 # anywhere in this tool, because we want 'set -e' do handle this case!!
 set -e
 
-OLD_RULES_DIR="/var/cache/alff/backup"
-OLD_RULES_FILE="${OLD_RULES_DIR}/rules.dump"
+# Try to load configuration
+if [ -f /etc/alff/alff-agent.conf ]; then
+	. /etc/alff/alff-agent.conf
+fi
 
-# The DELETE_ME_FILE has to be deleted within SLEEP_TIME to prevent
-# restore of the saved rules.
-DELETE_ME_FILE="${OLD_RULES_DIR}/.current_rules_dont_work"
-# The time to wait for deletion of DELETE_ME_FILE in seconds
-SLEEP_TIME=180
+# If there is no config, use defaults
+if [ -z "${RULES_DIR}" ]; then
+	RULES_DIR="/var/cache/alff/rules"
+	OLD_RULES_FILE="${RULES_DIR}/rules.dump"
+	CURRENT_RULES_FILE="${RULES_DIR}/rules.current"
+	DELETE_ME_FILE="${RULES_DIR}/.current_rules_dont_work"
+	SLEEP_TIME=180
+fi
 
 MY_NAME="alff-cat"
-
 
 # Check for root privileges
 if [ `id -u` != 0 ]; then
@@ -57,8 +61,8 @@ for tool in iptables-save iptables-restore; do
 done
 
 # Create rules backup dir, if not there
-if [ ! -d "${OLD_RULES_DIR}" ]; then
-	mkdir -p "${OLD_RULES_DIR}"
+if [ ! -d "${RULES_DIR}" ]; then
+	mkdir -p "${RULES_DIR}"
 fi
 
 
@@ -67,17 +71,21 @@ fi
 
 echo "The Alff-cat awakes..."
 # Save the current ruleset to $OLD_RULES_FILE
-echo -n " 1. Dumping current ruleset to ${OLD_RULES_DIR}... "
+echo -n " 1. Dumping current ruleset to ${RULES_DIR}... "
 iptables-save > "${OLD_RULES_FILE}" && echo "done."
 
-# Just execute $RULES_FILE
+# Save current rules to disk, to keep them over reboot
+echo -n " 2. Saving new rules from ${RULES_FILE} to ${CURRENT_RULES_FILE}... "
+cat "${RULES_FILE}" > "${CURRENT_RULES_FILE}" && echo "done."
+
+# Just execute $CURRENTRULES_FILE
 # The shell will handle both, a filename as parameter and
 # reading command from stdin
-echo -n " 2. Loading new rules from ${RULES_FILE}... "
-sh "${RULES_FILE}" && echo "done."
+echo -n " 3. Loading new rules from ${CURRENT_RULES_FILE}... "
+sh "${CURRENT_RULES_FILE}" && echo "done."
 
 # Wait for the admin to delete DELETE_ME_FILE
-echo -n " 3. Wait ${SLEEP_TIME:-180} seconds for delete of the token..."
+echo -n " 4. Wait ${SLEEP_TIME:-180} seconds for delete of the token..."
 touch "${DELETE_ME_FILE}"
 sleep ${SLEEP_TIME:-180} && echo "done."
 
