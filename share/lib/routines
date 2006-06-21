@@ -6,8 +6,6 @@
 #  -- Fri, 28 Apr 2006 19:52:22 +0200
 #
 
-
-
 ##
 function configureFirewallNetworkOptions() { # {{{
 
@@ -46,5 +44,42 @@ function configureFirewallNetworkOptions() { # {{{
 	esac
 }
 # }}}
+
+##
+# execute Hooks of given type
+function executeHooks() { #{{{
+	HOOK_TYPE="${1}"
+	
+	case "${HOOK_TYPE}" in
+		pregenerate)		;;
+		postgenerate)		;;
+		prepush)		;;
+		postpush)		;;
+		*)
+			echo "Error: Invalid hooktype \"${HOOK_TYPE}\"" >&2
+			return 1
+			;;
+	esac
+
+	if [ -z "${CONFIG_DIR}"  ]; then
+		CONFIG_DIR="/etc/alff"
+	fi
+	HOOK_DIR="${CONFIG_DIR}/hooks/${HOOK_TYPE}.d"
+
+	if [ -d "${HOOK_DIR}" ]; then
+		echo "Executing ${HOOK_TYPE} hooks..."
+		find "${HOOK_DIR}" \( -type f -or -type l \) -exec basename {} \; | sort -n | while read hook; do
+			if [ -x "${HOOK_DIR}/${hook}" ]; then
+				if ! sh -c "${HOOK_DIR}/${hook}"; then
+					echo "Error: ${HOOK_TYPE} hook \"${hook}\" exitet with status != 0" >&2
+					return 1
+				fi
+			fi
+		done
+	else
+		echo "Error: No hooks found for \"${HOOK_TYPE}\"" >&2
+		return 1
+	fi
+} #}}}
 
 # vim:foldmethod=marker
