@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+#
+# update-git
+#
+# Pull configuration from GIT before building rules
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Wed, 21 Jun 2006 13:39:56 +0200
+#
+#
+# Mark this script as executable to use it.
+#
+set -e
+
+CONFIG_DIR="/etc/alff"
+
+	pushd "${CONFIG_DIR}" >/dev/null
+	echo -n "Updating local config repository... "
+	if git pull >/dev/null; then
+		echo "done".
+		exit 0
+	else
+		echo "FAILED!"
+		exit 1
+	fi
