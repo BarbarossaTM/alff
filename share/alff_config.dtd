@@ -1,8 +1,8 @@
-<!ELEMENT alff_config	(options, vlan+)>
+<!ELEMENT alff_config	(options, vlan+, machine*)>
 	
 <!ELEMENT options 			(fw_type, allow_icmp?, allow_traceroute_udp?, allow_multicast?, conntrack_helper_mod?, default_chain_policy?, dhcp_server*)>
 <!ELEMENT vlan 				(id, desc, network+, interface, trusted?, filtered?, security_class*) >
-<!ELEMENT machines			(hostname, ip, desc?) >
+<!ELEMENT machine			(hostname, ip, desc?) >
 
 <!ELEMENT allow_icmp 			(#PCDATA)>
 <!ELEMENT allow_multicast		(#PCDATA)>
