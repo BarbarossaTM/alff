@@ -85,7 +85,7 @@ echo -n " 3. Loading new rules from ${CURRENT_RULES_FILE}... "
 sh "${CURRENT_RULES_FILE}" && echo "done."
 
 # Wait for the admin to delete DELETE_ME_FILE
-echo -n " 4. Wait ${SLEEP_TIME:-180} seconds for delete of the token..."
+echo -n " 4. Wait ${SLEEP_TIME:-180} seconds for deletion of the token..."
 touch "${DELETE_ME_FILE}"
 sleep ${SLEEP_TIME:-180} && echo "done."
 
