@@ -124,6 +124,12 @@ case "$1" in
 		echo "done."
 		echo ""
 
+		# Run pregenerate hooks
+		if ! executeHooks pregenerate; then
+			echo "Errors while executing pregenerate hooks, exiting!"
+			exit 1
+		fi
+
  		configureFirewallNetworkOptions 3> "${CACHE_DIR_BUILD}/000_proc_options"
 		echo ""
 
