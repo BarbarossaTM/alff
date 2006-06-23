@@ -329,5 +329,44 @@ sub getVlanNetworks($) { # $vlan_id -> ( list of networks ) {{{
 	}
 } #}}}
 
+################################################################################
+#				Machine handling			       #
+################################################################################
+
+##
+# Get a list of all known machine IDs
+sub getMachineIds() { #{{{
+	my $self = shift;
+
+	return sort keys %{$self->{config}->{machine}};
+} #}}}
+
+##
+# Check wether the given machine ID is valid.
+sub isValidMachineID { #{{{
+	my $self = shift;
+	my $machine_ID = shift;
+
+	return defined $self->{config}->{machine}->{$machine_ID};
+} #}}}
+
+##
+# Get the hostname for machine ID
+sub getMachineHostname($) { #{{{
+	my $self = shift;
+	my $machine_id = shift;
+
+	return $self->isValidMachineID( $machine_id ) ? $machine_hostname = $self->{config}->{machine}->{$machine_id}->{hostname} : undef;
+} #}}}
+
+##
+# Get the IP for the machine with the given ID
+sub getMachineIP($) { #{{{
+	my $self = shift;
+	my $machine_id = shift;
+
+	return $self->isValidMachineID( $machine_id ) ? $self->{config}->{machine}->{$machine_id}->{ip} : undef;
+} #}}}
+
 1;
 # vim:foldmethod=marker
