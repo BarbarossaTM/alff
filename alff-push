@@ -1,0 +1,61 @@
+#!/usr/bin/perl -w
+#
+# alff-push
+#
+# Push the ruleset to the given machine
+#
+
+use strict;
+use Alff::Config;
+use Net::CIDR;
+
+my $machine_id = $ARGV[0];
+my $ruleset = "/var/cache/alff/alff.rules";
+
+
+if ( $ARGV[1] ) {
+	$ruleset = $ruleset ;
+}
+
+if ( ! defined $machine_id ) {	
+	print STDERR "Usage: alff-push machine-ID [ - | ruleset_file ]\n";
+	exit 1;
+}
+
+# Check ruleset if if should be read from file
+if ( $ruleset ne '-' and ! -f $ruleset ) {
+	print STDERR "Error: There is no ruleset to push...\n";
+	exit 1;
+}
+
+# Get config data
+my $config = Alff::Config->new();
+my $machine_hostname = $config->getMachineHostname( $machine_id );
+my $machine_ip = $config->getMachineIP( $machine_id );
+
+if ( ! $config->isValidMachineID( $machine_id ) ) {
+	print STDERR "Error: Invalid machine ID $machine_id.\n";
+	exit 1;
+}
+
+if ( ! $machine_ip ) {
+	print STDERR "Error: Could not get IP address for machine $machine_id\n";
+	exit 1;
+}
+
+if ( ! Net::CIDR::cidrvalidate( $machine_ip ) ) {
+	print STDERR "Error: Invalid IP address for machine $machine_id.\n";
+	exit 1;
+}
+
+if ( $ruleset eq '-' ) {
+	print "Reading rules from stdin...\n";
+}
+
+
+my $ret = system( "cat $ruleset | ssh -l root $machine_ip \"alff-cat -\"" );
+if ( $ret ) {
+	print STDERR "Error: Could not push rulset from $ruleset to $machine_id\n";
+}
+
+exit $ret ? 0 : 1;
