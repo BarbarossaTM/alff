@@ -1,3 +1,7 @@
  * Fiddle around with tcp_pre_analysis and improve scan detection/prevention
  * Remove unreferenced chains in chain.d/99...
    + parse build rulesfile and add -F / -X stanzas..?!
+
+ * addService:
+  - DNS
+  + NSS hosts lockup fuer hostname
