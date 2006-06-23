@@ -150,7 +150,7 @@ sub loadChainRules($$) { # {{{
 # Loop through all combinations of vlans and generate a vlan-matrix
 # (Skip x <-> x rules and rules for x <-> y for x,y \in unfiltered vlans
 #
-print "* Classifying inter vlan traffic... ";
+print " * Classifying inter vlan traffic... ";
 
 if ( ! -d "$rules_d" ) {
 	print STDERR "Error: rules.d directory \"${rules_d}\" does not exist.\n";
