@@ -335,7 +335,7 @@ sub getVlanNetworks($) { # $vlan_id -> ( list of networks ) {{{
 
 ##
 # Get a list of all known machine IDs
-sub getMachineIds() { #{{{
+sub getMachineIDs() { #{{{
 	my $self = shift;
 
 	return sort keys %{$self->{config}->{machine}};
@@ -356,7 +356,7 @@ sub getMachineHostname($) { #{{{
 	my $self = shift;
 	my $machine_id = shift;
 
-	return $self->isValidMachineID( $machine_id ) ? $machine_hostname = $self->{config}->{machine}->{$machine_id}->{hostname} : undef;
+	return $self->isValidMachineID( $machine_id ) ? $self->{config}->{machine}->{$machine_id}->{hostname} : undef;
 } #}}}
 
 ##
