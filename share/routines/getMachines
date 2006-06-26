@@ -1,0 +1,22 @@
+#!/usr/bin/perl -w
+#
+# alff getMachines
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 26 Jun 2006 14:49:18 +0200
+#
+
+use strict;
+use Alff::Config;
+
+my $config = Alff::Config->new( configfile => "/etc/alff/alff.conf" );
+
+my @machine_IDs = $config->getMachineIDs();
+
+if ( scalar ( @machine_IDs ) > 0 ) {
+	print join ' ', @machine_IDs;
+	exit 0;
+} else {
+	print STDERR "Error: No machine IDs found!\n";
+	exit 1;
+}
