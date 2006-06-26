@@ -8,8 +8,15 @@
 #  -- Thu, 08 Dec 2005 18:01:52 +0100
 #
 
-FUNCTION_DIR="/usr/share/alff/routines/"
+##
+# Configuration stuff
+CONFIG_FILE="/etc/alff/alff.conf"
+CONFIG_DIR="/etc/alff"
+CHAIN_D="${CONFIG_DIR}/chain.d"
 
+##
+# alf library stuff
+FUNCTION_DIR="/usr/share/alff/routines/"
 CHAIND_PLUGIN_DIR="/usr/share/alff/plugins/chain.d/"
 
 ##
@@ -17,10 +24,6 @@ CHAIND_PLUGIN_DIR="/usr/share/alff/plugins/chain.d/"
 CACHE_DIR="/var/cache/alff/"
 CACHE_DIR_BUILD="${CACHE_DIR}/ruleset.build"
 CACHE_DIR_CHAINS="${CACHE_DIR}/chains"
-
-CONFIG_FILE="/etc/alff/alff.conf"
-CONFIG_DIR="/etc/alff"
-CHAIN_D="${CONFIG_DIR}/chain.d"
 
 
 MY_NAME="alff"
@@ -103,18 +106,20 @@ checkTools
 
 preload "/usr/share/alff/lib/routines"
 
-
 case "$1" in 
-	-h|--help)
+	-h|--help) #{{{
 		usage
 		exit 0
 		;;
-	-list)
+		#}}}
+
+	-list) #{{{
 		list_functions
 		exit 0
 		;;
+		#}}}
 
-	generate)
+	generate) #{{{
 		echo "The ALFF Linux Firewall Framework awakes ..."
 		echo ""
 
@@ -155,14 +160,22 @@ case "$1" in
 		cat "${CACHE_DIR_BUILD}"/* > "${CACHE_DIR}/alff.rules"
 		
 		;;
+		#}}}
 
+	push) #{{{
+		echo "The ALFF Linux Firewall Framework awakes ..."
+		echo ""
 
-	push)
-		echo "Pushing the ruleset to your firewalls..."
-		echo "To be done..."
+		if ! executeHooks prepush; then
+			echo "Error while executing prepush hooks!" >&2
+			exit 1
+		fi
+
+	
 		;;
+		#}}}
 
-	*)
+	*) #{{{
 		if [ $# -gt 0 ]; then
 			# try to run former $1
 			exec_function ${@}
@@ -170,6 +183,7 @@ case "$1" in
 			usage
 		fi
 		;;
+		#}}}
 esac
 
 # vim:ft=sh:foldmethod=marker:
