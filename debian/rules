@@ -54,10 +54,13 @@ install: build
 
 	##
 	# alff
-	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share/perl5
-	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share
+	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/chain.d
+	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/filter.d
+	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/rules.d
+	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/services.d
 	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/sbin
-	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff
+	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share
+	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share/perl5
 
 	# tools, plugins and libraries
 	cp -a $(CURDIR)/share $(CURDIR)/debian/alff-rulegen/usr/share/alff
