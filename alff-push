@@ -9,30 +9,35 @@ use strict;
 use Alff::Config;
 use Net::CIDR;
 
+# Where to look for configuration data
+my $config_dir = "/etc/alff";
+my $config_file = "${config_dir}/alff.conf";
+my $filter_d = "${config_dir}/filter.d";
+my $filter;	 # This will be set to a valid filter file if there is one.
+
+# Get machine_id and rulesfile (default it if not given)
 my $machine_id = $ARGV[0];
-my $ruleset = "/var/cache/alff/alff.rules";
+my $ruleset = $ARGV[1] ? $ARGV[1] : "/var/cache/alff/alff.rules";
 
-
-if ( $ARGV[1] ) {
-	$ruleset = $ruleset ;
-}
-
+# Check for valid machine_id
 if ( ! defined $machine_id ) {	
 	print STDERR "Usage: alff-push machine-ID [ - | ruleset_file ]\n";
 	exit 1;
 }
 
-# Check ruleset if if should be read from file
+# Check ruleset if it should be read from file
 if ( $ruleset ne '-' and ! -f $ruleset ) {
 	print STDERR "Error: There is no ruleset to push...\n";
 	exit 1;
 }
 
 # Get config data
-my $config = Alff::Config->new();
+my $config = Alff::Config->new( $config_file );
 my $machine_hostname = $config->getMachineHostname( $machine_id );
 my $machine_ip = $config->getMachineIP( $machine_id );
 
+
+# Validate machine data # {{{
 if ( ! $config->isValidMachineID( $machine_id ) ) {
 	print STDERR "Error: Invalid machine ID $machine_id.\n";
 	exit 1;
@@ -47,15 +52,34 @@ if ( ! Net::CIDR::cidrvalidate( $machine_ip ) ) {
 	print STDERR "Error: Invalid IP address for machine $machine_id.\n";
 	exit 1;
 }
+#}}}
+
+# Check for existing and valid filter #{{{
+if ( -e "$filter_d/$machine_id" ) {
+	$filter = "$filter_d/$machine_id";
+	if ( ! -s $filter or ! -x $filter ){
+		print STDERR "Error: The filter for machine $machine_id, is not executable or empty.\n";
+		print STDERR " You may want to fix this before pushing new rules to this machine.\n";
+		exit 2;
+	}
+}
+#}}}
 
 if ( $ruleset eq '-' ) {
 	print "Reading rules from stdin...\n";
 }
 
+my $status;
+if ( $filter ) {
+	$status = system( "cat $ruleset | $filter | ssh -l root $machine_ip \"alff-cat -\"" );
+} else {
+	$status = system( "cat $ruleset | ssh -l root $machine_ip \"alff-cat -\"" );
+}
 
-my $ret = system( "cat $ruleset | ssh -l root $machine_ip \"alff-cat -\"" );
-if ( $ret ) {
+if ( $status ) {
 	print STDERR "Error: Could not push rulset from $ruleset to $machine_id\n";
 }
 
-exit $ret ? 0 : 1;
+exit $status ? 0 : 1;
+
+# vim:foldmethod=marker
