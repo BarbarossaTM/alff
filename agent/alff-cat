@@ -65,6 +65,16 @@ if [ ! -d "${RULES_DIR}" ]; then
 	mkdir -p "${RULES_DIR}"
 fi
 
+function emergency_break() { #{{{
+	echo "There occured unkown errors!" >&2
+	echo "alff-cat will exit now to prevent future breakage..." >&2
+	exit 2
+} #}}}
+
+function restore_old_rules() { #{{{
+	echo "Retoring old ruleset..."
+	iptables-restore < "${OLD_RULES_FILE}" && echo "done."
+} #}}}
 
 ##
 # Ok, let´s go
@@ -72,29 +82,58 @@ fi
 echo "The Alff-cat awakes..."
 # Save the current ruleset to $OLD_RULES_FILE
 echo -n " 1. Dumping current ruleset to ${RULES_DIR}... "
-iptables-save > "${OLD_RULES_FILE}" && echo "done."
+if iptables-save > "${OLD_RULES_FILE}"; then
+	echo "done."
+else
+	echo "FAILED!"
+	emergency_break
+fi
 
 # Save current rules to disk, to keep them over reboot
 echo -n " 2. Saving new rules from ${RULES_FILE} to ${CURRENT_RULES_FILE}... "
-cat "${RULES_FILE}" > "${CURRENT_RULES_FILE}" && echo "done."
+if cat "${RULES_FILE}" > "${CURRENT_RULES_FILE}"; then
+	echo "done."
+else
+	echo "FAILED!"
+	emergency_break
+fi
 
 # Just execute $CURRENTRULES_FILE
 # The shell will handle both, a filename as parameter and
 # reading command from stdin
 echo -n " 3. Loading new rules from ${CURRENT_RULES_FILE}... "
-sh "${CURRENT_RULES_FILE}" && echo "done."
+if sh "${CURRENT_RULES_FILE}"; then
+	echo "done."
+else
+	echo "FAILED!"
+	echo "Errors while loading new ruleset."
+	echo "Alff-cat will load the old ruleset to prevent trouble..."
+	restore_old_rules
+	exit 3
+fi
 
 # Wait for the admin to delete DELETE_ME_FILE
 echo -n " 4. Wait ${SLEEP_TIME:-180} seconds for deletion of the token..."
-touch "${DELETE_ME_FILE}"
+if ! touch "${DELETE_ME_FILE}"; then
+	echo "Error: Could not create the delete-me-token!"
+	echo ""
+	echo "This maybe your last shell on this machine..."
+	echo "Use ^Z to put it into the background and try to fix everything."
+	echo "You can use 'fg' to come back to here. Then just press <RETURN> to exit."
+	echo ""
+	echo "Good luck!"
+	read
+	exit 4
+fi
 sleep ${SLEEP_TIME:-180} && echo "done."
 
 # Do we have to do a restore?
 if [ -f "${DELETE_ME_FILE}" ]; then
 	# Oh, something went wrong... Let´s restore the old rules
 	echo -n " Damn, alff-cat token has not been deleted, restoring old ruleset... "
-	iptables -F
-	iptables-restore < "${OLD_RULES_FILE}" && echo "done."
+	restore_old_rules
 fi
 
 echo "Have a nice day..."
+
+# vim:foldmethod=marker
