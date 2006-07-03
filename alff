@@ -40,6 +40,14 @@ function checkConfigDir() { # Check the configuration (environment) #{{{
 		echo "Error: CONFIG_DIR \"${CHAIN_D}\" does not exist!" >&2
 		exit 1
 	fi
+
+	if [ ! -d "${CACHE_DIR}/chains" ]; then
+		mkdir -p "${CACHE_DIR}/chains"{filter,mangle,nat}
+	fi
+
+	if [ ! -d "${CACHE_DIR_BUILD}" ]; then
+		mkdir -p "${CACHE_DIR_BUILD}"
+	fi
 } #}}}
 
 function checkTools() { # check for needed tooles #{{{
