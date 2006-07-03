@@ -24,7 +24,7 @@ CHAIND_PLUGIN_DIR="/usr/share/alff/plugins/chain.d/"
 CACHE_DIR="/var/cache/alff/"
 CACHE_DIR_BUILD="${CACHE_DIR}/ruleset.build"
 CACHE_DIR_CHAINS="${CACHE_DIR}/chains"
-
+CURRENT_RULESET="${CACHE_DIR}/alff.rules"
 
 MY_NAME="alff"
 
@@ -39,6 +39,14 @@ function checkConfigDir() { # Check the configuration (environment) #{{{
 	if [ ! -d "${CHAIN_D}" ]; then
 		echo "Error: CONFIG_DIR \"${CHAIN_D}\" does not exist!" >&2
 		exit 1
+	fi
+
+	if [ ! -d "${CACHE_DIR}/chains" ]; then
+		mkdir -p "${CACHE_DIR}/chains"{filter,mangle,nat}
+	fi
+
+	if [ ! -d "${CACHE_DIR_BUILD}" ]; then
+		mkdir -p "${CACHE_DIR_BUILD}"
 	fi
 } #}}}
 
@@ -131,7 +139,7 @@ case "$1" in
 
 		# Run pregenerate hooks
 		if ! executeHooks pregenerate; then
-			echo "Errors while executing pregenerate hooks, exiting!"
+			echo "Errors while executing pregenerate hooks, exiting!" >&2
 			exit 1
 		fi
 
@@ -157,7 +165,12 @@ case "$1" in
 
 		echo ""
 		echo "Generating ruleset... "
-		cat "${CACHE_DIR_BUILD}"/* > "${CACHE_DIR}/alff.rules"
+		cat "${CACHE_DIR_BUILD}"/* > "${CURRENT_RULESET}"
+
+		if ! executeHooks postgenerate; then
+			echo "Errors while executing postgenerate hooks, exiting!" >&2
+			exit 1
+		fi
 		
 		;;
 		#}}}
@@ -166,12 +179,38 @@ case "$1" in
 		echo "The ALFF Linux Firewall Framework awakes ..."
 		echo ""
 
+		if [ ! -s "${CURRENT_RULESET}" ]; then
+			echo "Error: There are no rules to push, staying cool" >&2
+			exit 1
+		fi
+
 		if ! executeHooks prepush; then
 			echo "Error while executing prepush hooks!" >&2
 			exit 1
 		fi
 
-	
+		# Maybe we got an explicit machine to push to
+		if [ "${2}" ]; then
+			echo -n "Pushing ruleset to ${2}... "
+			alff-push "${2}" "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
+		else
+			MACHINE_IDS=`alff getMachines`
+			if [ -z "${MACHINE_IDS}" ]; then
+				echo "Error: You did not specify at least one machine in alff.conf." >&2
+				exit 1
+			fi
+			
+			for machine_id in ${MACHINE_IDS}; do
+				echo -n "Pushing rules to ${machine_id}... "
+				alff-push ${machine_id} "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
+			done
+		fi
+
+		if ! executeHooks postpush; then
+			echo "Error while executing postpush hooks!" >&2
+			exit 1
+		fi
+		
 		;;
 		#}}}
 

@@ -3,12 +3,11 @@
    + parse build rulesfile and add -F / -X stanzas..?!
 
  * addService:
-  - DNS
-  + NSS hosts lockup fuer hostname
+  + Write README to explain, why to use DNS instead of NSS for hostname lookups
 
  * alff-cat:
   + Add TRAP to handle problems and restore old ruleset.
   + Add more trouble handling
   + Let alff-cat go to background after loading new rules.
 
- * Add pre-push-filter
+ * Added usefull granularity for allow_icmp (all, needed, none, 1:2...)
