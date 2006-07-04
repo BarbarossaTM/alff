@@ -54,19 +54,20 @@ install: build
 
 	##
 	# alff
+	#
+	# tools, plugins and libraries
+	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/sbin
+	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share
+	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share/perl5
+	cp -a $(CURDIR)/share $(CURDIR)/debian/alff-rulegen/usr/share/alff
+	cp -a $(CURDIR)/perl5/Alff $(CURDIR)/debian/alff-rulegen/usr/share/perl5
+	cp -a $(CURDIR)/alff $(CURDIR)/debian/alff-rulegen/usr/sbin
+	cp -a $(CURDIR)/alff-push $(CURDIR)/debian/alff-rulegen/usr/sbin
+	# config stuff
 	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/chain.d
 	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/filter.d
 	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/rules.d
 	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/services.d
-	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/sbin
-	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share
-	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share/perl5
-
-	# tools, plugins and libraries
-	cp -a $(CURDIR)/share $(CURDIR)/debian/alff-rulegen/usr/share/alff
-	cp -a $(CURDIR)/perl5/Alff $(CURDIR)/debian/alff-rulegen/usr/share/perl5
-	cp -a $(CURDIR)/alff $(CURDIR)/debian/alff-rulegen/usr/sbin
-	# config stuff
 	cp $(CURDIR)/alff.conf $(CURDIR)/debian/alff-rulegen/etc/alff/
 	cp -a $(CURDIR)/hooks $(CURDIR)/debian/alff-rulegen/etc/alff/
 
