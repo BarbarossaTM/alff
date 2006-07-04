@@ -41,9 +41,11 @@ function checkConfigDir() { # Check the configuration (environment) #{{{
 		exit 1
 	fi
 
-	if [ ! -d "${CACHE_DIR}/chains" ]; then
-		mkdir -p "${CACHE_DIR}/chains"{filter,mangle,nat}
-	fi
+	for dir in \. filter mangle nat; do
+		if [ ! -d "${CACHE_DIR_CHAINS}/${dir}" ]; then
+			mkdir -p "${CACHE_DIR_CHAINS}/${dir}"
+		fi
+	done
 
 	if [ ! -d "${CACHE_DIR_BUILD}" ]; then
 		mkdir -p "${CACHE_DIR_BUILD}"
