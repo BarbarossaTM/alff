@@ -1,0 +1,52 @@
+################################################################################
+#				   alff chain.d				       #
+################################################################################
+
+Some thoughts about the usage of the alff chain.d mechanism:
+
+
+00:		Flush all chains and set the default policy to DROP
+
+
+01 .. 09:	Create some basic chains you would like to use later on 
+		(e.g. log_and_reject, dont_log, blacklist, whitelist, ...)
+
+
+10 .. 29:	Configure your INPUT chain
+
+11:		Hook in the blacklist chain
+12:		Hook in the whitelist chain
+
+13 .. 19:	Check for spoofed connections, port scans, bad tcp headers...
+
+
+20 .. 29:	(Here you should make sure that you can access your firewall
+		 again as soon as these rules are loaded. The goal of this
+		 "early bird" configuration is to minimize the breakdown
+		 of any (adminstrative) connection to your firewall)
+
+
+30		Begin to set up the FORWARD chain and do other nifty things
+		you would like.
+		(A well configurated INPUT chain is asumed.)
+
+
+31:		Hook in the blacklist chain
+32:		Hook in the whitelist chain
+		(If someone is blacklisted, whitelisting does not matter...)
+
+33 .. 39:	Check for spoofed connections, port scans, bad tcp headers...
+
+
+50:		Hook in connection tracking
+		(accept ESTABLISHED and RELATED connections)
+
+51 .. 59:	Service handling
+
+
+75:		Create and hook in interVlanChains and load rules defined in
+		rules.d/ for these chains. (If no rules are specified, place
+		${DEFAULT_CHAIN_POLICY} inth the chain.
+
+
+99:		"Close" all chains with a LOG and REJECT target
