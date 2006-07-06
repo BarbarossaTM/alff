@@ -64,7 +64,8 @@ install: build
 	cp -a $(CURDIR)/alff $(CURDIR)/debian/alff-rulegen/usr/sbin
 	cp -a $(CURDIR)/alff-push $(CURDIR)/debian/alff-rulegen/usr/sbin
 	# config stuff
-	cp -a $(CURDIR)/etc $(CURDIR)/debian/alff-rulegen/
+	mkdir $(CURDIR)/debian/alff-rulegen/etc
+	cp -a $(CURDIR)/etc/ $(CURDIR)/debian/alff-rulegen/etc/alff/
 
 	##
 	# alff-agent
