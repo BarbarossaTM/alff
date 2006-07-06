@@ -1,0 +1,37 @@
+################################################################################
+#			/etc/alff/rules.d/ README			       #
+################################################################################
+
+This directory contains configuration files for the classifyInterVlanTraffic
+plugin, to setup the generated chains of network transitions.
+
+The filenames must have the format $SOURCEVLAN_to_$DESTINATION_VLAN,
+e.g. "1_to_2".
+
+They have to contain valid iptables rules to be loaded into the chains
+after they have been created.
+
+To simplify your life[tm] alff provides a simple defaulting mechanism for the
+case of having the same ruleset for multipl/eall network transitions from or
+to one vlan.
+Imagin having one adminisitrave network (e.g. vlan 42) and you would to allow
+your admins to do everything they like in any network. Just create a
+'42_to_default' file and insert one rule which just ACCEPTs all traffic:
+'iptables -A 42_to_default -j ACCEPT'
+
+Alff will take care of renaming the 'default' string to the correct value of
+the current network transition.
+
+The files will be read in the following order (if they exist.):
+
+ 1. $SourceVlan_to_default
+ 2. default_to_$DestinationVlan
+ 3. $SourceVlan_to_$DestinationVlan
+ If none of the above exists the 'default_chain_policy' from allf.conf will be
+ used.
+
+This order was choosen to provide the flexibilty to use the defaulting
+mechanism *and* specify special rules for one or more exact network
+transitions. Your also have the possibiliy to exclude one or more network
+transitions from the defaulting mechanism by just flushing all the rules in
+this chain.

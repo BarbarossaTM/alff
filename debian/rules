@@ -64,12 +64,7 @@ install: build
 	cp -a $(CURDIR)/alff $(CURDIR)/debian/alff-rulegen/usr/sbin
 	cp -a $(CURDIR)/alff-push $(CURDIR)/debian/alff-rulegen/usr/sbin
 	# config stuff
-	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/chain.d
-	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/filter.d
-	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/rules.d
-	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/services.d
-	cp $(CURDIR)/alff.conf $(CURDIR)/debian/alff-rulegen/etc/alff/
-	cp -a $(CURDIR)/hooks $(CURDIR)/debian/alff-rulegen/etc/alff/
+	cp -a $(CURDIR)/etc $(CURDIR)/debian/alff-rulegen/
 
 	##
 	# alff-agent
