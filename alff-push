@@ -32,7 +32,7 @@ if ( $ruleset ne '-' and ! -f $ruleset ) {
 }
 
 # Get config data
-my $config = Alff::Config->new( $config_file );
+my $config = Alff::Config->new( configfile => $config_file );
 my $machine_hostname = $config->getMachineHostname( $machine_id );
 my $machine_ip = $config->getMachineIP( $machine_id );
 
