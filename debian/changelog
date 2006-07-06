@@ -1,3 +1,9 @@
+alff (1.2-0) unstable; urgency=low
+
+  * Alff is now able to push the rules to your firewall machines.
+
+ -- Maximilian Wilhelm <max@rfc2324.org>  Mon, 19 Jun 2006 15:48:33 +0200
+
 alff (1.1-2) unstable; urgency=low
 
   * Added alff-agent to provide a framework to load the rules on your firewall.
