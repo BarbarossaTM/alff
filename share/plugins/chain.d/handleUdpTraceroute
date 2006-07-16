@@ -1,0 +1,23 @@
+#!/usr/bin/perl -w
+#
+# handleUdpTraceroute
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Sun, 16 Jul 2006 19:49:21 +0200
+#
+
+use strict;
+use Alff::Config;
+use Alff::Main;
+
+my $configfile = "/etc/alff/alff.conf";
+
+my $config = Alff::Config->new( configfile => $configfile );
+my $alff = Alff::Main->new;
+
+my $allow_traceroute_udp = $config->getOption( "allow_traceroute_udp" );
+
+if ( $allow_traceroute_udp eq "yes" ) {
+	print " * Allowing udp traceroute...\n";
+	$alff->write_cmd("iptables -A FORWARD -p udp --dport 33434:33523 -j ACCEPT");
+}
