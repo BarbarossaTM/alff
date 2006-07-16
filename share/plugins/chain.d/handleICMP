@@ -1,0 +1,43 @@
+#!/usr/bin/perl -w
+#
+# handleICMP
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Sun, 16 Jul 2006 17:06:01 +0200
+#
+
+use strict;
+use Alff::Config;
+use Alff::Main;
+
+my $configfile = "/etc/alff/alff.conf";
+my $chain = "handleIcmp";
+
+my $config = Alff::Config->new( configfile => $configfile );
+my $alff = Alff::Main->new;
+
+my $allow_icmp = $config->getOption( "allow_icmp" );
+
+$alff->create_chain( $chain );
+$alff->write_cmd("iptables -A FORWARD -p icmp -j $chain");
+
+# ICMP (partly) allowed
+if ( $allow_icmp ne "none" ) {
+	print " * Allowing $allow_icmp icmp traffic... \n";
+
+	if ( $allow_icmp eq "all" ) {
+		$alff->write_cmd("iptabls -A $chain -p icmp -j ACCEPT");
+
+	} elsif ( $allow_icmp eq "basic" ) {
+		$alff->write_cmd("iptables -A $chain -p icmp -m icmp --icmp-type  0 -j ACCEPT" );		# echo-replay
+		$alff->write_cmd("iptables -A $chain -p icmp -m icmp --icmp-type  3 -j ACCEPT" );		# destination-unreachable/*
+		$alff->write_cmd("iptables -A $chain -p icmp -m icmp --icmp-type  4 -j ACCEPT" );		# source-squench
+		$alff->write_cmd("iptables -A $chain -p icmp -m icmp --icmp-type  8 -j ACCEPT" );		# echo-request
+		$alff->write_cmd("iptables -A $chain -p icmp -m icmp --icmp-type 11 -j ACCEPT" );		# time-exceeded/*
+		$alff->write_cmd("iptables -A $chain -p icmp -m icmp --icmp-type 12 -j ACCEPT" );		# parameter-problem/*
+		$alff->write_cmd("iptables -A $chain -p icmp -j REJECT --reject-with icmp-admin-prohibited");	# REJECT everything else gently
+	}
+} else {
+	print " * Allowing NO icmp traffic!\n";
+	$alff->write_cmd("iptables -A $chain -p icmp -j REJECT --reject-with icmp-admin-prhobited");		# REJECT everything genlty
+}
