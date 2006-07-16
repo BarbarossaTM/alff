@@ -125,8 +125,22 @@ sub checkConfig() { #{{{
 			$self->{config}->{options}->{allow_icmp} = "all";
 		}
 	} else {
-		print STDERR "INFO: 'allow_icmp' unconfgured. Defaulting to 'all'.\n";
+		print STDERR "INFO: 'allow_icmp' unconfigured. Defaulting to 'all'.\n";
 		$self->{config}->{options}->{allow_icmp} = "all";
+	}
+	#}}}
+
+	# Check the allow_traceroute_udp option # {{{
+	if ( defined $self->{config}->{options}->{allow_traceroute_udp} ) {
+		my $allow_traceroute_udp = $self->{config}->{options}->{allow_traceroute_udp};
+
+		if ( $allow_traceroute_udp ne "yes" and $allow_traceroute_udp ne "no" ) {
+			print STDERR "Error: Invalid value for 'allow_traceroute_udp'. Defaulting to 'yes'.\n";
+			$self->{config}->{options}->{allow_traceroute_udp} = "yes";
+		}
+	} else {
+		print STDERR "INFO: 'allow_traceroute' unconfigured. Defaulting to 'yes'.\n";
+		$self->{config}->{options}->{allow_traceroute_udp} = "yes";
 	}
 	#}}}
 
