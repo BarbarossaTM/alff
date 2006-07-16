@@ -10,4 +10,4 @@
   + Add more trouble handling
   + Let alff-cat go to background after loading new rules.
 
- * Added usefull granularity for allow_icmp (all, needed, none, 1:2...)
+ * Added extra granularity for allow_icmp (0,8, 11:1, ...)
