@@ -116,6 +116,20 @@ sub checkConfig() { #{{{
 	}
 	#}}}
 
+	# Check the allow_icmp option # {{{
+	if ( defined $self->{config}->{options}->{allow_icmp} ) {
+		my $allow_icmp = $self->{config}->{options}->{allow_icmp};
+
+		if ( $allow_icmp ne "all" and $allow_icmp ne "basic" and $allow_icmp ne "none" ) {
+			print STDERR "Error: Invalid value for 'allow_icmp'. Defaulting to 'all'.\n";
+			$self->{config}->{options}->{allow_icmp} = "all";
+		}
+	} else {
+		print STDERR "INFO: 'allow_icmp' unconfgured. Defaulting to 'all'.\n";
+		$self->{config}->{options}->{allow_icmp} = "all";
+	}
+	#}}}
+
 	# Check the default_chain_policy #{{{
 	if ( defined $self->{config}->{options}->{default_chain_policy} ) {
 
