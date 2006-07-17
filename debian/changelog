@@ -1,3 +1,13 @@
+alff (1.2-1) unstable; urgency=high
+
+  * Added some new plugins (icmp/traceroute handling, black/whitelist).
+  * Improved plugin classifyInterVlanTraffic to dont create empty network.
+    traversel chains if the users wants this.
+  * Alff does now have the ability to execute some hooks at some usefull time.
+  * Provide some default configuration.
+
+ -- Maximilian Wilhelm <max@rfc2324.org>  Mon, 17 Jul 2006 17:51:25 +0200
+
 alff (1.2-0) unstable; urgency=low
 
   * Alff is now able to push the rules to your firewall machines.
