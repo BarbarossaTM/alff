@@ -1,6 +1,4 @@
  * Fiddle around with tcp_pre_analysis and improve scan detection/prevention
- * Remove unreferenced chains in chain.d/99...
-   + parse build rulesfile and add -F / -X stanzas..?!
 
  * addService:
   + Write README to explain, why to use DNS instead of NSS for hostname lookups
@@ -9,5 +7,3 @@
   + Add TRAP to handle problems and restore old ruleset.
   + Add more trouble handling
   + Let alff-cat go to background after loading new rules.
-
- * Added extra granularity for allow_icmp (0,8, 11:1, ...)
