@@ -21,7 +21,11 @@ function chainExists() { #{{{
 	local table="${2:-filter}"
 	local chain="$1"
 
-	return [ -f "${CACHE_DIR_CHAINS}/${table}/${chain}" ];
+	if [ -f "${CACHE_DIR_CHAINS}/${table}/${chain}" ]; then
+		return 0
+	else	
+		return 1
+	fi
 } #}}}
 
 
