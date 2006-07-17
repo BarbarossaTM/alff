@@ -26,7 +26,7 @@ if ( $allow_icmp ne "none" ) {
 	print " * Allowing $allow_icmp icmp traffic... \n";
 
 	if ( $allow_icmp eq "all" ) {
-		$alff->write_cmd("iptabls -A $chain -p icmp -j ACCEPT");
+		$alff->write_cmd("iptables -A $chain -p icmp -j ACCEPT");
 
 	} elsif ( $allow_icmp eq "basic" ) {
 		$alff->write_cmd("iptables -A $chain -p icmp -m icmp --icmp-type  0 -j ACCEPT" );		# echo-replay
