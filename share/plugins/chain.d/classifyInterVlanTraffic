@@ -28,6 +28,7 @@ my @vlans = $config->getVlanList;
 
 # The policy for totally unconfigured chains
 my $default_chain_policy = $config->getDefaultChainPolicy;
+my $remove_empty_chains = $config->getPluginOption( "classifyInterVlanTraffic", "remove_empty_chains") || 0;
 
 ################################################################################
 #			    Some nifty functions			       #
@@ -141,6 +142,26 @@ sub loadChainRules($$) { # {{{
 	}
 } #}}}
 
+##
+# Check if there are any rules specified for this chain
+sub hasRules($$) { #{{{
+	my $src_vlan = shift;
+	my $dst_vlan = shift;
+	my $chain = $src_vlan . "_to_" . $dst_vlan;
+
+	my @files = ( "${src_vlan}_to_default", "default_to_${dst_vlan}", "${src_vlan}_to_${dst_vlan}" );
+
+	# If there is no rules.d/ there are surely no files
+	return 0 if ( ! -d "$rules_d" );
+
+	foreach my $file ( @files ) {
+		# Ok found one
+		return 1 if ( -f "$rules_d/$file" );
+	}
+
+	# Nothing there
+	return 0;
+} #}}}
 
 ################################################################################
 #				Let´s go				       #
@@ -172,7 +193,12 @@ foreach my $src_vlan ( @vlans ) {
 			next;
 		}
 
-		# Ok, just do it[tm]
+		# Skip this traversal if we should watch for empty chains and there are no rules
+		if ( $remove_empty_chains eq "yes" and ! hasRules( $src_vlan, $dst_vlan ) ) {
+			next;
+		}
+
+		# OK, just do it[tm]
 		classifyTrafficFromTo( $src_vlan, $dst_vlan );
 		loadChainRules( $src_vlan, $dst_vlan );
 		# create empty line after each network traversal in rules file
