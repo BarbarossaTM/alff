@@ -15,7 +15,7 @@ fi
 
 echo -n " * Loading user defined rules... "
 # Load all files *not* like *_to_*, default_to_*, *_to_default and everything starting with a '.'
-for rules_file in `find "${RULES_D}" -type f ! -name \*_to_\* ! -name .\* ! -name \*default\*`; do
+for rules_file in `find "${RULES_D}" -type f ! -name \*_to_\* ! -name .\* ! -name \*default\* ! -name README`; do
 	echo -n "."
 	cat "${rules_file}" >&3
 done
