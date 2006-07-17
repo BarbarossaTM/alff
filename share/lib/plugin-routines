@@ -17,7 +17,7 @@ fi
 # Check if the given chain exists.
 # If no table is specified, 'filter' is assumed.
 # Usage: chainExists chain [ table ]
-function chainsExists() { #{{{
+function chainExists() { #{{{
 	local table="${2:-filter}"
 	local chain="$1"
 
