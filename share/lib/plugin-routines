@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+#
+# Helper routines to be used in shell based plugins
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  --  Mon, 17 Jul 2006 16:18:04 +0200
+#
+
+if [ -z "${CACHE_DIR_CHAINS}" ]; then
+	echo "Error: $0 seems not to be run by alff." >&2
+	echo "If you think you know what you're doing you might want to" >&2
+	echo "  export CACHE_DIR_CHAINS=\"/var/cache/alff/chains/\"" >&2
+	echo "or whereever your placed it." >&2
+	exit 1
+fi
+	
+# Check if the given chain exists.
+# If no table is specified, 'filter' is assumed.
+# Usage: chainExists chain [ table ]
+function chainsExists() { #{{{
+	local table="${2:-filter}"
+	local chain="$1"
+
+	return [ -f "${CACHE_DIR_CHAINS}/${table}/${chain}" ];
+} #}}}
+
+
+# vim:foldmethod=marker
