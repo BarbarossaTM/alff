@@ -396,5 +396,29 @@ sub getMachineIP($) { #{{{
 	return $self->isValidMachineID( $machine_id ) ? $self->{config}->{machine}->{$machine_id}->{ip} : undef;
 } #}}}
 
+################################################################################
+#				Plugin configuration			       #
+################################################################################
+
+##
+# Get a plugin config parameter
+sub getPluginOption($$) { #{{{
+	my $self = shift;
+	my $plugin = shift;
+	my $option = shift;
+
+	# Sorry, no plugin configuration at all
+	return undef if ( ! defined $self->{config}->{plugins} );
+
+	# If there is no plugin config, there no option...
+	return undef if ( ! defined $self->{config}->{plugins}->{$plugin} );
+
+	# Ok there is something configured for this plugin, but not this option
+	return undef if ( ! defined $self->{config}->{plugins}->{$plugin}->{$option} );
+
+	# Oh, we're lucky
+	return $self->{config}->{plugins}->{$plugin}->{$option};
+} #}}}
+
 1;
 # vim:foldmethod=marker
