@@ -17,7 +17,7 @@ for chain in ${CHAINS}; do
 		/usr/share/alff/plugins/chain.d/create_chain_ ${chain}
 	fi
 
-	iptables -A FORWARD -j ${chain}
+	echo "iptables -A FORWARD -j ${chain}" >&3
 done
 
 echo " done."
