@@ -1,6 +1,7 @@
 <!ELEMENT alff_config		(options, vlan+, machine*)>
 	
 <!ELEMENT options 		(fw_type, allow_icmp?, allow_traceroute_udp?, allow_multicast?, conntrack_helper_mod?, default_chain_policy?, dhcp_server*)>
+<!ELEMENT plugins		(classifyInterVlanTraffic?)>
 <!ELEMENT vlan 			(id, desc, network+, interface, trusted?, filtered?, security_class*) >
 <!ELEMENT machine		(id, hostname, ip, desc?) >
 
@@ -20,6 +21,10 @@
 <!ELEMENT network		(#PCDATA)>
 <!ELEMENT security_class	(#PCDATA)>
 <!ELEMENT trusted		(#PCDATA)>
+
+<!-- plugin options //-->
+<!ELEMENT classifyInterVlanTraffic	(remove_empty_chains?)>
+<!ELEMENT remove_empty_chains	(#PCDATA)>
 
 <!-- vim: ft=dtd
 //-->
