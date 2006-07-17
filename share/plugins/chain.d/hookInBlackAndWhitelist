@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+#
+# hookInBlackAndWhitelist
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 17 Jul 2006 16:24:50 +0200
+#
+
+. /usr/share/alff/lib/plugin-routines
+
+CHAINS="blacklist whitelist"
+
+echo -n " * Creating "
+for chain in ${CHAINS}; do
+	echo -n "${chain} "
+	if ! chainExists ${chain}; then
+		/usr/share/alff/plugins/chain.d/create_chain_ ${chain}
+	fi
+
+	iptables -A FORWARD -j ${chain}
+done
+
+echo " done."
