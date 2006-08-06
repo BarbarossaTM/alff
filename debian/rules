@@ -64,7 +64,7 @@ install: build
 	cp -a $(CURDIR)/alff $(CURDIR)/debian/alff-rulegen/usr/sbin
 	cp -a $(CURDIR)/alff-push $(CURDIR)/debian/alff-rulegen/usr/sbin
 	# config stuff
-	mkdir $(CURDIR)/debian/alff-rulegen/etc
+	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff
 	cp -a $(CURDIR)/etc/ $(CURDIR)/debian/alff-rulegen/etc/alff/
 
 	##
