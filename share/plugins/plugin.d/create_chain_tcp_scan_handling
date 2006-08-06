@@ -16,7 +16,7 @@ drop_scans="1"
 
 ##
 # Make sure there is (an empty) chain tcp_scan_handling
-"${CHAIND_PLUGIN_DIR}/create_chain_" tcp_scan_handling
+"${PLUGIND_PLUGIN_DIR}/create_chain_" tcp_scan_handling
 
 ##
 # Log scanning of nmap etc.
