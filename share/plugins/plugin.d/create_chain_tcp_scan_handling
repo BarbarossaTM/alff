@@ -10,13 +10,15 @@
 # 
 set -e 
 
+. /usr/share/alff/lib/plugin-routines
+
 loglevel="info"
 log_scans="1"
 drop_scans="1"
 
 ##
 # Make sure there is (an empty) chain tcp_scan_handling
-"${PLUGIND_PLUGIN_DIR}/create_chain_" tcp_scan_handling
+createChain tcp_scan_handling
 
 ##
 # Log scanning of nmap etc.
