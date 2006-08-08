@@ -50,7 +50,7 @@ function createChain() { #{{{
 		exit 1
 	fi
 	
-	if [ ! -f "${CACHE_DIR_CHAINS}/${table}/${chain}" ];
+	if [ ! -f "${CACHE_DIR_CHAINS}/${table}/${chain}" ]; then
 		touch "${CACHE_DIR_CHAINS}/${table}/${chain}"
 
 		##
