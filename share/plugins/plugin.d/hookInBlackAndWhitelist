@@ -14,7 +14,7 @@ echo -n " * Creating "
 for chain in ${CHAINS}; do
 	echo -n "${chain} "
 	if ! chainExists ${chain}; then
-		create_chain_ ${chain}
+		createChain ${chain}
 	fi
 
 	echo "iptables -A FORWARD -j ${chain}" >&3
