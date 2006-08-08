@@ -2,11 +2,17 @@
 #
 # create_chain_${chain}
 #
-# Create a chain 
+# This plugin is just a wrapper to the createChain method of the alff library
+# to be able to create a chain by just using this plugin.
 #
 # Maximilian Wilhelm <max@rfc2324.org>
-#  -- Mon, 15 May 2006 14:59:27 +0200
+#  -- Tue, 08 Aug 2006 16:45:04 +0200
 #
+
+set -e
+
+# Load the plugin routines
+. /usr/share/alff/lib/plugin-routines
 
 if [ -z "${CACHE_DIR_CHAINS}" ]; then
 	echo "Error: You have to export CACHE_DIR_CHAINS before running this script!" >&2
@@ -32,13 +38,5 @@ if [ -z "${chain}" ]; then
 	exit 1
 fi
 
-touch "${CACHE_DIR_CHAINS}/filter/${chain}"
-
-##
-# If not already there, create ${chain}
-cat << EOF >&3
-
-if ! iptables -t filter -F ${chain} >/dev/null 2>&1; then
-	iptables -t filter -N ${chain}
-fi
-EOF
+# Just call the createChain function
+createChain ${chain}
