@@ -9,9 +9,11 @@
 #
 set -e
 
+. /usr/share/alff/lib/plugin-routines
+
 ##
 # Make sure we have (an empty) chain
-"${PLUGIND_PLUGIN_DIR}/create_chain_" spoofcheck
+createChain spoofcheck
 
 cat << EOF >&3
 ##
