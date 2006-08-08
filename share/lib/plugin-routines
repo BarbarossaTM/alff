@@ -14,6 +14,11 @@ if [ -z "${CACHE_DIR_CHAINS}" ]; then
 	exit 1
 fi
 	
+if [ ! -d "${CACHE_DIR_CHAINS}" ]; then
+	echo "Error: CACHE_DIR_CHAINS ${CACHE_DIR_CHAINS} does not exist!" >&2
+	exit 1
+fi
+
 # Check if the given chain exists.
 # If no table is specified, 'filter' is assumed.
 # Usage: chainExists chain [ table ]
@@ -28,5 +33,35 @@ function chainExists() { #{{{
 	fi
 } #}}}
 
+# Create the given chain in the given table if it does not exist.
+# If no table is specified, 'filter# is assumed.
+# Usage: createChain chain [ table ]
+
+function createChain() { #{{{
+	# Get the chain name.
+	local chain="$1"
+	# If we got a table, use it, default to 'filter' else.
+	local table=${2:-filter}
+
+	if [ -z "${chain}" ]; then
+		echo "Error: No chain name specified..." >&2
+		echo " Either create a symlink with the name create_chain_YourChainName" >&2
+		echo " to this file or specify the YourChainName as command line parameter." >&2
+		exit 1
+	fi
+	
+	if [ ! -f "${CACHE_DIR_CHAINS}/${table}/${chain}" ];
+		touch "${CACHE_DIR_CHAINS}/${table}/${chain}"
+
+		##
+		# If not already there, create ${chain}
+cat << EOF >&3
+
+if ! iptables -t ${table} -F ${chain} >/dev/null 2>&1; then
+	iptables -t ${table} -N ${chain}
+fi
+EOF
+	fi
+} #}}}
 
 # vim:foldmethod=marker
