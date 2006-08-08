@@ -9,9 +9,11 @@
 #
 set -e
 
+. /usr/share/alff/lib/plugin-routines
+
 ##
 # Make sure we have (an empty) chain log_and_reject
-"${PLUGIND_PLUGIN_DIR}/create_chain_" log_and_reject
+createChain log_and_reject
 
 cat << EOF >&3
 # LOG the traffic to be rejected, but restrict the amount of logs...
