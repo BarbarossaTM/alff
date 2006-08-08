@@ -1,3 +1,10 @@
+alff (1.2-2) unstable; urgency=high
+
+  * Renamed former 'chain.d' to 'plugin.d'.
+  * Some minor fixes.
+
+ -- Maximilian Wilhelm <max@rfc2324.org>  Tue,  8 Aug 2006 16:16:39 +0200
+
 alff (1.2-1) unstable; urgency=high
 
   * Added some new plugins (icmp/traceroute handling, black/whitelist).
