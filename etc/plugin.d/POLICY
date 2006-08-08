@@ -1,8 +1,8 @@
 ################################################################################
-#				   alff chain.d				       #
+#				   alff plugin.d			       #
 ################################################################################
 
-Some thoughts about the usage of the alff chain.d mechanism:
+Some thoughts about the usage of the alff plugin.d mechanism:
 
 
 00:		Flush all chains and set the default policy to DROP
@@ -31,8 +31,7 @@ Some thoughts about the usage of the alff chain.d mechanism:
 		(A well configurated INPUT chain is asumed.)
 
 
-31:		Hook in the blacklist chain
-32:		Hook in the whitelist chain
+31 .. 32:	Hook in the blacklist/whitelist chain
 		(If someone is blacklisted, whitelisting does not matter...)
 
 33 .. 39:	Check for spoofed connections, port scans, bad tcp headers...
@@ -41,7 +40,7 @@ Some thoughts about the usage of the alff chain.d mechanism:
 50:		Hook in connection tracking
 		(accept ESTABLISHED and RELATED connections)
 
-51 .. 59:	Service handling
+51 .. 55:	Service handling
 
 
 75:		Create and hook in interVlanChains and load rules defined in

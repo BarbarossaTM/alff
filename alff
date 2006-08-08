@@ -12,12 +12,12 @@
 # Configuration stuff
 CONFIG_FILE="/etc/alff/alff.conf"
 CONFIG_DIR="/etc/alff"
-CHAIN_D="${CONFIG_DIR}/chain.d"
+PLUGIN_D="${CONFIG_DIR}/plugin.d"
 
 ##
 # alf library stuff
 FUNCTION_DIR="/usr/share/alff/routines/"
-CHAIND_PLUGIN_DIR="/usr/share/alff/plugins/chain.d/"
+PLUGIND_PLUGIN_DIR="/usr/share/alff/plugins/plugin.d/"
 
 ##
 # Some caches used at runtime
@@ -36,8 +36,8 @@ function checkConfigDir() { # Check the configuration (environment) #{{{
 		exit 1
 	fi
 
-	if [ ! -d "${CHAIN_D}" ]; then
-		echo "Error: CONFIG_DIR \"${CHAIN_D}\" does not exist!" >&2
+	if [ ! -d "${PLUGIN_D}" ]; then
+		echo "Error: CONFIG_DIR \"${PLUGIN_D}\" does not exist!" >&2
 		exit 1
 	fi
 
@@ -157,9 +157,9 @@ case "$1" in
 		# export environment variables which will be used by the plugins
 		export CHAIND_PLUGIN_DIR
 		export CACHE_DIR_CHAINS
-		find "${CHAIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
-			if [ -x "${CHAIN_D}/${plugin}" ]; then
-				sh -c "${CHAIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"
+		find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
+			if [ -x "${PLUGIN_D}/${plugin}" ]; then
+				sh -c "${PLUGIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"
 			fi
 		done
 

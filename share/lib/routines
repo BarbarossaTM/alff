@@ -77,8 +77,8 @@ function executeHooks() { #{{{
 			fi
 		done
 	else
-		echo "Error: No hooks found for \"${HOOK_TYPE}\"" >&2
-		return 1
+#		echo "INFO: No hooks found for \"${HOOK_TYPE}\"" >&2
+		return 0 
 	fi
 } #}}}
 

@@ -11,7 +11,7 @@ set -e
 
 ##
 # Make sure we have (an empty) chain
-"${CHAIND_PLUGIN_DIR}/create_chain_" spoofcheck
+"${PLUGIND_PLUGIN_DIR}/create_chain_" spoofcheck
 
 cat << EOF >&3
 ##

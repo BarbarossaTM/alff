@@ -14,7 +14,7 @@ echo -n " * Creating "
 for chain in ${CHAINS}; do
 	echo -n "${chain} "
 	if ! chainExists ${chain}; then
-		/usr/share/alff/plugins/chain.d/create_chain_ ${chain}
+		create_chain_ ${chain}
 	fi
 
 	echo "iptables -A FORWARD -j ${chain}" >&3
