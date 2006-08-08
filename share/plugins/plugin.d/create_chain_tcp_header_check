@@ -9,9 +9,11 @@
 #
 set -e
 
+. /usr/share/alff/lib/plugin-routines
+
 ##
 # Make sure there is (an empty) chain tcp_header_check
-"${PLUGIND_PLUGIN_DIR}/create_chain_" tcp_header_check
+createChain tcp_header_check
 
 cat << EOF >&3
 ##
