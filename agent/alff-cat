@@ -89,16 +89,19 @@ function send_mail() { #{{{
 	case "${1}" in
 		success)
 			SUBJECT="New firewall rules successfully loaded on ${HOSTNAME}"
-			TEXT="The new ruleset did successfully load on your firewall machine ${HOSTNAME}\n at `date`."
+			TEXT="The new ruleset did successfully load on your firewall machine ${HOSTNAME} at `date`."
 			;;
 		fail)
 			SUBJECT="New firewall rules FAILED to load on ${HOSTNAME}"
-			TEXT="I'm sorry to tell you that your new firewall rules FAILED to load on your\n firewall machines ${HOSTNAME}."
+			TEXT="I'm sorry to tell you that your new firewall rules FAILED to load on your
+firewall machines ${HOSTNAME}."
 			;;
 
 		token)
 			SUBJECT="New firewall rules NOT VERIFIED on ${HOSTNAME}"
-			TEXT="I'm sorry to tell you that your new firewall rules were NOT VERIFIED on\n your firewall machine ${HOSTAME}.\n The old rules have been restored."
+			TEXT="I'm sorry to tell you that your new firewall rules were NOT VERIFIED on
+your firewall machine ${HOSTAME}.
+The old rules have been restored."
 			;;
 	esac
 
@@ -137,7 +140,7 @@ mail -s "${SUBJECT}" root < "${MAIL_FILE}"
 # Ok, let´s go
 
 # Save the current ruleset to $OLD_RULES_FILE
-echo "1"
+echo -n "${HOSTNAME}:	1"
 if iptables-save > "${OLD_RULES_FILE}"; then
 	echo -n "."
 else
@@ -148,7 +151,7 @@ fi
 # Save current rules to disk, to keep them over reboot
 echo -n " 2"
 if cat "${RULES_FILE}" > "${CURRENT_RULES_FILE}"; then
-	echo "."
+	echo -n "."
 else
 	echo "FAILED to save new ruleset!"
 	emergency_break
