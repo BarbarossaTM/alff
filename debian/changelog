@@ -1,3 +1,10 @@
+alff (1.2-3) unstable; urgency=low
+
+  * Partly rewrote alff-cat to go to background when loading new rules.
+  * Alff-cat will now send a status mail if not told else.
+
+ -- Maximilian Wilhelm <max@rfc2324.org>  Wed,  9 Aug 2006 18:30:47 +0200
+
 alff (1.2-2) unstable; urgency=high
 
   * Renamed former 'chain.d' to 'plugin.d'.
