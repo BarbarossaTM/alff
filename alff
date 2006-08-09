@@ -145,6 +145,8 @@ case "$1" in
 			exit 1
 		fi
 
+		echo ""
+		echo ""
  		configureFirewallNetworkOptions 3> "${CACHE_DIR_BUILD}/000_proc_options"
 		echo ""
 
