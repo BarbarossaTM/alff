@@ -75,12 +75,16 @@ function emergency_break() { #{{{
 } #}}}
 
 function restore_old_rules() { #{{{
-	echo "Retoring old ruleset..."
+	echo -n "Retoring old ruleset..."
 	iptables-restore < "${OLD_RULES_FILE}" && echo "done."
 } #}}}
 
 # Usage: send_mail { success, fail }
 function send_mail() { #{{{
+
+	if [ "${MAIL_TO}" = 'I_WANT_NO_MAIL' ];
+		return
+	fi
 
 	local SUBJECT=""
 	local TEXT=""
@@ -132,7 +136,7 @@ Your alff cat.
 EOMAILFOOTER
 
 # Send out the mail to root
-mail -s "${SUBJECT}" root < "${MAIL_FILE}"
+mail -s "${SUBJECT}" ${MAIL_TO:-root} < "${MAIL_FILE}"
 
 } #}}}
 
