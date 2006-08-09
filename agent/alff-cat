@@ -15,6 +15,9 @@
 # anywhere in this tool, because we want 'set -e' do handle this case!!
 set -e
 
+LOG_FILE=`tempfile`
+ERROR_LOG=`tempfile`
+
 # Try to load configuration
 if [ -f /etc/alff/alff-agent.conf ]; then
 	. /etc/alff/alff-agent.conf
@@ -53,7 +56,7 @@ if [ "${RULES_FILE}" != '-' ]; then
 fi
 
 # Check for some needed binaries
-for tool in iptables-save iptables-restore; do
+for tool in tempfile iptables-save iptables-restore; do
 	if ! command -v ${tool} >/dev/null; then
 		echo "Error: '${tool}' is required by ${MY_NAME}, but was not found!" >&2
 		exit 2
@@ -76,45 +79,86 @@ function restore_old_rules() { #{{{
 	iptables-restore < "${OLD_RULES_FILE}" && echo "done."
 } #}}}
 
+# Usage: send_mail { success, fail }
+function send_mail() { #{{{
+
+	local SUBJECT=""
+	local TEXT=""
+	local MAIL_FILE=`tempfile`
+
+	case "${1}" in
+		success)
+			SUBJECT="New firewall rules successfully loaded on ${HOSTNAME}"
+			TEXT="The new ruleset did successfully load on your firewall machine ${HOSTNAME}\n at `date`."
+			;;
+		fail)
+			SUBJECT="New firewall rules FAILED to load on ${HOSTNAME}"
+			TEXT="I'm sorry to tell you that your new firewall rules FAILED to load on your\n firewall machines ${HOSTNAME}."
+			;;
+
+		token)
+			SUBJECT="New firewall rules NOT VERIFIED on ${HOSTNAME}"
+			TEXT="I'm sorry to tell you that your new firewall rules were NOT VERIFIED on\n your firewall machine ${HOSTAME}.\n The old rules have been restored."
+			;;
+	esac
+
+cat << EOMAILHEADER > "${MAIL_FILE}"
+Hi there!
+
+$TEXT
+
+Here's the logfile:
+==============================================================================
+EOMAILHEADER
+
+cat < "${LOG_FILE}" >> "${MAIL_FILE}"
+
+cat << EOMAIL >> "${MAIL_FILE}"
+==============================================================================
+
+Here's the error log:
+==============================================================================
+EOMAIL
+
+cat < "${ERROR_LOG}" >> "${MAIL_FILE}"
+
+cat << EOMAILFOOTER >> "${MAIL_FILE}"
+==============================================================================
+
+Your alff cat.
+EOMAILFOOTER
+
+# Send out the mail to root
+mail -s "${SUBJECT}" root < "${MAIL_FILE}"
+
+} #}}}
+
 ##
 # Ok, let´s go
 
-echo "The Alff-cat awakes..."
 # Save the current ruleset to $OLD_RULES_FILE
-echo -n " 1. Dumping current ruleset to ${RULES_DIR}... "
+echo "1"
 if iptables-save > "${OLD_RULES_FILE}"; then
-	echo "done."
+	echo -n "."
 else
-	echo "FAILED!"
+	echo "FAILED to dump current ruleset!"
 	emergency_break
 fi
 
 # Save current rules to disk, to keep them over reboot
-echo -n " 2. Saving new rules from ${RULES_FILE} to ${CURRENT_RULES_FILE}... "
+echo -n " 2"
 if cat "${RULES_FILE}" > "${CURRENT_RULES_FILE}"; then
-	echo "done."
+	echo "."
 else
-	echo "FAILED!"
+	echo "FAILED to save new ruleset!"
 	emergency_break
 fi
 
-# Just execute $CURRENTRULES_FILE
-# The shell will handle both, a filename as parameter and
-# reading command from stdin
-echo -n " 3. Loading new rules from ${CURRENT_RULES_FILE}... "
-if sh "${CURRENT_RULES_FILE}"; then
-	echo "done."
+# Try to create the delete-me token
+echo -n " 3"
+if touch "${DELETE_ME_FILE}"; then
+	echo -n "."
 else
-	echo "FAILED!"
-	echo "Errors while loading new ruleset."
-	echo "Alff-cat will load the old ruleset to prevent trouble..."
-	restore_old_rules
-	exit 3
-fi
-
-# Wait for the admin to delete DELETE_ME_FILE
-echo -n " 4. Wait ${SLEEP_TIME:-180} seconds for deletion of the token..."
-if ! touch "${DELETE_ME_FILE}"; then
 	echo "Error: Could not create the delete-me-token!"
 	echo ""
 	echo "This maybe your last shell on this machine..."
@@ -125,15 +169,34 @@ if ! touch "${DELETE_ME_FILE}"; then
 	read
 	exit 4
 fi
-sleep ${SLEEP_TIME:-180} && echo "done."
 
-# Do we have to do a restore?
-if [ -f "${DELETE_ME_FILE}" ]; then
-	# Oh, something went wrong... Let´s restore the old rules
-	echo -n " Damn, alff-cat token has not been deleted, restoring old ruleset... "
-	restore_old_rules
-fi
+#echo "Will now go to background an load new rules and wait ${SLEEP_TIME:-180} sec. for deletion of the token."
+echo -n " ..."
 
-echo "Have a nice day..."
+exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
+(
 
+	# Just execute $CURRENTRULES_FILE
+	if ! sh "${CURRENT_RULES_FILE}"; then
+		# Something went wrong while loading the new rules
+		# Restore the old ones to prevent trouble
+		restore_old_rules
+		send_mail fail
+		exit 3
+	fi
+
+	# Wait for deletion of the token.
+	sleep ${SLEEP_TIME:-180}
+
+	# Do we have to do a restore?
+	if [ -f "${DELETE_ME_FILE}" ]; then
+		# Oh, something went wrong... Let´s restore the old rules
+		restore_old_rules
+		send_mail token
+	fi
+) &
+	
+send_mail success
+
+rm "${LOG_FILE}" "${ERROR_LOG}" "${MAIL_FILE}"
 # vim:foldmethod=marker
