@@ -82,7 +82,7 @@ function restore_old_rules() { #{{{
 # Usage: send_mail { success, fail }
 function send_mail() { #{{{
 
-	if [ "${MAIL_TO}" = 'I_WANT_NO_MAIL' ];
+	if [ "${MAIL_TO}" = 'I_WANT_NO_MAIL' ]; then
 		return
 	fi
 
