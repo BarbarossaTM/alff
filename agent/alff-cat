@@ -15,8 +15,9 @@
 # anywhere in this tool, because we want 'set -e' do handle this case!!
 set -e
 
-LOG_FILE=`tempfile`
-ERROR_LOG=`tempfile`
+export LOG_FILE=`tempfile`
+export ERROR_LOG=`tempfile`
+export MAIL_FILE=`tempfile`
 
 # Try to load configuration
 if [ -f /etc/alff/alff-agent.conf ]; then
@@ -88,7 +89,6 @@ function send_mail() { #{{{
 
 	local SUBJECT=""
 	local TEXT=""
-	local MAIL_FILE=`tempfile`
 
 	case "${1}" in
 		success)
