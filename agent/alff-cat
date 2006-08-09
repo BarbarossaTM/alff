@@ -185,7 +185,6 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 		# Restore the old ones to prevent trouble
 		restore_old_rules
 		send_mail fail
-		exit 3
 	fi
 
 	# Wait for deletion of the token.
@@ -196,10 +195,11 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 		# Oh, something went wrong... Let´s restore the old rules
 		restore_old_rules
 		send_mail token
+	else
+		send_mail success
 	fi
+
+	rm "${LOG_FILE}" "${ERROR_LOG}" "${MAIL_FILE}"
 ) &
 	
-send_mail success
-
-rm "${LOG_FILE}" "${ERROR_LOG}" "${MAIL_FILE}"
 # vim:foldmethod=marker
