@@ -24,13 +24,11 @@ if [ -f /etc/alff/alff-agent.conf ]; then
 	. /etc/alff/alff-agent.conf
 fi
 
-# If there is no config, use defaults
-if [ -z "${RULES_DIR}" ]; then
-	RULES_DIR="/var/cache/alff/rules"
-	OLD_RULES_FILE="${RULES_DIR}/rules.dump"
-	CURRENT_RULES_FILE="${RULES_DIR}/rules.current"
-	DELETE_ME_FILE="${RULES_DIR}/.current_rules_dont_work"
-	SLEEP_TIME=180
+if [ -s /etc/alff/alff-defaults.conf ]; then
+	. /etc/alff/alff-defaults.conf
+else
+	echo "Error: The alff default configuration file does not exist or is empty!" >&2
+	exit 1
 fi
 
 MY_NAME="alff-cat"
