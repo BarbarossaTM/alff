@@ -91,11 +91,6 @@ case "${1}" in
 		echo -n "Starting Alff agent: "
 		LOGFILE="/var/log/${MY_NAME}.startup.${DATE}"
 
-		if ! check_config; then
-			echo "No configuration provided!"
-			exit 1
-		fi
-
 		if interactive_run && [ "${ALFF_INIT_VERBOSE}" == 'true' ]; then
 			load_rules 2>&1 | tee "${LOGFILE}" && echo "Rules successfully loaded." || echo "FAILED!"
 		else
