@@ -159,11 +159,20 @@ case "$1" in
 		# export environment variables which will be used by the plugins
 		export CHAIND_PLUGIN_DIR
 		export CACHE_DIR_CHAINS
-		find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
-			if [ -x "${PLUGIN_D}/${plugin}" ]; then
-				sh -c "${PLUGIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"
-			fi
-		done
+		if !  find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
+				if [ -x "${PLUGIN_D}/${plugin}" ]; then
+					if ! sh -c "${PLUGIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"; then
+						echo "" >&2
+						echo "There occured errors while executing plugin ${plugin}." >&2
+						echo "Alff will stop rule generation now to avoid trouble." >&2
+						exit 1
+					fi
+				fi
+			done ; then
+				# Second exit to stop the 'whole' alff. (remind the "| while" does open a subshell.)
+				exit 1
+		fi
+			
 
 		"$0" loadUserRules 3> "${CACHE_DIR_BUILD}/999_user_rules"
 
