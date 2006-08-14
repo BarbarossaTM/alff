@@ -206,6 +206,7 @@ case "$1" in
 		if [ "${2}" ]; then
 			echo -n "Pushing ruleset to ${2}... "
 			alff-push "${2}" "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
+			alff-approve-rules "${2}"
 		else
 			MACHINE_IDS=`alff getMachines`
 			if [ -z "${MACHINE_IDS}" ]; then
@@ -216,6 +217,7 @@ case "$1" in
 			for machine_id in ${MACHINE_IDS}; do
 				echo -n "Pushing rules to ${machine_id}... "
 				alff-push ${machine_id} "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
+				alff-approve-rules "${machine_id}"
 			done
 		fi
 
