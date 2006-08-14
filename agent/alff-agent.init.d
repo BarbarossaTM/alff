@@ -69,19 +69,19 @@ function load_rules() { #{{{
 }
 #}}}
 
-# Check the configuration
-check_config() { #{{{
-	if [ -z "${RULES_DIR}" ]; then
-		return 1
-	fi
-} #}}}
-
 if [ -f /etc/alff/alff-agent.conf ]; then
 	. /etc/alff/alff-agent.conf
 fi
 
+if [ -s /etc/alff/alff-defaults.conf ]; then
+	. /etc/alff/alff-defaults.conf
+else
+	echo "Error: The alff default configuration does not exist or is empty." >&2
+	exit 1
+fi
 
-NAME="alff-agent"
+
+MY_NAME="alff-agent"
 DATE="`date +%Y-%m-%d_%H%M`"
 
 
@@ -89,7 +89,7 @@ case "${1}" in
 	# Startup alff
 	start)
 		echo -n "Starting Alff agent: "
-		LOGFILE="/var/log/${NAME}.startup.${DATE}"
+		LOGFILE="/var/log/${MY_NAME}.startup.${DATE}"
 
 		if ! check_config; then
 			echo "No configuration provided!"
@@ -110,7 +110,7 @@ case "${1}" in
 	# Stop the whole firewall system
 	stop)
 		echo -n "Stopping firewall: "
-		LOGFILE="/var/log/${NAME}.shutdown.${DATE}"
+		LOGFILE="/var/log/${MY_NAME}.shutdown.${DATE}"
 
 		if interactive_run; then
 			flush_all 2>&1 | tee "${LOGFILE}" && echo "done." || echo "FAILED!"
