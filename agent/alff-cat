@@ -81,6 +81,7 @@ function restore_old_rules() { #{{{
 # Usage: send_mail { success, fail }
 function send_mail() { #{{{
 
+	# Maybe someone does alff-cat to shut up
 	if [ "${MAIL_TO}" = 'I_WANT_NO_MAIL' ]; then
 		return
 	fi
@@ -107,35 +108,41 @@ The old rules have been restored."
 			;;
 	esac
 
-cat << EOMAILHEADER > "${MAIL_FILE}"
-Hi there!
+	cat <<- EOMAILHEADER > "${MAIL_FILE}"
+	Hi there!
+	
+	$TEXT
+	
+	EOMAILHEADER
 
-$TEXT
+	if [ -s "${LOG_FILE}" ]; then #{{{
+		cat <<- EOF >> "${MAIL_FILE}"
+	
+		There's something in the logfile:
+		==============================================================================
+		EOF
+		
+		cat < "${LOG_FILE}" >> "${MAIL_FILE}"
+	
+		echo -e "==============================================================================\n" >> "${MAIL_FILE}"
+	fi #}}}
 
-Here's the logfile:
-==============================================================================
-EOMAILHEADER
+	if [ -s "${ERROR_LOG}" ]; then #{{{
+		cat <<- EOF >> "${MAIL_FILE}"
+		
+		There's something in the error log:
+		==============================================================================
+		EOF
+		
+		cat < "${ERROR_LOG}" >> "${MAIL_FILE}"
+		
+		echo -e "==============================================================================\n" >> "${MAIL_FILE}"
+	fi #}}}
 
-cat < "${LOG_FILE}" >> "${MAIL_FILE}"
+	echo -e "\nYour alff cat." >> "${MAIL_FILE}"
 
-cat << EOMAIL >> "${MAIL_FILE}"
-==============================================================================
-
-Here's the error log:
-==============================================================================
-EOMAIL
-
-cat < "${ERROR_LOG}" >> "${MAIL_FILE}"
-
-cat << EOMAILFOOTER >> "${MAIL_FILE}"
-==============================================================================
-
-Your alff cat.
-EOMAILFOOTER
-
-# Send out the mail to root
-mail -s "${SUBJECT}" ${MAIL_TO:-root} < "${MAIL_FILE}"
-
+	# Send out the mail
+	mail -s "${SUBJECT}" ${MAIL_TO:-root} < "${MAIL_FILE}"
 } #}}}
 
 ##
