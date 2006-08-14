@@ -70,7 +70,7 @@ fi
 function emergency_break() { #{{{
 	echo "There occured unkown errors!" >&2
 	echo "alff-cat will exit now to prevent future breakage..." >&2
-	exit 2
+	exit 3
 } #}}}
 
 function restore_old_rules() { #{{{
@@ -175,19 +175,33 @@ else
 	exit 4
 fi
 
+if touch "${RULES_LOADING_TOKEN}"; then
+	echo -n "."
+else
+	echo "Error: Could not create the rules-loading-token!"
+	echo ""
+	echo "This maybe your last shell on this machine..."
+	echo "Use ^Z to put it into the background and try to fix everything."
+	echo "You can use 'fg' to come back to here. Then just press <RETURN> to exit."
+	echo ""
+	echo "Good luck!"
+	read
+	exit 5
+fi
+
 #echo "Will now go to background an load new rules and wait ${SLEEP_TIME:-180} sec. for deletion of the token."
 echo -n " ..."
 
 exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 (
-
-	# Just execute $CURRENTRULES_FILE
+	# Load new rules by just executing the shell script
 	if ! sh "${CURRENT_RULES_FILE}"; then
 		# Something went wrong while loading the new rules
 		# Restore the old ones to prevent trouble
 		restore_old_rules
 		send_mail fail
 	fi
+	rm "${RULES_LOADING_TOKEN}"	
 
 	# Wait for deletion of the token.
 	sleep ${SLEEP_TIME:-180}
