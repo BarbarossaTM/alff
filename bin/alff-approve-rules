@@ -18,7 +18,7 @@ my $config_file = "${config_dir}/alff.conf";
 
 # Where to find things on the alff-aggent
 my $alff_rules_dir = "/var/cache/alff/rules";
-my $rules_loading_token = "${alff_rules_dir}/.rules_loading";
+my $rules_loading_token = "${alff_rules_dir}/.loading_new_rules";
 my $current_rules_dont_work_token = "${alff_rules_dir}/.current_rules_dont_work";
 
 # Get machine_id from command line
@@ -52,7 +52,8 @@ if ( ! Net::CIDR::cidrvalidate( $machine_ip ) ) {
 }
 #}}}
 
-my $first_connect = system( "ssh -l root $machine_ip \"while [ -f \"${rules_loading_token}\" ]; do echo -n '.'; sleep 3; done; exit;\"" );
+print "Approving rules on ${machine_id}: ";
+my $first_connect = system( "ssh -l root $machine_ip \"while [ -f \"${rules_loading_token}\" ]; do echo -n '.'; sleep 3; done; echo ' '; exit;\"" );
 if ( $first_connect ) {
 	print STDERR "Error: Could not connect to ${machine_id}!\n";
 	exit 1;
@@ -63,6 +64,9 @@ if ( $delete_token_status ) {
 	print STDERR "Error: Could not approve rules on ${machine_id}!\n";
 	exit 1;
 }
+
+# If everything succeded...
+print "done.\n";
 
 exit 0;
 # vim:foldmethod=marker
