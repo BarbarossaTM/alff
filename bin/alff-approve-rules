@@ -52,7 +52,7 @@ if ( ! Net::CIDR::cidrvalidate( $machine_ip ) ) {
 }
 #}}}
 
-my $first_connect = system( "ssh -l root $machine_ip \"while [ -f \"${rules_loading_token}\" ]; do echo -n '.'; sleep 3; done; logout\"" );
+my $first_connect = system( "ssh -l root $machine_ip \"while [ -f \"${rules_loading_token}\" ]; do echo -n '.'; sleep 3; done; exit;\"" );
 if ( $first_connect ) {
 	print STDERR "Error: Could not connect to ${machine_id}!\n";
 	exit 1;
