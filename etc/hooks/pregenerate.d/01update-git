@@ -15,11 +15,15 @@ set -e
 CONFIG_DIR="/etc/alff"
 
 	pushd "${CONFIG_DIR}" >/dev/null
-	echo -n "Updating local config repository... "
+	echo -n " * Updating local config repository... "
 	if git pull >/dev/null; then
 		echo "done".
-		exit 0
-	else
-		echo "FAILED!"
-		exit 1
+
+		echo -n " * Pushing local changes to server... "
+		if git push >/dev/null; then
+			exit 0
+		fi
 	fi
+
+	echo "There went something wrong!"
+	exit 1
