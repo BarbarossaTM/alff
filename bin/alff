@@ -204,7 +204,7 @@ case "$1" in
 
 		# Maybe we got an explicit machine to push to
 		if [ "${2}" ]; then
-			echo -n "Pushing ruleset to ${2}... "
+			echo -n "Pushing ruleset to ${2}: "
 			alff-push "${2}" "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
 			alff-approve-rules "${2}"
 		else
@@ -215,7 +215,7 @@ case "$1" in
 			fi
 			
 			for machine_id in ${MACHINE_IDS}; do
-				echo -n "Pushing rules to ${machine_id}... "
+				echo -n "Pushing rules to ${machine_id}: "
 				alff-push ${machine_id} "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
 				alff-approve-rules "${machine_id}"
 			done

@@ -142,7 +142,7 @@ mail -s "${SUBJECT}" ${MAIL_TO:-root} < "${MAIL_FILE}"
 # Ok, let´s go
 
 # Save the current ruleset to $OLD_RULES_FILE
-echo -n "${HOSTNAME}:	1"
+echo -n "1"
 if iptables-save > "${OLD_RULES_FILE}"; then
 	echo -n "."
 else
