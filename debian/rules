@@ -61,8 +61,7 @@ install: build
 	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share/perl5
 	cp -a $(CURDIR)/share $(CURDIR)/debian/alff-rulegen/usr/share/alff
 	cp -a $(CURDIR)/perl5/Alff $(CURDIR)/debian/alff-rulegen/usr/share/perl5
-	cp -a $(CURDIR)/alff $(CURDIR)/debian/alff-rulegen/usr/sbin
-	cp -a $(CURDIR)/alff-push $(CURDIR)/debian/alff-rulegen/usr/sbin
+	cp -a $(CURDIR)/bin/* $(CURDIR)/debian/alff-rulegen/usr/sbin
 	# config stuff
 	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff
 	cp -a $(CURDIR)/etc/* $(CURDIR)/debian/alff-rulegen/etc/alff/
@@ -74,7 +73,7 @@ install: build
 	mkdir -p $(CURDIR)/debian/alff-agent/etc/init.d
 	cp $(CURDIR)/agent/alff-cat $(CURDIR)/debian/alff-agent/usr/sbin/alff-cat
 	cp $(CURDIR)/agent/alff-agent.init.d $(CURDIR)/debian/alff-agent/etc/init.d/alff-agent
-	cp $(CURDIR)/agent/alff-agent.conf $(CURDIR)/debian/alff-agent/etc/alff/alff-agent.conf
+	cp $(CURDIR)/agent/*.conf $(CURDIR)/debian/alff-agent/etc/alff/
 
 # Build architecture-independent files here.
 binary-indep: build install

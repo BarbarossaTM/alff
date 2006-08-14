@@ -1,3 +1,12 @@
+alff (1.2-4) unstable; urgency=low
+
+  * Splitted alff-agent configuration into fixed defaults and user changeable
+    values and updated tools in alff-agent package.
+  * Added alff-approve-rules to check firewall accessability after pushing
+    new rules.
+
+ -- Maximilian Wilhelm <max@rfc2324.org>  Mon, 14 Aug 2006 16:31:12 +0200
+
 alff (1.2-3) unstable; urgency=low
 
   * Partly rewrote alff-cat to go to background when loading new rules.
