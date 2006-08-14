@@ -161,7 +161,7 @@ fi
 
 # Try to create the delete-me token
 echo -n " 3"
-if touch "${DELETE_ME_FILE}"; then
+if touch "${DELETE_ME_TOKEN}"; then
 	echo -n "."
 else
 	echo "Error: Could not create the delete-me-token!"
@@ -193,7 +193,7 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 	sleep ${SLEEP_TIME:-180}
 
 	# Do we have to do a restore?
-	if [ -f "${DELETE_ME_FILE}" ]; then
+	if [ -f "${DELETE_ME_TOKEN}" ]; then
 		# Oh, something went wrong... Let´s restore the old rules
 		restore_old_rules
 		send_mail token
