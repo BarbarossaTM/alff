@@ -51,8 +51,8 @@ function load_rules() { #{{{
 	# First check for an existing DELETE_ME_FILE, to be aware of a reboot while
 	# alff-cat was running. Maybe something went wrong.
 	if [ -f "${DELETE_ME_FILE}" ]; then
-		echo "It seems that this machine was rebooted while loading new rules." >&2
-		echo "Trying to load the old rules to avoid trouble..." >&2
+		echo "It seems that this machine was rebooted while loading new rules or the new" >&2
+		echo "rules were not approved. Trying to load the old rules to avoid trouble..." >&2
 		if [ -f "${OLD_RULES_FILE}" ]; then
 			iptables-restore < "${OLD_RULES_FILE}"
 		fi
