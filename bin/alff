@@ -218,6 +218,7 @@ case "$1" in
 				echo -n "Pushing rules to ${machine_id}: "
 				alff-push ${machine_id} "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
 				alff-approve-rules "${machine_id}"
+				echo ""
 			done
 		fi
 
