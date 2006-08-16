@@ -31,6 +31,7 @@ my @allow_from_security_classes;		# Maybe this service should be available from 
 
 sub readYesNo($) { # {{{
 	my $default = shift || "no";
+	print " (yes/no) [${default}]: ";
 	my $input = <STDIN>;
 
 	return $default if ( $input eq "\r" || $input eq "\n" );
@@ -82,23 +83,23 @@ $ports = <STDIN>;
 chomp $ports;
 
 # Read "accessability" options
-print "Should this service be reachable from all trusted networks? (yes/no): [no]";
+print "Should this service be reachable from all trusted networks?";
 $allow_from_trusted_networks = readYesNo( "no" );
 
-print "Should this service be reachable from all filtered networks? (yes/no): [no]";
+print "Should this service be reachable from all filtered networks?";
 $allow_from_filtered_networks = readYesNo( "no" );
 
-print "Should this service be accessable from all the world[tm]? (yes/no): [no]";
+print "Should this service be accessable from all the world[tm]?";
 $allow_from_world = readYesNo( "no" );
 
 # If there are dynamic security classes, ask the user he wants to specify access levels therefore. #{{{
 if ( scalar( @security_classes ) > 0 ) {
 	print "There are dynamic security classes defined in alff.conf.\n";
-	print "Should I ask you about access from your dynamic security classes? (yes/no): [no]";
+	print "Should I ask you about access from your dynamic security classes?";
 
 	if ( readYesNo( "no" )  eq "yes" ) {
 		foreach my $security_class ( @security_classes ) {
-			print " Should this service be reachable from all $security_class networks? (yes/no): [no]";
+			print " Should this service be reachable from all $security_class networks?";
 			my $ret = readYesNo( "no" );
 			if ( $ret eq "yes" ) {
 				push @allow_from_security_classes, $security_class;
