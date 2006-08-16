@@ -7,6 +7,7 @@
 #
 
 use strict;
+use Alff::Config;			# Alff configuration (security classes)
 use Alff::Validator;			# Port validation
 use Net::CIDR;				# IP validation
 use Net::DNS;				# DNS Resolver
@@ -15,6 +16,18 @@ use Net::DNS;				# DNS Resolver
 my $service_d = "/etc/alff/services.d/";
 my $resolver = Net::DNS::Resolver->new();
 my $validator = Alff::Validator->new();
+my $config = Alff::Config->new();
+
+my @security_classes = grep { ! m/^filtered$|^trusted$/  } $config->getSecurityClasses();
+
+my $server_names = "";				# server names to be read later
+my $ips = "";					# resolved IPs of the servers
+my $ports = "";					# ports for this service
+my $allow_from_trusted_networks = "no";		# service accessability options
+my $allow_from_filtered_networks = "no";	# ..
+my $allow_from_world = "no";			# ..
+my @allow_from_security_classes;		# Maybe this service should be available from some self defined security classes
+
 
 sub readYesNo($) { # {{{
 	my $default = shift || "no";
@@ -43,13 +56,6 @@ if ( length( $service ) > 21 ) {
 	print STDERR "Error: Given service name is to long. Max. 21 chars allowed.\n";
 	exit 1;
 }
-
-my $server_names = "";				# server names to be read later
-my $ips = "";					# resolved IPs of the servers
-my $ports = "";					# ports for this service
-my $allow_from_trusted_networks = "no";		# service accessability options
-my $allow_from_filtered_networks = "no";	# ..
-my $allow_from_world = "no";			# ..
 
 ##
 # Check for service dir
@@ -84,8 +90,24 @@ $allow_from_filtered_networks = readYesNo( "no" );
 
 print "Should this service be accessable from all the world[tm]? (yes/no): [no]";
 $allow_from_world = readYesNo( "no" );
-#}}}
 
+# If there are dynamic security classes, ask the user he wants to specify access levels therefore. #{{{
+if ( scalar( @security_classes ) > 0 ) {
+	print "There are dynamic security classes defined in alff.conf.\n";
+	print "Should I ask you about access from your dynamic security classes? (yes/no): [no]";
+
+	if ( readYesNo( "no" )  eq "yes" ) {
+		foreach my $security_class ( @security_classes ) {
+			print " Should this service be reachable from all $security_class networks? (yes/no): [no]";
+			my $ret = readYesNo( "no" );
+			if ( $ret eq "yes" ) {
+				push @allow_from_security_classes, $security_class;
+			}
+		}
+	}
+} #}}}
+
+#}}}
 
 ##
 # Validate input #{{{
@@ -94,22 +116,6 @@ if ( length( $server_names ) == 0 || length( $ports ) == 0 ) {
 	exit 1;
 }
 
-if ( $allow_from_filtered_networks ne "yes" && $allow_from_filtered_networks ne "no" ) {
-	print STDERR "Error: Invalid option \"$allow_from_filtered_networks\" for accessibility from filtered networks\n";
-	exit 1;
-}
-
-if ( $allow_from_trusted_networks ne "yes" && $allow_from_trusted_networks ne "no" ) {
-	print STDERR "Error: Invalid option \"$allow_from_trusted_networks\" for accessibility from trusted networks\n";
-	exit 1;
-}
-
-if ( $allow_from_world ne "yes" && $allow_from_world ne "no" ) {
-	print STDERR "Error: Invalid option \"$allow_from_world\" for accessibility from the world[tm]\n";
-	exit 1;
-}
-
-
 # Check ports/protocols #{{{
 foreach my $port ( split /\s+/, $ports ) {
 	if ( ! $validator->validate_port( $port ) ) {
@@ -117,7 +123,6 @@ foreach my $port ( split /\s+/, $ports ) {
 		exit 1;
 	}
 } #}}}
-
 
 # Resolv hostnames to IPs #{{{
 foreach my $server_name ( split /\s+/, $server_names ) {
@@ -178,11 +183,17 @@ package Alff::Service::Config;
 	allow_from_trusted_networks => \"$allow_from_trusted_networks\",
 	allow_from_filtered_networks => \"$allow_from_filtered_networks\",
 	allow_from_world => \"$allow_from_world\",
+";
 
+if ( scalar( @allow_from_security_classes ) > 0 ) {
+	foreach my $security_class ( @allow_from_security_classes ) {
+		print SERVICE_FILE "	allow_from_${security_class}_networks => \"yes\",\n";
+	}
+}
+
+print SERVICE_FILE "
 }
 # vim:ft=perl:
 ";
-
-
 
 # vim:foldmethod=marker
