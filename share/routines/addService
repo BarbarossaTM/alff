@@ -179,6 +179,7 @@ package Alff::Service::Config;
 	allow_from_filtered_networks => \"$allow_from_filtered_networks\",
 	allow_from_world => \"$allow_from_world\",
 
+}
 # vim:ft=perl:
 ";
 
