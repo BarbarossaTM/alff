@@ -233,7 +233,7 @@ sub generateServiceChain($) { #{{{
 	# Allow service for configured security classes
 	foreach my $config_key ( keys %{$serviceconfig} ) {
 		# search for security classes
-		if ( $config_key =~ m/allow_from_(\w+)_networks/ ) {
+		if ( $config_key =~ m/allow_from_(\w+)_networks/ && $serviceconfig->{$config_key} eq "yes" ) {
 			my $sec_class = $1;
 			my $sec_class_chain = "allowServicesFrom" . ucfirst( $sec_class ) . "Nets";
 
