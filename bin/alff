@@ -216,7 +216,7 @@ case "$1" in
 			
 			for machine_id in ${MACHINE_IDS}; do
 				echo -n "Pushing rules to ${machine_id}: "
-				exec_function push ${machine_id} "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
+				exec_function push-rules ${machine_id} "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
 				exec_function approve-rules "${machine_id}"
 				echo ""
 			done
