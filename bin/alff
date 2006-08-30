@@ -157,7 +157,7 @@ case "$1" in
 		# Create fd3 (all script should output there stuff to fd3, which is redirected to a proper outfile
 		exec 3>&1
 		# export environment variables which will be used by the plugins
-		export CHAIND_PLUGIN_DIR
+		export PLUGIND_PLUGIN_DIR
 		export CACHE_DIR_CHAINS
 		if !  find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
 				if [ -x "${PLUGIN_D}/${plugin}" ]; then
