@@ -1,4 +1,4 @@
-alff (1.2-4) unstable; urgency=low
+alff (0.0.2-4) unstable; urgency=low
 
   * Splitted alff-agent configuration into fixed defaults and user changeable
     values and updated tools in alff-agent package.
@@ -7,21 +7,21 @@ alff (1.2-4) unstable; urgency=low
 
  -- Maximilian Wilhelm <max@rfc2324.org>  Mon, 14 Aug 2006 16:31:12 +0200
 
-alff (1.2-3) unstable; urgency=low
+alff (0.0.2-3) unstable; urgency=low
 
   * Partly rewrote alff-cat to go to background when loading new rules.
   * Alff-cat will now send a status mail if not told else.
 
  -- Maximilian Wilhelm <max@rfc2324.org>  Wed,  9 Aug 2006 18:30:47 +0200
 
-alff (1.2-2) unstable; urgency=high
+alff (0.0.2-2) unstable; urgency=high
 
   * Renamed former 'chain.d' to 'plugin.d'.
   * Some minor fixes.
 
  -- Maximilian Wilhelm <max@rfc2324.org>  Tue,  8 Aug 2006 16:16:39 +0200
 
-alff (1.2-1) unstable; urgency=high
+alff (0.0.2-1) unstable; urgency=high
 
   * Added some new plugins (icmp/traceroute handling, black/whitelist).
   * Improved plugin classifyInterVlanTraffic to dont create empty network.
@@ -31,25 +31,25 @@ alff (1.2-1) unstable; urgency=high
 
  -- Maximilian Wilhelm <max@rfc2324.org>  Mon, 17 Jul 2006 17:51:25 +0200
 
-alff (1.2-0) unstable; urgency=low
+alff (0.0.2-0) unstable; urgency=low
 
   * Alff is now able to push the rules to your firewall machines.
 
  -- Maximilian Wilhelm <max@rfc2324.org>  Mon, 19 Jun 2006 15:48:33 +0200
 
-alff (1.1-2) unstable; urgency=low
+alff (0.0.1-2) unstable; urgency=low
 
   * Added alff-agent to provide a framework to load the rules on your firewall.
 
  -- Maximilian Wilhelm <max@rfc2324.org>  Mon, 19 Jun 2006 15:48:33 +0200
 
-alff (1.1-1) unstable; urgency=high
+alff (0.0.1-1) unstable; urgency=high
 
   * Complete rewrite of service chain handling.
 
  -- Maximilian Wilhelm <mwilhelm@math.uni-paderborn.de>  Fri,  9 Jun 2006 17:43:50 +0200
 
-alff (1.0-1) unstable; urgency=low
+alff (0.0.1-1) unstable; urgency=low
 
   * Initial debianized release.
 
