@@ -26,7 +26,7 @@ my $machine_id = $ARGV[0];
 
 # Check for valid machine_id
 if ( ! defined $machine_id ) {	
-	print STDERR "Usage: alff-delete-token machine-ID\n";
+	print STDERR "Usage: alff approve-rules machine-ID\n";
 	exit 1;
 }
 

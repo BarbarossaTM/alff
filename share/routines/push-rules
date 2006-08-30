@@ -21,7 +21,7 @@ my $ruleset = $ARGV[1] ? $ARGV[1] : "/var/cache/alff/alff.rules";
 
 # Check for valid machine_id
 if ( ! defined $machine_id ) {	
-	print STDERR "Usage: alff-push machine-ID [ - | ruleset_file ]\n";
+	print STDERR "Usage: alff push-rules machine-ID [ - | ruleset_file ]\n";
 	exit 1;
 }
 
