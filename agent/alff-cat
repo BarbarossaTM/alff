@@ -13,7 +13,7 @@
 # Do never ever add
 #       || echo "FAILED!"
 # anywhere in this tool, because we want 'set -e' to handle this case!!
-set -e
+#set -e
 
 export LOG_FILE=`tempfile`
 export ERROR_LOG=`tempfile`
@@ -79,6 +79,15 @@ function restore_old_rules() { #{{{
 	iptables-restore < "${OLD_RULES_FILE}" && echo "done."
 } #}}}
 
+function dump_tables() { # {
+	for table in ${DIFF_TABLES}; do
+		if ! iptables -t ${table} -L -v -n | sed -e 's/^[[:space:]]\+[0-9]\+[KM]\?[[:space:]]\+[0-9]\+[KM]\?\(.*\)/    0     0\1/' \
+							-e 's/[0-9]\+[KM]\? packets, [0-9]\+[KM]\? bytes)/0 packets, 0 bytes)/' ; then	
+			return 1
+		fi
+	done
+} #}}}
+
 # Save the current ruleset to $OLD_RULES_FILE and 
 # save a zeroed iptables output dump to $OLD_RULES_FILE.iptables
 function dump_current_rules() { #{{{
@@ -90,12 +99,7 @@ function dump_current_rules() { #{{{
 
 	# Save rules in iptables-print-format for possible diff
 	if [ "${DIFF_TABLES}" ]; then
-		echo > "${OLD_RULES_FILE}.iptables"
-		for table in ${DIFF_TABLES}; do
-			if ! iptables -t ${table} -Z -L -v -n | grep -v '^Zeroing chain' >> "${OLD_RULES_FILE}.iptables"; then	
-				return 1
-			fi
-		done
+		dump_tables > "${OLD_RULES_FILE}.iptables"
 	fi
 } #}}}
 
@@ -139,10 +143,7 @@ The old rules have been restored."
 	# Diff ruleset in iptables format for the admin #{{{
 	if [ "${1}" = 'success' -a "${DIFF_TABLES}" ]; then
 
-		echo > "${CURRENT_RULES_FILE}.iptables"
-		for table in ${DIFF_TABLES}; do
-			iptables -t ${table} -Z -L -v -n | grep -v '^Zeroing chain' >> "${CURRENT_RULES_FILE}.iptables"
-		done
+		dump_tables > "${CURRENT_RULES_FILE}.iptables"
 
 		diff -Nup "${OLD_RULES_FILE}.iptables" "${CURRENT_RULES_FILE}.iptables" > "${RULES_DIFF}"
 
@@ -248,26 +249,36 @@ echo -n " ..."
 
 exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 (
+	STATUS=""
+
 	# Load new rules by just executing the shell script
-	if ! sh "${CURRENT_RULES_FILE}"; then
+	if ! sh -e "${CURRENT_RULES_FILE}"; then
 		# Something went wrong while loading the new rules
 		# Restore the old ones to prevent trouble
 		restore_old_rules
-		send_mail fail
+		STATUS="fail"
 	fi
-	rm "${RULES_LOADING_TOKEN}"	
 
-	# Wait for deletion of the token.
-	sleep ${SLEEP_TIME:-180}
+	# Rule loading has finished.
+	rm -- "${RULES_LOADING_TOKEN}"
 
-	# Do we have to do a restore?
-	if [ -f "${DELETE_ME_TOKEN}" ]; then
-		# Oh, something went wrong... Let´s restore the old rules
-		restore_old_rules
-		send_mail token
-	else
-		send_mail success
+	# If the rules did load without error, try to get them approved
+	if [ "${STATUS}" != 'fail' ]; then
+		# Wait for deletion of the rules-dont-work-token.
+		sleep ${SLEEP_TIME:-180}
+	
+		# Chillin' time is over... do we have to do a restore?
+		if [ -f "${DELETE_ME_TOKEN}" ]; then
+			# Oh, something went wrong... Let´s restore the old rules
+			restore_old_rules
+			STATUS="token"
+		else
+			# Yeha, everything went fine
+			STATUS="success"
+		fi
 	fi
+
+	send_mail ${STATUS}
 
 	rm -- "${LOG_FILE}" "${ERROR_LOG}" "${MAIL_FILE}" "${RULES_DIFF}"
 ) &
