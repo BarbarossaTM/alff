@@ -89,12 +89,14 @@ function dump_current_rules() { #{{{
 	fi
 
 	# Save rules in iptables-print-format for possible diff
-	echo > "${OLD_RULES_FILE}.iptables"
-	for table in ${DIFF_TABLES}; do
-		if ! iptables -t ${table} -Z -L -v -n | grep -v '^Zeroing chain' >> "${OLD_RULES_FILE}.iptables"; then	
-			return 1
-		fi
-	done
+	if [ "${DIFF_TABLES}" ]; then
+		echo > "${OLD_RULES_FILE}.iptables"
+		for table in ${DIFF_TABLES}; do
+			if ! iptables -t ${table} -Z -L -v -n | grep -v '^Zeroing chain' >> "${OLD_RULES_FILE}.iptables"; then	
+				return 1
+			fi
+		done
+	fi
 } #}}}
 
 # Usage: send_mail { success, fail }
@@ -142,10 +144,11 @@ The old rules have been restored."
 			iptables -t ${table} -Z -L -v -n | grep -v '^Zeroing chain' >> "${CURRENT_RULES_FILE}.iptables"
 		done
 
-		diff -up "${OLD_RULES_FILE}.iptables" "${CURRENT_RULES_FILE}.iptables" > "${RULES_DIFF}"
+		diff -Nup "${OLD_RULES_FILE}.iptables" "${CURRENT_RULES_FILE}.iptables" > "${RULES_DIFF}"
+
 		if [ -s "${RULES_DIFF}" ]; then
 			# Diff of the ruleset
-			cat <<- EODIFF >> ${MAIL_FILE}"
+			cat <<- EODIFF >> "${MAIL_FILE}"
 			
 			There are some differences:
 			================================================================================
@@ -266,7 +269,7 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 		send_mail success
 	fi
 
-	rm "${LOG_FILE}" "${ERROR_LOG}" "${MAIL_FILE}" "${RULES_DIFF}"
+	rm -- "${LOG_FILE}" "${ERROR_LOG}" "${MAIL_FILE}" "${RULES_DIFF}"
 ) &
 	
 # vim:foldmethod=marker
