@@ -5,5 +5,3 @@
 
  * alff-cat:
   + Add TRAP to handle problems and restore old ruleset.
-  + Add more trouble handling
-  + Let alff-cat go to background after loading new rules.
