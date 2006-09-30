@@ -71,9 +71,9 @@ if ( $ruleset eq '-' ) {
 
 my $status;
 if ( $filter ) {
-	$status = system( "cat $ruleset | $filter | ssh -l root $machine_ip \"alff-cat -\"" );
+	$status = system( "cat $ruleset | $filter | ssh -x -l root $machine_ip \"alff-cat -\"" );
 } else {
-	$status = system( "cat $ruleset | ssh -l root $machine_ip \"alff-cat -\"" );
+	$status = system( "cat $ruleset | ssh -x -l root $machine_ip \"alff-cat -\"" );
 }
 
 if ( $status ) {

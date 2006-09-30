@@ -53,13 +53,13 @@ if ( ! Net::CIDR::cidrvalidate( $machine_ip ) ) {
 #}}}
 
 print "Approving rules on ${machine_id}: ";
-my $first_connect = system( "ssh -l root $machine_ip \"while [ -f \"${rules_loading_token}\" ]; do echo -n '.'; sleep 3; done; echo -n ' '; exit;\"" );
+my $first_connect = system( "ssh -x -l root $machine_ip \"while [ -f \"${rules_loading_token}\" ]; do echo -n '.'; sleep 3; done; echo -n ' '; exit;\"" );
 if ( $first_connect ) {
 	print STDERR "Error: Could not connect to ${machine_id}!\n";
 	exit 1;
 }
 
-my $delete_token_status = system( "ssh -l root $machine_ip \"rm \"${current_rules_dont_work_token}\" \"" );
+my $delete_token_status = system( "ssh -x -l root $machine_ip \"rm \"${current_rules_dont_work_token}\" \"" );
 if ( $delete_token_status ) {
 	print STDERR "Error: Could not approve rules on ${machine_id}!\n";
 	exit 1;
