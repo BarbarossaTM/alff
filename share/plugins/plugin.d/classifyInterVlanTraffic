@@ -28,7 +28,8 @@ my @vlans = $config->getVlanList;
 
 # The policy for totally unconfigured chains
 my $default_chain_policy = $config->getDefaultChainPolicy;
-my $remove_empty_chains = $config->getPluginOption( "classifyInterVlanTraffic", "remove_empty_chains") || 0;
+my $remove_empty_chains = $config->getPluginOption( "classifyInterVlanTraffic", "remove_empty_chains" ) || 0;
+my $force_x_to_x_chains = $config->getPluginOption( "classifyInterVlanTraffic", "force_x_to_x_chains" ) || 0;
 
 ################################################################################
 #			    Some nifty functions			       #
@@ -183,8 +184,8 @@ foreach my $src_vlan ( @vlans ) {
 
 	print ".";
 	foreach my $dst_vlan ( @vlans ) {
-		# Skip x <-> x rules.
-		if ( $src_vlan eq $dst_vlan ) {
+		# Skip x <-> x rules (if not forced otherwise)
+		if ( $src_vlan eq $dst_vlan and not $force_x_to_x_chains ) {
 			next;
 		}
 
