@@ -81,7 +81,7 @@ function restore_old_rules() { #{{{
 
 function dump_tables() { # {
 	for table in ${DIFF_TABLES}; do
-		if ! iptables -t ${table} -L -v -n | sed -e 's/^[[:space:]]\+[0-9]\+[KM]\?[[:space:]]\+[0-9]\+[KM]\?\(.*\)/    0     0\1/' \
+		if ! iptables -t ${table} -L -v -n | sed -e 's/^[[:space:]]*[0-9]\+[KM]\?[[:space:]]\+[0-9]\+[KM]\?\(.*\)/    0     0\1/' \
 							-e 's/[0-9]\+[KM]\? packets, [0-9]\+[KM]\? bytes)/0 packets, 0 bytes)/' ; then	
 			return 1
 		fi
