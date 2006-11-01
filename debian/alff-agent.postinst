@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# alff-agent.postinst
+#
+
+if [ -x "/etc/init.d/alff-agent" ]; then
+	# start alff-agent as soon as possible after the network has been initialized.
+	update-rc.d alff-agent start 41 S . >/dev/null
+fi
