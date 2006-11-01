@@ -1,0 +1,254 @@
+.TH alff.conf 5
+
+.SH NAME
+alff.conf \- The main configuration for A Linux Firewall Framework
+
+\" SYNOPSIS %{{{
+.SH SYNOPSIS
+The
+.I alff.conf
+file is a configuration file for A Linux Firewall Framework (alff).
+.I alff.conf
+contains basic firewall configuration options regarding your firewall type,
+the network environment and your firewall machines.
+\" %}}}
+
+\" FILE FORMAT {{{
+.SH FILE FORMAT
+.PP
+The main configuration of alff is stored in XML format.
+This format was chosen to simplify config handling within the alff perl modules.
+A simple API for reading confiugration options via shell is included.
+
+.PP
+The alff_config document type definition resides in the external entity
+"alff_config.dtd"; this is normally stored in /usr/share/alff.
+The configuration file should contain the following structure:
+
+.nf
+	<?xml version="1.0"?>
+	<!DOCTYPE alff_config SYSTEM "/usr/share/alff/alff_config.dtd">
+	<alff_config>
+	...
+	</alff_config>
+.fi
+
+.SS <alff_config>
+.PP 
+This is the top level element for the alff configuration an can contain options, vlan and machine elements in any order.
+The order options, vlan, machine is prefered by the author but not neccessary.
+
+.SS <options> \" {{{
+.PP
+This element contains global configuration options.
+.P
+The fw_type element is mandatory, the elements allow_icmp, allow_traeroute_udp,
+default_chain_policy and dhcp_server are optional.
+
+.TP \" fw_type{{{
+fw_type 
+Specify the type of this firewall.
+This system can by run on a bridging firewall which is bridging a trunk 
+with 802.1Q-Vlans (e.g. when using Cisco[tm] hardware) or as a routing firewall.
+The bridge mode is not really tested and working for now, be warned.
+The keywords are "bridge" and "router".
+\" }}}
+
+.TP \" allow_icmp {{{
+allow_icmp
+This option is used by the handleICMP plugin and controls which ICMP packets will 
+be able to pass your firewalls. 
+Possible options are: all, basic and none.
+All means, that all icmp packets can pass your firewall unfiltered,
+in basic mode aff will allow allow echo-{request,reply}, destination-unreachable/*,
+source-squench, time-exceeded/*, parameter-problem/* (ICMP types: 0,3,4,8,11,12)
+to pass the filter and none will block all ICMP.
+Be warned: You might get into trouble if you block all ICMP traffic...
+The default value is all.
+\" }}}
+
+.TP \" allow_traceroute_udp {{{
+allow_traceroute_udp
+This option is read by the handleTracerouteUdp plugin and controls wether
+traceroute packets(udp packets to ports 33434 - 33523) can pass your firewalls
+in any direction. This does not influence traceroute using ICMP packets.
+The default value is yes.
+\" }}}
+
+.TP \" default_chain_policy {{{
+default_chain_policy
+This option is read by the classifyInterVlanTraffic plugin and controls which
+target will be used in vlan_to_vlan chains which do not have any configuration.
+See the 
+.BR classifyInterVlanTraffic (7)
+plugin man page for further information about configuration of this plugin.
+Valid values are ACCEPT, DROP, REJECT, LOG or a self defined chain, which has to be created before classifyInterVlanTraffic is invoked.
+See /etc/plugin.d/POLICY for the intended order of plugin execution.
+\" }}}
+\" }}}
+
+.SS <vlan> \" {{{
+This element contains information about your networks.
+Each network alff should know of has to be put into a vlan block.
+The term vlan is just a name for a network segment with one or more ip networks. It does not need to be a 802.1q vlan.
+The name vlan was chosen because the initial purpose of alff was to filter between a number of 802.1q vlans which include one ip network each.
+
+Each vlan element has to in include the elements id and at least one network.
+It may include interface, desc, filtered, trusted or (a) self defined security_class(es).
+
+.TP \" id {{{
+id
+This option specifies the id of this vlan, which will be used as identifier in alff.
+It can be either a numeric id (maybe you want to represent the 802.1q vlan ID) or a
+string which describes this vlan. It is wise to use only ASCII characters.
+\" }}}
+
+.TP \" network {{{
+network
+The network option contains information about the ip network(s) which this vlan represents.
+Each network element should be in CIDR format (e.g. 192.168.0.0/24).
+\" }}}
+
+.TP \" interface {{{
+interface
+The interface to which this vlan is connected. (e.g. eth0 or bond0.42)
+This is optional. If specified alff will check if packets from the ip
+network(s) of this vlan come in on the correct interface.
+\"}}}
+
+.TP \" security_class {{{
+security_class
+The the security_class element can be used to create a logical view on your network
+and splitting your vlans into zones.
+A security_class name can be used in a service configuration to allow access to a
+service from a (number of) vlan(s).
+See
+.BR alff_services (7)
+for further information about service handling in alff.
+You can specify multiple security_classes per vlan and can group several vlans logically
+by putting them into the same security_class.
+\" }}}
+
+.TP \" filtered {{{
+filtered
+This is a built-in security_class which means that a vlan is behind your firewall.
+This information is used when creating a vlan to vlan matrix or can be used as an access level for services.
+See
+.BR classifyInterVlanTraffic (7) alff_services (7)
+for further information about vlanto vlan matrix generation and service handling in alff.
+You have to set every vlan which is behind your firewall to filtered to make classifyInterVlanTraffic do what you want!
+\"}}}
+
+.TP \" trusted {{{
+trusted
+This is another built-in security_class of alff which means, that the machines in this vlan are kind of trusted.
+It does not include 'filtered' as one might want to set a vlan to 'trusted' which is outside your own network.
+This information can be used as another access level for services.
+See
+.BR alff_services (7)
+for further information about service handling in alff.
+\" }}}
+
+\" }}}
+
+.SS <machine> \" {{{
+This element contains information about your firewall machines.
+Each machine element has to include the elements, id, hostname and ip.
+It may include desc.
+
+.TP \" {{{
+id
+This option specifies the id of this firewall machine, which will be used as an identifiere in alff.
+It can be either a numeric id or a string (e.g. the hostname) It is wise to use ASCII characters only.
+The machine id is mainly use by
+.BR alff-push-rules (7)
+\" }}}
+
+.TP \" {{{
+hostname
+Specify the FQDN hostname of this firewall machine.
+\" }}}
+
+.TP \" {{{
+ip
+Provide the IP address of this firewall machine.
+Alff will use this IP address to connect to your firewall, to prevent DNS attacks and errors.
+\"}}}
+
+.TP \" {{{
+desc
+You may provide a description about this firewall machine.
+This is optional and only for humans :)
+\" }}}
+
+\" }}}
+
+\" }}}
+
+.SH EXAMPLE CONFIGURATION FILE \" {{{
+.nf
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE alff_config SYSTEM "/usr/share/alff/alff_config.dtd">
+
+<alff_config>
+    <!-- Global options for alff //-->
+    <options>
+        <fw_type> router </fw_type>
+
+        <allow_icmp> basic </allow_icmp>
+
+        <allow_traceroute_udp> yes </allow_traceroute_udp>
+
+        <default_chain_policy> REJECT </default_chain_policy>
+
+        <dhcp_server> 192.168.42.5  </dhcp_server>
+    </options>
+
+    <vlan>
+        <id> 42 </id>
+        <network> 192.168.42.0/24 </network>
+        <desc> my Home network </desc>
+        <interface> eth0 </interface>
+        <filtered> yes </filtered>
+        <trusted> yes </trusted>
+    </vlan>
+
+    <vlan>
+        <id> 23 </id>
+        <network> 192.168.23.0/23 </network>
+        <desc> my hacking lab network </desc>
+        <filtered> yes </filtered>
+    </vlan>
+
+    <machine id="fw1">
+        <hostname> fw1.example.com </hostname>
+        <ip> 192.168.1.2 </ip>
+        <desc> My main firewall </desc>
+    </machine>
+
+    <machine id="firewall2">
+        <hostname> firewall2.example.com </hostname>
+        <ip> 192.168.1.3 </ip>
+        <desc> My backup firewall </desc>
+    </machine>
+</alff_config>
+.fi
+\"}}}
+
+.SH NO WARRANTIES \" {{{
+This program is distributed in the hope that it  will  be  useful,  but
+WITHOUT  ANY  WARRANTY;  without  even  the  implied  warranty  of MER-
+ANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  General
+Public License for more details.
+\" }}}
+
+.SH "SEE ALSO" \" {{{
+.BR alff (1)
+
+Homepage: http://alff.rfc2324.org
+\" }}}
+
+.SH AUTHOR
+Maximilian Wilhelm <max@rfc2324.org>
+
+\" vim:foldmethod=marker
