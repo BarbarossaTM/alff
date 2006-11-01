@@ -93,10 +93,10 @@ binary-arch: build install
 #	dh_installemacsen
 #	dh_installpam
 #	dh_installmime
-#	dh_installinit
+	dh_installinit --noscripts
 #	dh_installcron
 #	dh_installinfo
-	dh_installman
+	dh_installman -palff-rulegen man/{alff.conf.5,alff.1}
 	dh_link
 #	dh_strip
 	dh_compress
