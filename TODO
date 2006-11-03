@@ -9,5 +9,3 @@
  * alff.conf:
   + Add information about routes for networks behind a router
   + Think about possibility to generate network/interfaces from alff.conf
-  + Add switch/plugin which automatically creates rules which ACCEPT traffic
-    between firewall machines
