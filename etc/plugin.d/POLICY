@@ -45,7 +45,7 @@ Some thoughts about the usage of the alff plugin.d mechanism:
 
 75:		Create and hook in interVlanChains and load rules defined in
 		rules.d/ for these chains. (If no rules are specified, place
-		${DEFAULT_CHAIN_POLICY} inth the chain.
+		${DEFAULT_CHAIN_POLICY} into the chain.
 
 
 99:		"Close" all chains with a LOG and REJECT target
