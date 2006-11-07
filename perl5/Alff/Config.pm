@@ -244,11 +244,23 @@ sub getOption($) { #{{{
 	return $self->{config}->{options}->{$conf_opt};
 } #}}}
 
+##
 # Get a list of all known securityClasses
 sub getSecurityClasses() { #{{{
 	my $self = shift;
 
 	return sort @{$self->{config}->{allSecurityClasses}};
+} #}}}
+
+##
+# Check if the given security_class is defined anywhere in alff.conf
+sub isValidSecurityClass($) { #{{{
+	my $self = shift;
+	my $securityClass = shift;
+
+	return undef if ( ! $securityClass );
+
+	return grep { /^$securityClass$/ } @{$self->{config}->{allSecurityClasses}};
 } #}}}
 
 ################################################################################
