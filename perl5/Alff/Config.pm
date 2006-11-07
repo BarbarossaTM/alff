@@ -264,6 +264,15 @@ sub getVlanList() { #{{{
 } #}}}
 
 ##
+# Check if a given vlan id represents a valid vlan id from alff.conf
+sub isValidVlan($) { #{{{
+	my $self = shift;
+	my $vlan_id = shift;
+
+	return defined $self->{config}->{vlan}->{$vlan_id};
+} #}}}
+
+##
 # Return a list of all vlans of the specified security class
 sub getVlansOfSecurityClass($) { #{{{
 	my $self = shift;
@@ -355,6 +364,18 @@ sub getVlanNetworks($) { # $vlan_id -> ( list of networks ) {{{
 		# Create a pseudo list, with just one element
 		return ( $vlan_ref->{network} );
 	}
+} #}}}
+
+##
+# Return a list of all SecurityClasses of this vlan
+sub getSecurityClassesOfVlan($) { #{{{
+	my $self = shift;
+	my $vlan_id = shift;
+
+	# Check if vlan is valid
+	return undef if ( ! $self->isValidVlan( $vlan_id ) );
+
+	return sort @{$self->{config}->{vlan}->{$vlan_id}->{securityClasses}}
 } #}}}
 
 ################################################################################
