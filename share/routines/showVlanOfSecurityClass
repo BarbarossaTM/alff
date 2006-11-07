@@ -1,0 +1,28 @@
+#!/usr/bin/perl -w
+#
+# alff showVlansOfSecurityClass
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Tue, 07 Nov 2006 13:49:34 +0100
+#
+
+use strict;
+use Alff::Config;
+
+my $config = Alff::Config->new();
+
+my $security_class = $ARGV[0];
+
+if ( ! $security_class ) {
+	print STDERR "alff showVlansOfSecurityClass [security_class]\n";
+	exit 1;
+}
+
+if ( $config->isValidSecurityClass( $security_class ) ){
+	print "Vlans of security_class $security_class: " . join( ", ", $config->getVlansOfSecurityClass( $security_class ) ) . "\n";
+	exit 0;
+} else {
+	print STDERR "alff showVlansOfSecurityClass [security_class]\n";
+	print STDERR "Error: Invalid security_class $security_class\n";
+	exit 1;
+}
