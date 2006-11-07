@@ -292,7 +292,7 @@ sub getVlansOfSecurityClass($) { #{{{
 	my @allSecurityClasses = @{$self->{config}->{allSecurityClasses}};
 
 	# Check if the given $securityClass is valid
-	return ( ) unless grep { /^$securityClass$/ } @allSecurityClasses;
+	return ( ) if ( ! $self->isValidSecurityClass( $securityClass ) );
 
 	my @allvlans = $self->getVlanList;
 	my @vlans = ( );
