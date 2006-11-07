@@ -19,4 +19,9 @@ if ( ! $vlan ) {
 
 if ( $config->isValidVlan( $vlan ) ) {
 	print "Security classes of vlan '$vlan': " . join ( ", ", sort $config->getSecurityClassesOfVlan( $vlan ) ) . "\n";
+	exit 0;
+} else {
+	print STDERR "Usage: alff showSecurityClassesOfVlan [vlan]\n";
+	print STDERR "Error: Invalid vlan id $vlan\n";
+	exit 1;
 }
