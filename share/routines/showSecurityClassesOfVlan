@@ -1,0 +1,27 @@
+#!/usr/bin/perl -w
+#
+# alff showSecurityClassesOfVlan
+#
+# Maximilianw Wilhelm <max@rfc2324.org>
+#
+
+use strict;
+use Alff::Config;
+
+my $config = Alff::Config->new();
+
+my $vlan = $ARGV[0];
+
+if ( ! $vlan ) {
+	print STDERR "Usage: alff showSecurityClassesOfVlan [vlan]\n";
+	exit 1;
+}
+
+if ( $config->isValidVlan( $vlan ) ) {
+	print "Security classes of vlan '$vlan': " . join ( ", ", sort $config->getSecurityClassesOfVlan( $vlan ) ) . "\n";
+	exit 0;
+} else {
+	print STDERR "Usage: alff showSecurityClassesOfVlan [vlan]\n";
+	print STDERR "Error: Invalid vlan id $vlan\n";
+	exit 1;
+}
