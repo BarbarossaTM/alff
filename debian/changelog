@@ -1,3 +1,14 @@
+alff (0.0.3-0) unstable; urgency=low
+
+  * Added possibility to include a rules diff in alff-cat status mail.
+  * Added option to allow/force creation of x_to_x chains in vlan matrix.
+  * Include alff.conf (5) man page.
+  * Added new plugin 'acceptInterFirewallTraffic' which will generate rules to
+    accept traffic between all firewall machines.
+  * Added 'showSecurityClassesOfVlan' and 'showVlanOfSecurityClass' routines.
+
+ -- Maximilian Wilhelm <max@rfc2324.org>  Mon, 13 Nov 2006 22:34:12 +0100
+
 alff (0.0.2-4) unstable; urgency=low
 
   * Splitted alff-agent configuration into fixed defaults and user changeable
