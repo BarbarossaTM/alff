@@ -65,7 +65,7 @@ function usage() { # print usage #{{{
 	echo ""
 	echo "${MY_NAME} is the main firewall management tool."
 	echo "It is used for generating rulesets, pushing rulesets to your firewalls"
-	echo "and it´s functions may be used as assistance by changing the configuration. "
+	echo "Alff´s functions may be usefull for changing the configuration."
 	echo "See 'alff -list' for a list of all available functions."
 	echo ""
 	echo "We assume that you know what you are doing..."
