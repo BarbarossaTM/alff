@@ -61,7 +61,7 @@ function checkTools() { # check for needed tooles #{{{
 } #}}}
 
 function usage() { # print usage #{{{
-	echo "Usage: ${MY_NAME} { -list | generate | push | <function> [ <param> ] }"
+	echo "Usage: ${MY_NAME} { generate | push | -list | <function> [ <param> ] }"
 	echo ""
 	echo "${MY_NAME} is the main firewall management tool."
 	echo "It is used for generating rulesets, pushing rulesets to your firewalls"
@@ -69,7 +69,6 @@ function usage() { # print usage #{{{
 	echo "See 'alff -list' for a list of all available functions."
 	echo ""
 	echo "We assume that you know what you are doing..."
-	exit 0
 } #}}}
 
 function list_functions() { # list available functions #{{{
@@ -84,8 +83,7 @@ function exec_function() { # execute given function #{{{
 		shift
 		"${FUNCTION_DIR}/${fw_function}" $@
 	else
-		echo "Error: Function $1 does not exist." >&2
-		echo "Use ${MY_NAME} -list to get a list of all implemented functions"
+		usage
 		exit 1
 	fi
 
@@ -238,6 +236,7 @@ case "$1" in
 			exec_function ${@}
 		else
 			usage
+			exit 1
 		fi
 		;;
 		#}}}
