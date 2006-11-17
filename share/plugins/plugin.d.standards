@@ -1,0 +1,73 @@
+#
+# /usr/share/alff/plugins/std_options
+#
+# These file describes standard options to alff plugins used by 
+#'alff setupPluginsInitially' to place them into the right order
+# in the plugin.d/ directory.
+# 
+# Format:
+# id:plugin_name:option
+# Where option is ment as parameter for this plugin, attached to the
+# symbolic link name.
+#
+# E.g: 99:finish_:INPUT would create the following:
+# 99finish_INPUT -> /usr/share/alff/plugins/plugin.d/finish_INPUT
+
+
+# 00:		Flush all chains and set the default policy to DROP
+00:clear_filter_tables
+
+# 01 .. 09:	Create some basic chains you would like to use later on
+#		(e.g. log_and_reject, dont_log, blacklist, whitelist, ...)
+01:create_chain_log_and_reject
+
+04:create_chain_spoofcheck
+04:create_chain_tcp_header_check
+04:create_chain_tcp_scan_handling
+04:generateServiceChains
+
+##
+# 10 .. 29:	Configure your INPUT chain
+10:print_info_:INPUT
+
+
+# 12 .. 14:	Check for spoofed connections, port scans, bad tcp headers...
+#drop_spoofed_packets_
+
+# DHCP
+15:enable_DHCP_relay_INPUT
+
+#20 .. 29:	(Here you should make sure that you can access your firewall
+#		again as soon as these rules are loaded. The goal of this
+#		"early bird" configuration is to minimize the breakdown
+#		of any (adminstrative) connection to your firewall)
+20:acceptInterFirewallTraffic
+
+##
+# 30		Begin to set up the FORWARD chain and do other nifty things
+#		you would like.
+#		(A well configurated INPUT chain is asumed.)
+30:print_info_:FORWARD
+
+# 31:		Hook in the blacklist/whitelist chain
+#		(If someone is blacklisted, whitelisting does not matter...)
+31:hookInBlackAndWhitelist
+
+# DHCP
+35:enable_DHCP_relay_FORWARD
+
+40:handleICMP
+41:handleTracerouteUdp
+
+# 50:		Hook in connection tracking
+#		(accept ESTABLISHED and RELATED connections)
+50:accept_established_connections
+
+# 51 .. 55:	Service handling
+55:hookInServiceChains
+
+# 75:		Create and hook in interVlanChains and load rules defined in
+#		rules.d/ for these chains. (If no rules are specified, place
+#		${DEFAULT_CHAIN_POLICY} into the chain.
+75:classifyInterVlanTraffic
+
