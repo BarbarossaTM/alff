@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# setupPlugins
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Fri, 17 Nov 2006 21:19:43 +0100
+#
+
+set -e
+
+PLUGIN_D="/etc/alff/plugin.d"
+
+PLUGIN_D_PLUGINDIR="/usr/share/alff/plugins/plugin.d/"
+PLUGIN_D_STANDARDS="/usr/share/alff/plugins/plugin.d.standards"
+
+# Does ${PLUGIN_D} exists?
+if [ ! -d "${PLUGIN_D}" ]; then
+	echo "Error: plugin.d "${PLUGIN_D}" does not exist.!"
+	echo "I will not setup anything."
+	exit 1
+fi
+
+# Did the user do anything therein?
+if [ `find "${PLUGIN_D}" ! -name POLICY | wc -l` -gt 1 ]; then
+	echo "Error: It seems that you have setup plugin.d allready."
+	echo "I will not touch it."
+	exit 1
+fi
+
+# Check if $PLUGIN_D_PLUGINDIR exists
+if [ ! -d "${PLUGIN_D_PLUGINDIR}" ]; then
+	echo "Error: No plugins found on this system at ${PLUGIN_D_PLUGINDIR}"
+	exit 1
+fi
+
+# Check if $PLUGIN_D_STANDARDS exists
+if [ ! -f "${PLUGIN_D_STANDARDS}" ]; then
+	echo "Error: ${PLUGIN_D_STANDARDS} does not exist."
+	exit 1
+fi
+
+
+# OK let´s go
+grep -v '^$\|^#' "${PLUGIN_D_STANDARDS}" | \
+	while IFS=: read prio plugin_name option; do
+		linkname="${prio}${plugin_name}${option}"
+
+		echo "Adding ${linkname}..."
+		ln -s "${PLUGIN_D_PLUGINDIR}/${plugin_name}" "${PLUGIN_D}/${linkname}"
+	done
