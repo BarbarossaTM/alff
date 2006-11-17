@@ -35,7 +35,6 @@ function chainExists() { #{{{
 
 # Create the given chain in the given table if it does not exist.
 # If no table is specified, 'filter# is assumed.
-# Usage: createChain chain [ table ]
 
 function createChain() { #{{{
 	# Get the chain name.
@@ -63,5 +62,23 @@ fi
 EOF
 	fi
 } #}}}
+
+# This function will 'echo' back the plugin was called with.
+# It first checks if $0 contains any value after the last '_' and if not
+# checks for "$1".
+#
+# (Thanks to the munin if_ plugin coders for this idea!)
+#
+# Usagge: getOption $1
+function getOption() { # {{{ 
+	local CHAIN=`basename $0 | awk -F_ '{ print $NF }'`
+
+	if [ ! "${CHAIN}" ]; then
+		CHAIN="${1}"
+	fi
+
+	echo "${CHAIN}"
+}
+# }}}
 
 # vim:foldmethod=marker
