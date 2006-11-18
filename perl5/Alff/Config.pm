@@ -60,7 +60,8 @@ sub new { #{{{
 	$obj->{config} = $config;
 
 	$obj->checkConfig unless ( $args->{nocheck} );
-	$obj->sanitizeSecurityClasses;
+	$obj->sanitizeSecurityClasses();
+	$obj->sanitizeMachines();
 
 	return $obj;
 } #}}}
@@ -210,6 +211,31 @@ sub sanitizeSecurityClasses() { #{{{
 
 	my @allSecurityClassesList = keys %allSecurityClasses;
 	$self->{config}->{allSecurityClasses} = \@allSecurityClassesList;
+}
+#}}}
+
+##
+# Ensure that the machine data is store beneith the machine id.
+# The data structures only have to be fixed if only one machine is configured
+# in alff.conf
+sub sanitizeMachines() { # {{{
+	my $self = shift;
+	
+	# If a machine 'id' is defined as this is no ref, there is only
+	# one machine in alff.conf, we have to fix the data structures
+	# resulting of this
+	if ( defined $self->{config}->{machine}->{id} and not 
+	     ref $self->{config}->{machine}->{id} ) {
+
+		my %machine_hash_tmp;
+		foreach my $key ( 'id', 'ip', 'hostname', 'desc' ) {
+			$machine_hash_tmp{$key} = $self->{config}->{machine}->{$key};
+			delete $self->{config}->{machine}->{$key};
+		}
+
+		my $machine_id = $machine_hash_tmp{id};
+		$self->{config}->{machine}->{$machine_id} = \%machine_hash_tmp;
+	}
 }
 #}}}
 
