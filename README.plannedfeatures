@@ -1,7 +1,0 @@
- * It may be rather usefull to generate iptables-save like rules to minimize
-   the time for loading the new ruleset.
-
- * It might be a good idea to parse a generated ruleset and remove unreferenced
-   chains. (besides {black,white}list)
-
- * Added extra granularity for allow_icmp (0,8, 11:1, ...)

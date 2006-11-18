@@ -4,6 +4,12 @@
  * Create config spaces in alff to be able to manage several firewalls
    on one admin machine in /etc/alff/<config_space>
 
+ * Write the 'Alff:Ruler' which will read the output of all plugins and
+   create an iptables-save like format.
+   + This adds an easy possibility to remove unreferenced chains
+
+ * Add extra granularity for allow_icmp option.
+
  * Fiddle around with tcp_pre_analysis and improve scan detection/prevention
 
  * addService:
