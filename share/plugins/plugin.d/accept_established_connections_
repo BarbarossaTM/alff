@@ -1,6 +1,6 @@
-#!/usr/bin/env sh
+#!/bin/sh -e 
 #
-# accept_established_connections
+# accept_established_connections_
 #
 # Accept ESTABLISHED and RELATED connections by looking at the 
 # connection tracking table
@@ -9,12 +9,9 @@
 #  -- Thu, 27 Apr 2006 20:40:49 +0200
 #
 
-# Nice litte trick to make this script more flexible
-# The chain in which the spoofcheck chain should be hooked in has to be
-# specified by providing _$CHAIN at the end of the symlink name to this
-# script.
-# (Thanks to the munin if_ plugin coders for this idea)
-CHAIN=`basename $0 | awk -F_ '{ print $NF }'`
+. /usr/share/alff/lib/plugin-routines
+
+CHAIN=`getOption $1`
 
 if [ "${CHAIN}" ]; then
 	echo " * Creating rule to ACCEPT established connections... "
