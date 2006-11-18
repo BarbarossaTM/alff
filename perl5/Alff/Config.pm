@@ -101,14 +101,18 @@ sub checkConfig() { #{{{
 		my $fw_type = $self->{config}->{options}->{fw_type};
 
 		if ( $fw_type eq "router" ) {
+		}
+
+		elsif ( $fw_type eq "host" ) {
 			
 		}
+
 		elsif( $fw_type eq "bridge" ) {
 			print STDERR "The bridging mode is not supported by alff atm... Sorry!\n";
 			exit 1
 		}
 		else {
-			print STDERR "Error: fw_type has to be either \"router\" or \"bridge\"!\n";
+			print STDERR "Error: fw_type has to be one of \"router\", \"host\" or \"bridge\"!\n";
 		}
 	}
 	else {
