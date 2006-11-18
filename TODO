@@ -1,3 +1,9 @@
+ * New Alff mode 'host' for simple host security.
+  + Update alff setupPlugins to read 'fw_type'
+
+ * Create config spaces in alff to be able to manage several firewalls
+   on one admin machine in /etc/alff/<config_space>
+
  * Fiddle around with tcp_pre_analysis and improve scan detection/prevention
 
  * addService:
