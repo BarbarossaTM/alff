@@ -1,0 +1,10 @@
+
+Changes between v0.0.3 and v0.0.4:
+
+ * Remove 'default_chain_policy' and defined new plugin option 'default_chain_target'
+   for 'classifyInterVlanTraffic' instead to avoid confusion.
+ * Renamed plugin 'accept_established_connections' to 'accept_established_connections_'
+   to show intended usage directly by looking at the plugin name.
+ * Began to add new fw_type 'host' for security a single host.
+ * Added 'alff setupPlugins' to help you with the initial alff setup.
+ * 
