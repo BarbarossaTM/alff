@@ -10,6 +10,10 @@ use strict;
 use Alff::Config;
 use Alff::Main;
 
+my $VERSION = 1.0;
+
+my $plugin_name = 'classifyInterVlanTraffic';
+
 ##
 # Some paths
 my $configfile = "/etc/alff/alff.conf";
@@ -27,9 +31,9 @@ my $config = Alff::Config->new( configfile => $configfile, debug => $debug )
 my @vlans = $config->getVlanList;
 
 # The policy for totally unconfigured chains
-my $default_chain_policy = $config->getDefaultChainPolicy;
-my $remove_empty_chains = $config->getPluginOption( "classifyInterVlanTraffic", "remove_empty_chains" ) || 0;
-my $force_x_to_x_chains = $config->getPluginOption( "classifyInterVlanTraffic", "force_x_to_x_chains" ) || 0;
+my $default_chain_policy = $config->getPluginOption( $plugin_name, "default_chain_target" ) || "REJECT";
+my $remove_empty_chains  = $config->getPluginOption( $plugin_name, "remove_empty_chains" ) || 0;
+my $force_x_to_x_chains  = $config->getPluginOption( $plugin_name, "force_x_to_x_chains" ) || 0;
 
 ################################################################################
 #			    Some nifty functions			       #
