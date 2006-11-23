@@ -5,6 +5,6 @@ Changes between v0.0.3 and v0.0.4:
    for 'classifyInterVlanTraffic' instead to avoid confusion.
  * Renamed plugin 'accept_established_connections' to 'accept_established_connections_'
    to show intended usage directly by looking at the plugin name.
- * Began to add new fw_type 'host' for security a single host.
+ * Began to add new fw_type 'host' for securitng a single host.
  * Added 'alff setupPlugins' to help you with the initial alff setup.
  * 
