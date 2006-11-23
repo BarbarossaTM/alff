@@ -16,7 +16,14 @@ use strict;
 use Alff::Main;
 use XML::Simple;
 
-my $default_configfile = "/etc/alff/alff.conf";
+# Where is (are) are the alff configuration(s) stored?
+my $config_basedir = "/etc/alff";
+
+# The name of the default config space (used if not provided)
+my $default_config_space = "deafult";
+
+# The name of the main alff configuration file
+my $configfile_name = "alff.conf";
 
 
 ##
@@ -42,20 +49,28 @@ sub new { #{{{
 	# Put arguments into ref(hashtable);
 	my $args = &_options ;
 
-	my $configfile = $args->{configfile} || $default_configfile;
+	# Enable debug mode?
 	my $debug = $args->{debug} || 0;
 
 	my $alff = Alff::Main->new();
 
+	# Create a new (still incomplete) instance
 	my $obj = bless { 
 		alff => $alff,
 		args => $args,
-		configfile => $configfile,
 		debug => $debug,
 		}, $class;
-	
-	
-	my $config = $obj->loadConfig( $configfile  );
+
+	# Which config space should be used?
+	my $config_space = $obj->_getConfigSpace( $args->{config_space} );
+	$obj->{config_space} = $config_space;
+
+	# Use the correct config file for this config space.
+	my $config_file = "$config_basedir/$config_space/$configfile_name";
+	$obj->{configfile} = $config_file;
+
+	# Load the configuration
+	my $config = $obj->loadConfig( $config_file );
 
 	$obj->{config} = $config;
 
@@ -64,6 +79,31 @@ sub new { #{{{
 	$obj->sanitizeMachines();
 
 	return $obj;
+} #}}}
+
+##
+# Figure out which config space should be used.
+# Will test given parameter (should be $args->config_space},
+# $ENV{'ALFF_CONFIG_SPACE'} and $default_config_space for validity
+# in that order.
+# Return the config_space name if found one.
+sub _getConfigSpace($) { #{{{
+	my $self = shift;
+
+	my $args_config_space = shift || "";
+	my $config_space = $default_config_space;
+
+	if ( $args_config_space ) {
+		$config_space = $args_config_space;
+	} elsif ( $ENV{'ALFF_CONFIG_SPACE'} ) {
+		$config_space = $ENV{'ALFF_CONFIG_SPACE'};
+	}
+
+	if ( ! -d "$config_basedir/$config_space" ) {
+		die( "ERROR: There is no directory for config space \"$config_space\"\n" );
+	}
+
+	return $config_space;
 } #}}}
 
 ##
@@ -272,6 +312,13 @@ sub getOption($) { #{{{
 	my $conf_opt = shift;
 
 	return $self->{config}->{options}->{$conf_opt};
+} #}}}
+
+##
+# Return the config space name
+sub getConfigSpace() { #{{{
+	my $self = shift;
+	return $self->{config_space};
 } #}}}
 
 ##
