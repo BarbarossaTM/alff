@@ -22,23 +22,15 @@ my $plugin_d_defaults_file = "/usr/share/alff/plugins/plugin.d.defaults";
 my $plugin_d_plugindir = "/usr/share/alff/plugins/plugin.d/";
 
 # Load the plugin.d defaults configuration
-my $plugin_d_defaults = loadConfig( $plugin_d_defaults_file );
+if ( ! -f $plugin_d_defaults_file ) {
+	die( "ERROR: Configfile \"$plugin_d_defaults_file\" does not exist.\n" );
+}
 
-sub loadConfig($) { #{{{
-	my $configfile = shift;
+# Load and parse the configuration
+my $plugin_d_defaults = XML::Simple::XMLin( $plugin_d_defaults_file, NormalizeSpace => 2 )
+	or die( "ERROR: Could not load configuration from \"$plugin_d_defaults_file\".\n" );
 
-	my $config;
 
-	if ( ! -f $configfile ) {
-		die( "ERROR: Configfile \"$configfile\" does not exist.\n" );
-	}
-
-	# Load and parse the configuration
-	$config = XML::Simple::XMLin( $configfile, NormalizeSpace => 2 )
-		or die( "ERROR: Could not load configuration from \"$configfile\".\n" );
-
-	return $config;
-} #}}}
 
 # Does ${PLUGIN_D} exists?
 if ( ! -d $plugin_d ) {
@@ -46,14 +38,14 @@ if ( ! -d $plugin_d ) {
 }
 
 # Did the user do anything therein?
-opendir( PLUDIN_D, $plugin_d )
+opendir( PLUGIN_D, $plugin_d )
 	or die( "ERROR: Could not read directory contents of \"$plugin_d\"\n" );
 
 if ( grep { ! m/^README$/ and -f "$plugin_d/$_" } readdir ( PLUGIN_D ) ) {
 	die( "ERROR: It seems that you have setup plugin.d allready.\nI will not touch it.\n" );
 }
 
-close( PLUGIN_D )
+close( PLUGIN_D );
 
 
 # Check if $PLUGIN_D_PLUGINDIR exists
@@ -68,14 +60,14 @@ if ( ! -f $plugin_d_defaults_file ) {
 
 
 # OK let´s go
-my $fw_type = $config->getOption( 'fw_type' );
+my $fw_type = $alff_config->getOption( 'fw_type' );
 
 foreach my $plugin_id (  keys %{$plugin_d_defaults->{$fw_type}} ) {
 	my $plugin_name = $plugin_d_defaults->{$fw_type}->{$plugin_id}->{name};
 	# Get the plugin options if any, use "" otherwise.
 	my $options = $plugin_d_defaults->{$fw_type}->{$plugin_id}->{options} ? $plugin_d_defaults->{$fw_type}->{$plugin_id}->{options} : "";
 
-	my $plugin_path = "$plugin_d_plugindir/$name";
+	my $plugin_path = "$plugin_d_plugindir/$plugin_name";
 	my $plugin_d_entry = "$plugin_d/${plugin_id}${plugin_name}${options}";
 
 	print "Adding $plugin_d_entry ...\n";
