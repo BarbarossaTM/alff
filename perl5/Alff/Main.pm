@@ -144,11 +144,7 @@ sub create_chain($) { # create_chain( chain_name [, table_name] ) #{{{
 		close( CHAINFILE );
 	}
 
-	print $output_fh 
-"if ! iptables -t $table -F $chain >/dev/null 2>/dev/null; then
-iptables -t $table -N $chain
-fi\n";
-
+	print $output_fh "iptables -t $table -N $chain\n";
 } #}}}
 
 ##
