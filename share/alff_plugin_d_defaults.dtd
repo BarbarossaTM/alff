@@ -1,0 +1,15 @@
+<!-- DTD file for the alff_plugin_d_defaults configuration //-->
+<!ELEMENT alff_plugin_d_defaults	(router, bridge, host)>
+
+<!ELEMENT router			(?plugin+)>
+<!ELEMENT bridge			(?plugin+)>
+<!ELEMENT host				(?plugin+)>
+
+<!ELEMENT plugin			(id, name, options?)>
+
+<!ELEMENT id 				(#PCDATA)>
+<!ELEMENT name				(#PCDATA)>
+<!ELEMENT options 			(#PCDATA)>
+
+<!-- vim: ft=dtd
+//-->

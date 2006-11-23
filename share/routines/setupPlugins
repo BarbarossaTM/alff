@@ -1,50 +1,86 @@
-#!/bin/sh
+#!/usr/bin/perl -w
 #
 # setupPlugins
 #
 # Maximilian Wilhelm <max@rfc2324.org>
-#  -- Fri, 17 Nov 2006 21:19:43 +0100
+#  -- Thu, 23 Nov 2006 02:11:39 +0100
 #
 
-set -e
+use strict;
+use Alff::Config;
+use XML::Simple;
 
-PLUGIN_D="/etc/alff/plugin.d"
+# Load the alff.conf
+my $alff_config = Alff::Config->new();
+my $config_space = $alff_config->getConfigSpace();
 
-PLUGIN_D_PLUGINDIR="/usr/share/alff/plugins/plugin.d/"
-PLUGIN_D_STANDARDS="/usr/share/alff/plugins/plugin.d.standards"
+print "Using config space \"$config_space\"";
+sleep 3;
+
+my $plugin_d = "/etc/alff/${config_space}/plugin.d";
+my $plugin_d_defaults_file = "/usr/share/alff/plugins/plugin.d.defaults";
+my $plugin_d_plugindir = "/usr/share/alff/plugins/plugin.d/";
+
+# Load the plugin.d defaults configuration
+my $plugin_d_defaults = loadConfig( $plugin_d_defaults_file );
+
+sub loadConfig($) { #{{{
+	my $configfile = shift;
+
+	my $config;
+
+	if ( ! -f $configfile ) {
+		die( "ERROR: Configfile \"$configfile\" does not exist.\n" );
+	}
+
+	# Load and parse the configuration
+	$config = XML::Simple::XMLin( $configfile, NormalizeSpace => 2 )
+		or die( "ERROR: Could not load configuration from \"$configfile\".\n" );
+
+	return $config;
+} #}}}
 
 # Does ${PLUGIN_D} exists?
-if [ ! -d "${PLUGIN_D}" ]; then
-	echo "Error: plugin.d "${PLUGIN_D}" does not exist.!"
-	echo "I will not setup anything."
-	exit 1
-fi
+if ( ! -d $plugin_d ) {
+	die( "ERROR: plugin.d \"${plugin_d}\" does not exist.!\nDid you create this config space allready?.\n" );
+}
 
 # Did the user do anything therein?
-if [ `find "${PLUGIN_D}" ! -name POLICY | wc -l` -gt 1 ]; then
-	echo "Error: It seems that you have setup plugin.d allready."
-	echo "I will not touch it."
-	exit 1
-fi
+opendir( PLUDIN_D, $plugin_d )
+	or die( "ERROR: Could not read directory contents of \"$plugin_d\"\n" );
+
+if ( grep { ! m/^README$/ and -f "$plugin_d/$_" } readdir ( PLUGIN_D ) ) {
+	die( "ERROR: It seems that you have setup plugin.d allready.\nI will not touch it.\n" );
+}
+
+close( PLUGIN_D )
+
 
 # Check if $PLUGIN_D_PLUGINDIR exists
-if [ ! -d "${PLUGIN_D_PLUGINDIR}" ]; then
-	echo "Error: No plugins found on this system at ${PLUGIN_D_PLUGINDIR}"
-	exit 1
-fi
+if ( ! -d $plugin_d_plugindir ) {
+	die( "ERROR: No plugins found on this system at \"$plugin_d_plugindir\".\n" );
+}
 
-# Check if $PLUGIN_D_STANDARDS exists
-if [ ! -f "${PLUGIN_D_STANDARDS}" ]; then
-	echo "Error: ${PLUGIN_D_STANDARDS} does not exist."
-	exit 1
-fi
+# Check if the plugin_d_defaults_file exists
+if ( ! -f $plugin_d_defaults_file ) {
+	die( "ERROR: plugin.d defaults file \"$plugin_d_defaults_file\" does not exist.\n" );
+}
 
 
 # OK let´s go
-grep -v '^$\|^#' "${PLUGIN_D_STANDARDS}" | \
-	while IFS=: read prio plugin_name option; do
-		linkname="${prio}${plugin_name}${option}"
+my $fw_type = $config->getOption( 'fw_type' );
 
-		echo "Adding ${linkname}..."
-		ln -s "${PLUGIN_D_PLUGINDIR}/${plugin_name}" "${PLUGIN_D}/${linkname}"
-	done
+foreach my $plugin_id (  keys %{$plugin_d_defaults->{$fw_type}} ) {
+	my $plugin_name = $plugin_d_defaults->{$fw_type}->{$plugin_id}->{name};
+	# Get the plugin options if any, use "" otherwise.
+	my $options = $plugin_d_defaults->{$fw_type}->{$plugin_id}->{options} ? $plugin_d_defaults->{$fw_type}->{$plugin_id}->{options} : "";
+
+	my $plugin_path = "$plugin_d_plugindir/$name";
+	my $plugin_d_entry = "$plugin_d/${plugin_id}${plugin_name}${options}";
+
+	print "Adding $plugin_d_entry ...\n";
+	symlink( $plugin_path, $plugin_d_entry )
+		or die( "ERROR: Could not create symlink from \"$plugin_path\" to \"$plugin_d_entry\"\n" );
+}
+
+# vim:foldmethod=marker
