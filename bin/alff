@@ -77,16 +77,30 @@ function list_functions() { # list available functions #{{{
 } #}}}
 
 function exec_function() { # execute given function #{{{
-	fw_function="${1}"
-	if [ -f "${FUNCTION_DIR}/${fw_function}" ]; then
+	local function_name="${1}"
+	if [ -f "${FUNCTION_DIR}/${function_name}" ]; then
 		# shift function name away and keep possbile arguments
 		shift
-		"${FUNCTION_DIR}/${fw_function}" $@
+		"${FUNCTION_DIR}/${function_name}" $@
 	else
 		usage
+		echo ""
+		echo "ERROR: There is no function \"${function_name}\"!" >&2
 		exit 1
 	fi
 
+} #}}}
+
+function exec_buildin_function() { # execute given function #{{{
+	local function_name="${1}"
+	if [ -f "${FUNCTION_DIR}/build-in/${function_name}" ]; then
+		# shift function name away and keep possbile arguments
+		shift
+		"${FUNCTION_DIR}/build-in/${function_name}" $@
+	else
+		echo "ERROR: There is no build-in function \"${function_name}\"!" >&2
+		exit 1
+	fi
 } #}}}
 
 # Preload definitions from file (rich mans source) #{{{
@@ -205,8 +219,8 @@ case "$1" in
 		# Maybe we got an explicit machine to push to
 		if [ "${2}" ]; then
 			echo -n "Pushing ruleset to ${2}: "
-			exec_function push-rules "${2}" "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
-			exec_function approve-rules "${2}"
+			exec_buildin_function push-rules "${2}" "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
+			exec_buildin_function approve-rules "${2}"
 		else
 			MACHINE_IDS=`alff getMachines`
 			if [ -z "${MACHINE_IDS}" ]; then
@@ -216,8 +230,8 @@ case "$1" in
 			
 			for machine_id in ${MACHINE_IDS}; do
 				echo -n "Pushing rules to ${machine_id}: "
-				exec_function push-rules ${machine_id} "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
-				exec_function approve-rules "${machine_id}"
+				exec_buildin_function push-rules ${machine_id} "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
+				exec_buildin_function approve-rules "${machine_id}"
 				echo ""
 			done
 		fi
