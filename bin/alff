@@ -4,7 +4,7 @@
 #
 # Main firewall management tool for the alff firewall fremawork.
 #
-# Maximlian Wilhelm <mwilhelm@math.uni-paderborn.de>
+# Maximlian Wilhelm <max@rfc2324.org>
 #  -- Thu, 08 Dec 2005 18:01:52 +0100
 #
 
@@ -16,7 +16,7 @@ PLUGIN_D="${CONFIG_DIR}/plugin.d"
 
 ##
 # alf library stuff
-FUNCTION_DIR="/usr/share/alff/routines/"
+export ALFF_FUNCTION_DIR="/usr/share/alff/routines/"
 PLUGIND_PLUGIN_DIR="/usr/share/alff/plugins/plugin.d/"
 
 ##
@@ -73,15 +73,15 @@ function usage() { # print usage #{{{
 
 function list_functions() { # list available functions #{{{
 	echo "Functions supported by ${MY_NAME}:"
-	find "${FUNCTION_DIR}" -type f -exec basename {} \; | grep -v "^Entries$\|^Root$\|^Repository$" | sed -e 's/^/ * /'
+	find "${ALFF_FUNCTION_DIR}" -maxdepth 1 -type f -exec "$ALFF_FUNCTION_DIR}/build-in/show-function-info" {} \;
 } #}}}
 
 function exec_function() { # execute given function #{{{
 	local function_name="${1}"
-	if [ -f "${FUNCTION_DIR}/${function_name}" ]; then
+	if [ -f "${ALFF_FUNCTION_DIR}/${function_name}" ]; then
 		# shift function name away and keep possbile arguments
 		shift
-		"${FUNCTION_DIR}/${function_name}" $@
+		"${ALFF_FUNCTION_DIR}/${function_name}" $@
 	else
 		usage
 		echo ""
@@ -93,10 +93,10 @@ function exec_function() { # execute given function #{{{
 
 function exec_buildin_function() { # execute given function #{{{
 	local function_name="${1}"
-	if [ -f "${FUNCTION_DIR}/build-in/${function_name}" ]; then
+	if [ -f "${ALFF_FUNCTION_DIR}/build-in/${function_name}" ]; then
 		# shift function name away and keep possbile arguments
 		shift
-		"${FUNCTION_DIR}/build-in/${function_name}" $@
+		"${ALFF_FUNCTION_DIR}/build-in/${function_name}" $@
 	else
 		echo "ERROR: There is no build-in function \"${function_name}\"!" >&2
 		exit 1
