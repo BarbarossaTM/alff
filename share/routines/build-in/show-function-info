@@ -12,22 +12,30 @@
 # Check for environment
 if [ -z "${ALFF_FUNCTION_DIR}" ]; then
 	echo "ERROR: ALFF_FUNCTION_DIR not set. Did you run $0 from within alff?!" >&2
-	exit 1;
+	exit 1
 fi
 
-if [ -z "${1}" ]; then
+function_name="${1}"
+
+if [ -z "${function_name}" ]; then
 	echo "ERROR: Usage: $0 function_name" >&2
 	exit 1
 fi
 
-if [ ! -f "${ALFF_FUNCTION_DIR}/${1}" ]; then
-	echo "ERROR: Alff function \"${1}\" does not exist." >&2
+# As this script is called with the full pathname of the function,
+# we may have to strip the path...
+if echo "${function_name}" | grep -q '/'; then
+	function_name=`basename "${function_name}"`
+fi
+
+if [ ! -f "${ALFF_FUNCTION_DIR}/${function_name}" ]; then
+	echo "ERROR: Alff function \"${function_name}\" does not exist." >&2
 	exit 1
 fi
 
-function_desc=`grep '^# ALFF_FUNCTION_DESC' "${ALFF_FUNCTION_DIR}/${1}" | sed -e 's/# ALFF_FUNCTION_DESC[[:space:]]*//'`
+function_desc=`grep '^# ALFF_FUNCTION_DESC' "${ALFF_FUNCTION_DIR}/${function_name}" | sed -e 's/# ALFF_FUNCTION_DESC[[:space:]]*//'`
 if [ -z "${function_desc}" ]; then
 	function_desc="No description available."
 fi
 
-echo " * ${1}	(${function_desc})"
+echo " * ${function_name}	(${function_desc})"
