@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# show-function-info
+#
+# This build-in function from alff is used to generate an informative overview
+# about the function available.
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Sat, 25 Nov 2006 22:04:23 +0100
+#
+
+# Check for environment
+if [ -z "${ALFF_FUNCTION_DIR}" ]; then
+	echo "ERROR: ALFF_FUNCTION_DIR not set. Did you run $0 from within alff?!" >&2
+	exit 1;
+fi
+
+if [ -z "${1}" ]; then
+	echo "ERROR: Usage: $0 function_name" >&2
+	exit 1
+fi
+
+if [ ! -f "${ALFF_FUNCTION_DIR}/${1}" ]; then
+	echo "ERROR: Alff function \"${1}\" does not exist." >&2
+	exit 1
+fi
+
+function_desc=`grep '^# ALFF_FUNCTION_DESC' "${ALFF_FUNCTION_DIR}/${1}" | sed -e 's/# ALFF_FUNCTION_DESC[[:space:]]*//'`
+if [ -z "${function_desc}" ]; then
+	function_desc="No description available."
+fi
+
+echo " * ${1}	(${function_desc})"
