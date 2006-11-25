@@ -73,7 +73,7 @@ function usage() { # print usage #{{{
 
 function list_functions() { # list available functions #{{{
 	echo "Functions supported by ${MY_NAME}:"
-	find "${ALFF_FUNCTION_DIR}" -maxdepth 1 -type f -exec "$ALFF_FUNCTION_DIR}/build-in/show-function-info" {} \;
+	find "${ALFF_FUNCTION_DIR}" -maxdepth 1 -type f -exec "${ALFF_FUNCTION_DIR}/build-in/show-function-info" {} \;
 } #}}}
 
 function exec_function() { # execute given function #{{{
