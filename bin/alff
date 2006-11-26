@@ -26,6 +26,12 @@ DEFAULT_CONFIG_SPACE="default"
 ## Some functions ##
 
 function checkConfigDir() { # Check the configuration (environment) #{{{
+
+	# Dereference symlink if it is one
+	if [ -L "${ALFF_CONFIG_DIR}" ]; then
+		ALFF_CONFIG_DIR=`readlink -e "${ALFF_CONFIG_DIR}"`
+	fi
+
 	if [ ! -d "${ALFF_CONFIG_DIR}" ]; then
 		usage
 		echo "Error: ALFF_CONFIG_DIR \"${ALFF_CONFIG_DIR}\" does not exist!" >&2
@@ -41,11 +47,13 @@ function checkConfigDir() { # Check the configuration (environment) #{{{
 		exit 1
 	fi
 
+	# There should be an alff.conf
 	if [ ! -f "${ALFF_CONFIG_FILE}" ]; then
 		echo "Error: There is no alff.conf in \"${ALFF_CONFIG_DIR}\".">&2
 		exit 1
 	fi
 
+	# There should be a plugin.d directory
 	if [ ! -d "${PLUGIN_D}" ]; then
 		usage
 		echo "Error: Plugin directory \"${PLUGIN_D}\" does not exist!" >&2
@@ -137,191 +145,190 @@ function preload()
 	fi
 } #}}}
 
+##
+# Set $ALFF_CONFIG_SPACE to the given value.
+function setConfigSpace() { #{{{
+
+	ALFF_CONFIG_SPACE="${1}"
+
+	##
+	# Configuration stuff
+	export ALFF_CONFIG_SPACE
+	export ALFF_CONFIG_DIR="${CONFIG_BASEDIR}/${ALFF_CONFIG_SPACE}"
+	export ALFF_CONFIG_FILE="${ALFF_CONFIG_DIR}/alff.conf"
+	PLUGIN_D="${ALFF_CONFIG_DIR}/plugin.d"
+
+	##
+	# Some caches used at runtime
+	export CACHE_BASEDIR="/var/cache/alff/${ALFF_CONFIG_SPACE}"
+	export CACHE_DIR_BUILD="${CACHE_BASEDIR}/ruleset.build"
+	export ALFF_CACHE_DIR_CHAINS="${CACHE_BASEDIR}/chains"
+	CURRENT_RULESET="${CACHE_BASEDIR}/alff.rules"
+} #}}}
+
+
 ## Showtime ##
 
-##
-# Check for config_space
-if [ "$1" = '-c' ]; then
-	ALFF_CONFIG_SPACE="${2}"
+setConfigSpace "default"
 
-	# Dereference symlink if any
-	if [ -L "${CONFIG_BASEDIR}/${ALFF_CONFIG_SPACE}" ]; then
-		ALFF_CONFIG_SPACE=`readlink -e "${ALFF_CONFIG_SPACE}"`
-	fi
-
-	# Check if this configspace exists
-	if [ -z "${ALFF_CONFIG_SPACE}" -o ! -d  "${CONFIG_BASEDIR}/${ALFF_CONFIG_SPACE}" ]; then
-		echo "ERROR: Config space \"${ALFF_CONFIG_SPACE}\" does not exist." >&2
-		exit 1
-	fi
-
-	# OK should be valid
-	# Remove -c $ALFF_CONFIG_SPACE from the command line parameters
-	shift 2
-else
-	ALFF_CONFIG_SPACE="${DEFAULT_CONFIG_SPACE}"
-fi
-
-##
-# Configuration stuff
-export ALFF_CONFIG_SPACE
-export ALFF_CONFIG_DIR="${CONFIG_BASEDIR}/${ALFF_CONFIG_SPACE}"
-export ALFF_CONFIG_FILE="${ALFF_CONFIG_DIR}/alff.conf"
-PLUGIN_D="${ALFF_CONFIG_DIR}/plugin.d"
-
-##
-# Some caches used at runtime
-export CACHE_BASEDIR="/var/cache/alff/${ALFF_CONFIG_SPACE}"
-export CACHE_DIR_BUILD="${CACHE_BASEDIR}/ruleset.build"
-export ALFF_CACHE_DIR_CHAINS="${CACHE_BASEDIR}/chains"
-CURRENT_RULESET="${CACHE_BASEDIR}/alff.rules"
-
-
-
-checkConfigDir
 checkTools
-initCacheDirs
 
 preload "/usr/share/alff/lib/routines"
 
-case "$1" in 
-	-c) # This should not happend with a valid command line. {{{
-		usage
-		exit 1
-		;;
-		#}}}
+# Loop over $1 to figure out what to do
+while [ "$1" ]; do
+	case "$1" in 
+		-c) # Use given config space {{{
+			setConfigSpace $2
+			shift 2
+			;;
+			#}}}
 
-	-h|--help) # Print usage text {{{
-		usage
-		exit 0
-		;;
-		#}}}
-
-	-list) # List available functions {{{
-		list_functions
-		exit 0
-		;;
-		#}}}
-
-	generate) # Generate ruleset {{{
-		echo "The ALFF Linux Firewall Framework awakes ..."
-		echo "Using config space ${ALFF_CONFIG_SPACE}."
-		echo ""
-
-		echo -n  "Cleaning up cache dirs... "
-		for dir in "${ALFF_CACHE_DIR_CHAINS}" "${CACHE_DIR_BUILD}"; do
-			if [ `dirname "${dir}"` != "${CACHE_BASEDIR}" ]; then
-				echo "ERROR: Should cleanup cache dir not in ${CACHE_BASEDIR}" >&2
-				exit 1
-			fi
-
-			find "${dir}" -type f -exec rm {} \;		&& echo -n "`basename ${dir}` "
-		done
-		echo "done."
-		echo ""
-
-		# Run pregenerate hooks
-		if ! executeHooks pregenerate; then
-			echo "Errors while executing pregenerate hooks, exiting!" >&2
-			exit 1
-		fi
-
-		# FIXME: Need concept of putting shell commands to the firewall machines.
-		# Maybe as prefix to the iptables-restore rules?
-		echo ""
-		echo ""
-		configureFirewallNetworkOptions 3> "${CACHE_DIR_BUILD}/000_proc_options"
-		echo ""
-
-		echo "Generating rules... "
-		##
-		# pimp my "run-parts"
-		#
-		# Create fd3 (all script should output there stuff to fd3, which is redirected to a proper outfile
-		exec 3>&1
-
-		if !  find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
-				if [ -x "${PLUGIN_D}/${plugin}" ]; then
-					if ! sh -c "${PLUGIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"; then
-						echo "" >&2
-						echo "There occured errors while executing plugin ${plugin}." >&2
-						echo "Alff will stop rule generation now to avoid trouble." >&2
-						exit 1
-					fi
-				fi
-			done ; then
-				# Second exit to stop the 'whole' alff. (remind the "| while" does open a subshell.)
-				exit 1
-		fi
-			
-
-		exec_buildin_function loadUserRules 3> "${CACHE_DIR_BUILD}/999_user_rules"
-
-		echo ""
-		echo "Generating ruleset... "
-		cat "${CACHE_DIR_BUILD}"/* > "${CURRENT_RULESET}"
-
-		if ! executeHooks postgenerate; then
-			echo "Errors while executing postgenerate hooks, exiting!" >&2
-			exit 1
-		fi
-		
-		;;
-		#}}}
-
-	push) # Push ruleset to firewall machine(s) {{{
-		echo "The ALFF Linux Firewall Framework awakes ..."
-		echo "Using config space ${ALFF_CONFIG_SPACE}."
-		echo ""
-
-		if [ ! -s "${CURRENT_RULESET}" ]; then
-			echo "Error: There are no rules to push, staying cool" >&2
-			exit 1
-		fi
-
-		if ! executeHooks prepush; then
-			echo "Error while executing prepush hooks!" >&2
-			exit 1
-		fi
-
-		# Maybe we got an explicit machine to push to
-		if [ "${2}" ]; then
-			echo -n "Pushing ruleset to ${2}: "
-			exec_buildin_function push-rules "${2}" "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
-			exec_buildin_function approve-rules "${2}"
-		else
-			MACHINE_IDS=`exec_function getMachines`
-			if [ -z "${MACHINE_IDS}" ]; then
-				echo "Error: You did not specify at least one machine in alff.conf." >&2
-				exit 1
-			fi
-			
-			for machine_id in ${MACHINE_IDS}; do
-				echo -n "Pushing rules to ${machine_id}: "
-				exec_buildin_function push-rules ${machine_id} "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
-				exec_buildin_function approve-rules "${machine_id}"
-				echo ""
-			done
-		fi
-
-		if ! executeHooks postpush; then
-			echo "Error while executing postpush hooks!" >&2
-			exit 1
-		fi
-		
-		;;
-		#}}}
-
-	*) # If $1 is a function, execute it {{{
-		if [ $# -gt 0 ]; then
-			# try to run former $1
-			exec_function ${@}
-		else
+		-h|--help) # Print usage text {{{
 			usage
-			exit 1
-		fi
-		;;
-		#}}}
-esac
+			exit 0
+			;;
+			#}}}
+
+		-list) # List available functions {{{
+			list_functions
+			exit 0
+			;;
+			#}}}
+
+		generate) # Generate ruleset {{{
+			echo "The ALFF Linux Firewall Framework awakes ..."
+			echo "Using config space ${ALFF_CONFIG_SPACE}."
+			echo ""
+
+			checkConfigDir
+			initCacheDirs
+
+			echo -n  "Cleaning up cache dirs... "
+			for dir in "${ALFF_CACHE_DIR_CHAINS}" "${CACHE_DIR_BUILD}"; do
+				if [ `dirname "${dir}"` != "${CACHE_BASEDIR}" ]; then
+					echo "ERROR: Should cleanup cache dir not in ${CACHE_BASEDIR}" >&2
+					exit 1
+				fi
+
+				find "${dir}" -type f -exec rm {} \;		&& echo -n "`basename ${dir}` "
+			done
+			echo "done."
+			echo ""
+
+			# Run pregenerate hooks
+			if ! executeHooks pregenerate; then
+				echo "Errors while executing pregenerate hooks, exiting!" >&2
+				exit 1
+			fi
+
+			# FIXME: Need concept of putting shell commands to the firewall machines.
+			# Maybe as prefix to the iptables-restore rules?
+			echo ""
+			echo ""
+			configureFirewallNetworkOptions 3> "${CACHE_DIR_BUILD}/000_proc_options"
+			echo ""
+
+			echo "Generating rules... "
+			##
+			# pimp my "run-parts"
+			#
+			# Create fd3 (all script should output there stuff to fd3, which is redirected to a proper outfile
+			exec 3>&1
+
+			if !  find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
+					if [ -x "${PLUGIN_D}/${plugin}" ]; then
+						if ! sh -c "${PLUGIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"; then
+							echo "" >&2
+							echo "There occured errors while executing plugin ${plugin}." >&2
+							echo "Alff will stop rule generation now to avoid trouble." >&2
+							exit 1
+						fi
+					fi
+				done ; then
+					# Second exit to stop the 'whole' alff. (remind the "| while" does open a subshell.)
+					exit 1
+			fi
+
+
+			exec_buildin_function loadUserRules 3> "${CACHE_DIR_BUILD}/999_user_rules"
+
+			echo ""
+			echo "Generating ruleset... "
+			cat "${CACHE_DIR_BUILD}"/* > "${CURRENT_RULESET}"
+
+			if ! executeHooks postgenerate; then
+				echo "Errors while executing postgenerate hooks, exiting!" >&2
+				exit 1
+			fi
+
+			exit 0
+			;;
+			#}}}
+
+		push) # Push ruleset to firewall machine(s) {{{
+			echo "The ALFF Linux Firewall Framework awakes ..."
+			echo "Using config space ${ALFF_CONFIG_SPACE}."
+			echo ""
+
+			checkConfigDir
+			initCacheDirs
+
+			if [ ! -s "${CURRENT_RULESET}" ]; then
+				echo "Error: There are no rules to push, staying cool" >&2
+				exit 1
+			fi
+
+			if ! executeHooks prepush; then
+				echo "Error while executing prepush hooks!" >&2
+				exit 1
+			fi
+
+			# Maybe we got an explicit machine to push to
+			if [ "${2}" ]; then
+				echo -n "Pushing ruleset to ${2}: "
+				exec_buildin_function push-rules "${2}" "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
+				exec_buildin_function approve-rules "${2}"
+			else
+				MACHINE_IDS=`exec_function getMachines`
+				if [ -z "${MACHINE_IDS}" ]; then
+					echo "Error: You did not specify at least one machine in alff.conf." >&2
+					exit 1
+				fi
+				
+				for machine_id in ${MACHINE_IDS}; do
+					echo -n "Pushing rules to ${machine_id}: "
+					exec_buildin_function push-rules ${machine_id} "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
+					exec_buildin_function approve-rules "${machine_id}"
+					echo ""
+				done
+			fi
+
+			if ! executeHooks postpush; then
+				echo "Error while executing postpush hooks!" >&2
+				exit 1
+			fi
+
+			exit 0
+			;;
+			#}}}
+
+		*) # If $1 is a function, execute it {{{
+			if [ $# -gt 0 ]; then
+				checkConfigDir
+				initCacheDirs
+
+				# try to run former $1
+				exec_function ${@}
+
+				exit 0
+			else
+				usage
+				exit 1
+			fi
+			;;
+			#}}}
+	esac
+done
 
 # vim:ft=sh:foldmethod=marker:
