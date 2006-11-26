@@ -148,8 +148,14 @@ case "$1" in
 		echo ""
 
 		echo -n  "Cleaning up cache dirs... "
-		find "${CACHE_DIR}/chains/" -type f -exec rm {} \;	&& echo -n "chains "
-		find "${CACHE_DIR_BUILD}" -type f -exec rm {} \;	&& echo -n "`basename ${CACHE_DIR_BUILD}` "
+		for dir in "${CACHE_DIR_CHAINS}" "${CACHE_DIR_BUILD}"; do
+			if [ `dirname "${dir}"` != "${CACHE_BASEDIR}" ]; then
+				echo "ERROR: Should cleanup cache dir not in ${CACHE_BASEDIR}" >&2
+				exit 1
+			fi
+
+			find "${dir}" -type f -exec rm {} \;		&& echo -n "`basename ${dir}`"
+		done
 		echo "done."
 		echo ""
 
