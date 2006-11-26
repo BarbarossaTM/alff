@@ -1,23 +1,10 @@
-#!/usr/bin/env sh
+#!/bin/sh
 #
 # alff routines
 #
 # Maximilian Wilhelm <max@rfc2324.org>
 #  -- Fri, 28 Apr 2006 19:52:22 +0200
 #
-
-if [ -z "${ALFF_CONFIG_DIR}" ]; then
-	echo "Error: $0 seems not to be run by alff." >&2
-	echo "If you think you know what you're doing you might want to" >&2
-	echo "  export ALFF_CONDIF_DIR=\"/etc/alff/<config_space>/\"" >&2
-	echo "or whereever you placed it." >&2
-	exit 1
-fi
-	
-if [ ! -d "${ALFF_CONFIG_DIR}" ]; then
-	echo "Error: ALFF_CONFIG_DIR ${ALFF_CONFIG_DIR} does not exist!" >&2
-	exit 1
-fi
 
 ##
 function configureFirewallNetworkOptions() { # {{{
