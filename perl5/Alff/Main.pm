@@ -15,6 +15,9 @@ use strict;
 use File::Basename;
 use IO::Handle;
 
+# Default table for chain handling functions if none specified
+my $default_table = 'filter';
+
 ##
 # Little bit of magic to simplify debugging
 sub _options(@) { #{{{
@@ -55,7 +58,7 @@ sub new() { #{{{
 ################################################################################
 
 ##
-# Write out the content of the given file
+# Write out the content of the given file to previously opened fd3
 sub write_filecontent($) { # write_filecontent( file_name ) #{{{
 	my $self = shift;
 	my $file = shift;
@@ -75,15 +78,23 @@ sub write_filecontent($) { # write_filecontent( file_name ) #{{{
 } #}}}
 
 ##
-# Write out the given command line to fd3
-sub write_cmd($) { # write_cmd( command_string ) #{{{
+# Write out the given line to previously opened fd3
+sub write_line($) { # write_cmd( command_string ) #{{{
 	my $self = shift;
-	my $cmd = shift;
+	my $line = shift;
 	my $output_fh = $self->{output_fh};
 
-	print $output_fh "$cmd\n";
+	print $output_fh "$line\n";
 } #}}}
 
+sub write_cmd($) {
+	my $self = shift;
+	my $cmd = shift;
+
+	print STDERR "Warning: Alff::Main->write_cmd should not be used anymore.\n";
+	print STDERR "Use Alff::Main->write_line instead.\n";
+	$self->write_line( $cmd );
+}
 
 ################################################################################
 #				Chain handling				       #
@@ -94,7 +105,7 @@ sub write_cmd($) { # write_cmd( command_string ) #{{{
 sub create_chain($) { # create_chain( chain_name [, table_name] ) #{{{
 	my $self = shift;
 	my $chain = shift;
-	my $table = shift || "filter";
+	my $table = shift || $default_table;
 
 	my $output_fh = $self->{output_fh};
 
@@ -110,11 +121,11 @@ sub create_chain($) { # create_chain( chain_name [, table_name] ) #{{{
 } #}}}
 
 ##
-# Check if chain $arg1 exists in table ($arg2 || filter)
+# Check if chain $arg1 exists in table ($arg2 || $default_table)
 sub chain_exists($) { # chain_exists( chain_name [, table_name] ) #{{{
 	my $self = shift;
 	my $chain = shift;
-	my $table = shift || "filter";
+	my $table = shift || $default_table;
 
 	my $chain_file = "$self->{cache_dir_chains}/$table/$chain";
 
