@@ -11,8 +11,6 @@
 use strict;
 use Alff::Config;
 
-my $configfile = "/etc/alff/alff.conf";
-
 my $config_opt;
 my $nocheck = 0;
 
@@ -32,7 +30,7 @@ if ( ! $config_opt ) {
 }
 
 # Load configuration
-my $config = Alff::Config->new( configfile => $configfile, nocheck => $nocheck  );
+my $config = Alff::Config->new( nocheck => $nocheck  );
 my $config_entry;
 
 if ( $config_opt eq "security_classes" ) {
