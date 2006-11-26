@@ -55,8 +55,8 @@ function checkConfigDir() { # Check the configuration (environment) #{{{
 
 function initCacheDirs() { # Initialize the cache directories #{{{
 	for table in \. filter mangle nat raw; do
-		if [ ! -d "${CACHE_DIR_CHAINS}/${table}" ]; then
-			mkdir -p "${CACHE_DIR_CHAINS}/${table}"
+		if [ ! -d "${ALFF_CACHE_DIR_CHAINS}/${table}" ]; then
+			mkdir -p "${ALFF_CACHE_DIR_CHAINS}/${table}"
 		fi
 	done
 
@@ -173,7 +173,7 @@ PLUGIN_D="${ALFF_CONFIG_DIR}/plugin.d"
 # Some caches used at runtime
 export CACHE_BASEDIR="/var/cache/alff/${ALFF_CONFIG_SPACE}"
 export CACHE_DIR_BUILD="${CACHE_BASEDIR}/ruleset.build"
-export CACHE_DIR_CHAINS="${CACHE_BASEDIR}/chains"
+export ALFF_CACHE_DIR_CHAINS="${CACHE_BASEDIR}/chains"
 CURRENT_RULESET="${CACHE_BASEDIR}/alff.rules"
 
 
@@ -209,7 +209,7 @@ case "$1" in
 		echo ""
 
 		echo -n  "Cleaning up cache dirs... "
-		for dir in "${CACHE_DIR_CHAINS}" "${CACHE_DIR_BUILD}"; do
+		for dir in "${ALFF_CACHE_DIR_CHAINS}" "${CACHE_DIR_BUILD}"; do
 			if [ `dirname "${dir}"` != "${CACHE_BASEDIR}" ]; then
 				echo "ERROR: Should cleanup cache dir not in ${CACHE_BASEDIR}" >&2
 				exit 1
@@ -239,7 +239,7 @@ case "$1" in
 		exec 3>&1
 		# export environment variables which will be used by the plugins
 #		export PLUGIND_PLUGIN_DIR
-#		export CACHE_DIR_CHAINS
+#		export ALFF_CACHE_DIR_CHAINS
 		if !  find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
 				if [ -x "${PLUGIN_D}/${plugin}" ]; then
 					if ! sh -c "${PLUGIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"; then
