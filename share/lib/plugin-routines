@@ -6,16 +6,16 @@
 #  --  Mon, 17 Jul 2006 16:18:04 +0200
 #
 
-if [ -z "${CACHE_DIR_CHAINS}" ]; then
+if [ -z "${ALFF_CACHE_DIR_CHAINS}" ]; then
 	echo "Error: $0 seems not to be run by alff." >&2
 	echo "If you think you know what you're doing you might want to" >&2
-	echo "  export CACHE_DIR_CHAINS=\"/var/cache/alff/chains/\"" >&2
+	echo "  export ALFF_CACHE_DIR_CHAINS=\"/var/cache/alff/<config_space>/chains/\"" >&2
 	echo "or whereever your placed it." >&2
 	exit 1
 fi
 	
-if [ ! -d "${CACHE_DIR_CHAINS}" ]; then
-	echo "Error: CACHE_DIR_CHAINS ${CACHE_DIR_CHAINS} does not exist!" >&2
+if [ ! -d "${ALFF_CACHE_DIR_CHAINS}" ]; then
+	echo "Error: ALFF_CACHE_DIR_CHAINS ${ALFF_CACHE_DIR_CHAINS} does not exist!" >&2
 	exit 1
 fi
 
@@ -26,7 +26,7 @@ function chainExists() { #{{{
 	local table="${2:-filter}"
 	local chain="$1"
 
-	if [ -f "${CACHE_DIR_CHAINS}/${table}/${chain}" ]; then
+	if [ -f "${ALFF_CACHE_DIR_CHAINS}/${table}/${chain}" ]; then
 		return 0
 	else	
 		return 1
@@ -49,8 +49,8 @@ function createChain() { #{{{
 		exit 1
 	fi
 	
-	if [ ! -f "${CACHE_DIR_CHAINS}/${table}/${chain}" ]; then
-		touch "${CACHE_DIR_CHAINS}/${table}/${chain}"
+	if [ ! -f "${ALFF_CACHE_DIR_CHAINS}/${table}/${chain}" ]; then
+		touch "${ALFF_CACHE_DIR_CHAINS}/${table}/${chain}"
 
 		##
 		# If not already there, create ${chain}
