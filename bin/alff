@@ -226,6 +226,8 @@ case "$1" in
 			exit 1
 		fi
 
+		# FIXME: Need concept of putting shell commands to the firewall machines.
+		# Maybe as prefix to the iptables-restore rules?
 		echo ""
 		echo ""
 		configureFirewallNetworkOptions 3> "${CACHE_DIR_BUILD}/000_proc_options"
@@ -237,9 +239,7 @@ case "$1" in
 		#
 		# Create fd3 (all script should output there stuff to fd3, which is redirected to a proper outfile
 		exec 3>&1
-		# export environment variables which will be used by the plugins
-#		export PLUGIND_PLUGIN_DIR
-#		export ALFF_CACHE_DIR_CHAINS
+
 		if !  find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
 				if [ -x "${PLUGIN_D}/${plugin}" ]; then
 					if ! sh -c "${PLUGIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"; then

@@ -23,7 +23,8 @@ fi
 function configureFirewallNetworkOptions() { # {{{
 
 	# Get fw_type configuration option
-	FW_TYPE=`alff getOption -nocheck fw_type`
+	# Little trick to run exec_buildin_function defined by alff
+	FW_TYPE=`exec_function getOption -nocheck fw_type`
 
 	echo  " * Configuring networking feature for ${FW_TYPE} mode..."
 
