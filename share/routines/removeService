@@ -8,7 +8,7 @@
 #  -- Mon, 19 Dec 2005 14:01:30 +0100
 #
 
-. /usr/share/alff/lib/routines
+. "/usr/share/alff/lib/function-routines"
 
 # Where the service configurations are stored.
 SERVICES_D="${ALFF_CONFIG_DIR}/services.d"

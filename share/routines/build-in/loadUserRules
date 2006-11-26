@@ -6,7 +6,7 @@
 #  -- Fri, 23 Dec 2005 20:15:54 +0100
 #
 
-. /usr/share/alff/lib/routines
+. "/usr/share/alff/lib/function-routines"
 
 RULES_D="${ALFF_CONFIG_DIR}/rules.d"
 
