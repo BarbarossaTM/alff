@@ -222,7 +222,7 @@ case "$1" in
 			exec_buildin_function push-rules "${2}" "${CURRENT_RULESET}" && echo "done." || echo "FAILED!"
 			exec_buildin_function approve-rules "${2}"
 		else
-			MACHINE_IDS=`alff getMachines`
+			MACHINE_IDS=`exec_function getMachines`
 			if [ -z "${MACHINE_IDS}" ]; then
 				echo "Error: You did not specify at least one machine in alff.conf." >&2
 				exit 1
