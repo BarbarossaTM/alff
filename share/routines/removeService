@@ -1,5 +1,7 @@
 #!/bin/sh -e
 #
+# ALFF_FUNCTION_DESC Remove a service from alff.
+#
 # removeService <servicename>
 #
 # Maximilian Wilhelm <max@rfc2324.org>

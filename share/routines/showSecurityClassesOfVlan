@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 #
+# ALFF_FUNCTION_DESC Show the security classes of the given vlan.
+#
 # alff showSecurityClassesOfVlan
 #
 # Maximilianw Wilhelm <max@rfc2324.org>

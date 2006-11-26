@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 #
+# ALFF_FUNCTION_DESC Shell interface to get option values from alff.conf
+#
 # alff getOption
 #
 # Get a specific option from the alff.conf file

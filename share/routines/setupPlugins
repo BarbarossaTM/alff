@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 #
+# ALFF_FUNCTION_DESC Setup plugin.d initially with standard plugins
+#
 # setupPlugins
 #
 # Maximilian Wilhelm <max@rfc2324.org>
