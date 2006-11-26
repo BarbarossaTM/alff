@@ -215,7 +215,7 @@ case "$1" in
 				exit 1
 			fi
 
-			find "${dir}" -type f -exec rm {} \;		&& echo -n "`basename ${dir}`"
+			find "${dir}" -type f -exec rm {} \;		&& echo -n "`basename ${dir}` "
 		done
 		echo "done."
 		echo ""
@@ -255,7 +255,7 @@ case "$1" in
 		fi
 			
 
-		"$0" loadUserRules 3> "${CACHE_DIR_BUILD}/999_user_rules"
+		exec_buildin_function loadUserRules 3> "${CACHE_DIR_BUILD}/999_user_rules"
 
 		echo ""
 		echo "Generating ruleset... "
