@@ -10,7 +10,7 @@ if [ -z "${ALFF_CACHE_DIR_CHAINS}" ]; then
 	echo "Error: $0 seems not to be run by alff." >&2
 	echo "If you think you know what you're doing you might want to" >&2
 	echo "  export ALFF_CACHE_DIR_CHAINS=\"/var/cache/alff/<config_space>/chains/\"" >&2
-	echo "or whereever your placed it." >&2
+	echo "or whereever you placed it." >&2
 	exit 1
 fi
 	
