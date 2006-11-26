@@ -13,7 +13,6 @@ package Alff::Config;
 my $VERSION="1.0";
 
 use strict;
-use Alff::Main;
 use XML::Simple;
 
 # Where is (are) are the alff configuration(s) stored?
