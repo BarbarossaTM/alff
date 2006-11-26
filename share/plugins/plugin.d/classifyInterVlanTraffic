@@ -81,7 +81,7 @@ sub classifyTrafficFromTo($$) { #{{{
 
 			$commandline .= " -d $dst_network -j $chain";
 
-			$alff->write_cmd( $commandline );
+			$alff->write_line( $commandline );
 		}
 	}
 
@@ -117,7 +117,7 @@ sub loadChainRules($$) { # {{{
 
 					chomp;
 
-					$alff->write_cmd( $_ );
+					$alff->write_line( $_ );
 				}
 				close( RULES );
 
@@ -143,7 +143,7 @@ sub loadChainRules($$) { # {{{
 
 	if ( $load_count == 0 ) {
 		print STDERR "INFO: No rules found for chain $chain, setting the default_chain_target...\n" if ( $debug );
-		$alff->write_cmd( "iptables -A $chain -j $default_chain_target" );
+		$alff->write_line( "iptables -A $chain -j $default_chain_target" );
 	}
 } #}}}
 
@@ -207,7 +207,7 @@ foreach my $src_vlan ( @vlans ) {
 		classifyTrafficFromTo( $src_vlan, $dst_vlan );
 		loadChainRules( $src_vlan, $dst_vlan );
 		# create empty line after each network traversal in rules file
-		$alff->write_cmd(" ");
+		$alff->write_line(" ");
 	}
 }
 print " done.\n";
