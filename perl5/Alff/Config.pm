@@ -51,11 +51,8 @@ sub new { #{{{
 	# Enable debug mode?
 	my $debug = $args->{debug} || 0;
 
-	my $alff = Alff::Main->new();
-
 	# Create a new (still incomplete) instance
 	my $obj = bless { 
-		alff => $alff,
 		args => $args,
 		debug => $debug,
 		}, $class;
