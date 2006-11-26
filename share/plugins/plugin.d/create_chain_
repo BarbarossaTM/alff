@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh -e
 #
 # create_chain_${chain}
 #
@@ -8,8 +8,6 @@
 # Maximilian Wilhelm <max@rfc2324.org>
 #  -- Tue, 08 Aug 2006 16:45:04 +0200
 #
-
-set -e
 
 # Load the plugin routines
 . /usr/share/alff/lib/plugin-routines

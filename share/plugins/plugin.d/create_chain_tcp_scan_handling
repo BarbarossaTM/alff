@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh -e
 #
 # create_chain_tcp_scan_handling
 #
@@ -8,7 +8,6 @@
 # Maximilian Wilhelm <max@rfc2324.org>
 #  -- Mon, 24 Apr 2006 20:05:49 +0200
 # 
-set -e 
 
 . /usr/share/alff/lib/plugin-routines
 

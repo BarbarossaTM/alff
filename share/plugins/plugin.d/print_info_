@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 #
 # print_info
 #
@@ -8,12 +8,14 @@
 #  -- Thu, 27 Apr 2006 20:42:39 +0200
 #
 
+. /usr/share/alff/lib/plugin-routines
+
 # Nice litte trick to make this script more flexible
 # The chain in which the spoofcheck chain should be hooked in has to be
 # specified by providing _$CHAIN at the end of the symlink name to this
 # script.
 # (Thanks to the munin if_ plugin coders for this idea)
-CHAIN=`basename $0 | awk -F_ '{ print $NF }'`
+CHAIN=`getOption "$1"`
 
 cat << EOMSG
 

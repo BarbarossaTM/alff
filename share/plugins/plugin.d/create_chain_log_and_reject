@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh -e
 #
 # create_chain_log_and_reject
 #
@@ -7,7 +7,6 @@
 # Maximilian Wilhelm <max@rfc2324.org>
 #  -- Mon, 24 Apr 2006 19:34:30 +0200
 #
-set -e
 
 . /usr/share/alff/lib/plugin-routines
 

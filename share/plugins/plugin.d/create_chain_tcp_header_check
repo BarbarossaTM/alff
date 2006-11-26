@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh -e
 #
 # tcp_pre-analysis
 #
@@ -7,7 +7,6 @@
 # Maximilian Wilhelm <max@rfc2324.org>
 #  -- Mon, 24 Apr 2006 20:04:15 +0200
 #
-set -e
 
 . /usr/share/alff/lib/plugin-routines
 
