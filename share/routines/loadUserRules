@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh -e
 #
 # loadUserRules
 #
@@ -6,7 +6,9 @@
 #  -- Fri, 23 Dec 2005 20:15:54 +0100
 #
 
-RULES_D="/etc/alff/rules.d"
+. /usr/share/alff/lib/routines
+
+RULES_D="${ALFF_CONFIG_DIR}/rules.d"
 
 if [ ! -d "${RULES_D}" ]; then
 	echo "Error: rules.d ${RULES_D} does not exist."
