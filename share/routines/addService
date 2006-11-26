@@ -13,10 +13,11 @@ use Net::CIDR;				# IP validation
 use Net::DNS;				# DNS Resolver
 
 
-my $service_d = "/etc/alff/services.d/";
 my $resolver = Net::DNS::Resolver->new();
 my $validator = Alff::Validator->new();
 my $config = Alff::Config->new();
+my $config_dir = $config->getConfigDir();
+my $service_d = "$config_dir/services.d/";
 
 my @security_classes = grep { ! m/^filtered$|^trusted$/  } $config->getSecurityClasses();
 
