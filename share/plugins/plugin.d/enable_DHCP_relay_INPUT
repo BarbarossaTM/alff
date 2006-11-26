@@ -10,7 +10,7 @@ use strict;
 use Alff::Main;
 use Alff::Config;
 
-# Read config from default config file (/etc/alff/alff.conf);
+# Read configuration from the config file (correct config space is passed via env.)
 my $config = Alff::Config->new;
 my $alff = Alff::Main->new;
 
@@ -19,10 +19,10 @@ my @dhcp_servers = $config->getDHCPServers;
 if ( scalar( @dhcp_servers ) > 0 ) {
 
 	print " * Allowing DHCP traffic to local DHCP relay... ";
-	$alff->write_cmd("iptables -A INPUT -p udp -d 255.255.255.255 --sport 68 --dport 67 -j ACCEPT");
+	$alff->write_line("iptables -A INPUT -p udp -d 255.255.255.255 --sport 68 --dport 67 -j ACCEPT");
 
 	foreach my $dhcp_server ( @dhcp_servers ) {
-		$alff->write_cmd("/sbin/iptables  -A INPUT -p udp -s $dhcp_server --sport 67 -j ACCEPT");
+		$alff->write_line("iptables  -A INPUT -p udp -s $dhcp_server --sport 67 -j ACCEPT");
 	}
 	print "done.\n";
 }

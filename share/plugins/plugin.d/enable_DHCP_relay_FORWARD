@@ -10,9 +10,9 @@ use strict;
 use Alff::Main;
 use Alff::Config;
 
-# Read config from default config file (/etc/alff/alff.conf);
-my $config = Alff::Config->new;
-my $alff = Alff::Main->new;
+# Read configuration from the config file (correct config space is passed via env.)
+my $config = Alff::Config->new();
+my $alff = Alff::Main->new();
 
 my $chain = "allowDHCP";
 
@@ -23,11 +23,11 @@ if ( scalar( @dhcp_servers ) > 0 ) {
 	print " * Allowing DHCP traffic to configured DHCP servers... ";
 	$alff->create_chain( $chain );
 
-	$alff->write_cmd("iptables -A FORWARD -p udp --sport 67:68 --dport 67:68 -j $chain");
+	$alff->write_line("iptables -A FORWARD -p udp --sport 67:68 --dport 67:68 -j $chain");
 
 	foreach my $dhcp_server ( @dhcp_servers ) {
-		$alff->write_cmd("iptables -A $chain -d $dhcp_server -p udp --sport 68 --dport 67 -j ACCEPT");
-		$alff->write_cmd("iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 68 -j ACCEPT");
+		$alff->write_line("iptables -A $chain -d $dhcp_server -p udp --sport 68 --dport 67 -j ACCEPT");
+		$alff->write_line("iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 68 -j ACCEPT");
 			
 	}
 	print "done.\n";
