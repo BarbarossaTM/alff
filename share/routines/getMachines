@@ -9,7 +9,7 @@
 use strict;
 use Alff::Config;
 
-my $config = Alff::Config->new( configfile => "/etc/alff/alff.conf" );
+my $config = Alff::Config->new();
 
 my @machine_IDs = $config->getMachineIDs();
 
