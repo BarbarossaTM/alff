@@ -10,9 +10,7 @@ use strict;
 use Alff::Config;
 use Alff::Main;
 
-my $configfile = "/etc/alff/alff.conf";
-
-my $config = Alff::Config->new( configfile => $configfile );
+my $config = Alff::Config->new();
 my $alff = Alff::Main->new;
 
 my $allow_traceroute_udp = $config->getOption( "allow_traceroute_udp" );
