@@ -40,8 +40,13 @@ sub new() { #{{{
 
 	my $args = &_options;
 
+	# Enable debugging?
 	my $debug = $args->{debug} || 0;
-	my $cache_dir_chains = $args->{cache_dir_chains} || "/var/cache/alff/chains";
+
+	my $cache_dir_chains = $args->{cache_dir_chains} || $ENV{'ALFF_CACHE_DIR_CHAINS'} ;
+	if ( ! $cache_dir_chains ) {
+		die( "ERROR: Alff::Main: No cache dir for chains specified. Is this tool run by alff?!\n" );
+	}
 
 	my $fh = IO::Handle->new();
 	$fh->fdopen( 3, "w" );			# open fd 3 for writing
