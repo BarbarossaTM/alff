@@ -13,11 +13,12 @@ use XML::Simple;
 # Load the alff.conf
 my $alff_config = Alff::Config->new();
 my $config_space = $alff_config->getConfigSpace();
+my $config_dir = $alff_config->getConfigDir();
 
-print "Using config space \"$config_space\"";
+print "Setting up config space \"$config_space\"";
 sleep 3;
 
-my $plugin_d = "/etc/alff/${config_space}/plugin.d";
+my $plugin_d = "$config_dir/plugin.d";
 my $plugin_d_defaults_file = "/usr/share/alff/plugins/plugin.d.defaults";
 my $plugin_d_plugindir = "/usr/share/alff/plugins/plugin.d/";
 
