@@ -1,6 +1,6 @@
-#!/usr/bin/env sh
+#!/bin/sh -e
 #
-# 40drop_spoofed_packets_FORWARD
+# drop_spoofed_packets_
 #
 # Drop every packet which is surely spoofed.
 #
@@ -8,20 +8,17 @@
 #  --  Mon, 24 Apr 2006 19:57:56 +0200
 #
 
-# Nice litte trick to make this script more flexible
-# The chain in which the spoofcheck chain should be hooked in has to be
-# specified by providing _$CHAIN at the end of the symlink name to this
-# script.
-# (Thanks to the munin if_ plugin coders for this idea)
-CHAIN=`basename $0 | awk -F_ '{ print $NF }'`
+. /usr/share/alff/lib/plugin-routines
 
-if [ "${CHAIN}" ]; then
+chain=`getOption "$1"`
 
-	if [ -f "${CACHE_DIR_CHAINS}/filter/spoofcheck"  ]; then
+if [ "${chain}" ]; then
+
+	if chainExists "${1}" "filter" ; then
 		echo " * Creating rule to DROP spoofed packets... "
-		echo "iptables -A ${CHAIN} -j spoofcheck" >&3
+		echo "iptables -A ${chain} -j spoofcheck" >&3
 	else
-		echo "Error: Chain \"spoofcheck\" does not exist, but should be hooked in into ${CHAIN}!">&2
+		echo "Error: Chain \"spoofcheck\" does not exist, but should be hooked in into ${chain}!">&2
 	fi
 else
 	echo "Error: You did not specify the chain in which 'spoofcheck' should be hooked in" >&2
