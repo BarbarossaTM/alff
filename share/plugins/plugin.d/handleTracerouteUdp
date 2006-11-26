@@ -17,5 +17,5 @@ my $allow_traceroute_udp = $config->getOption( "allow_traceroute_udp" );
 
 if ( $allow_traceroute_udp eq "yes" ) {
 	print " * Allowing udp traceroute...\n";
-	$alff->write_cmd("iptables -A FORWARD -p udp --dport 33434:33523 -j ACCEPT");
+	$alff->write_line("iptables -A FORWARD -p udp --dport 33434:33523 -j ACCEPT");
 }
