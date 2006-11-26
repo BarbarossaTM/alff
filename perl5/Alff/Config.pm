@@ -321,6 +321,13 @@ sub getConfigSpace() { #{{{
 } #}}}
 
 ##
+# Return the basedir where all configurations are stored in.
+# There will be a dir for each config space in the base dir.
+sub getConfigBasedir() { #{{{
+	return $config_basedir;
+} #}}}
+
+##
 # Get a list of all known securityClasses
 sub getSecurityClasses() { #{{{
 	my $self = shift;
