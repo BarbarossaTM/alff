@@ -15,15 +15,19 @@ use Alff::Main;
 use Alff::Service;
 
 my $debug = 0;
-my $services_d = "/etc/alff/services.d/";
+
+my $alff_config = Alff::Config->new();
+my $alff_main = Alff::Main->new();
+
+my $config_dir = $alff_config->getConfiDir();
+
+my $services_d = "$config_dir/services.d";
 
 if ( ! -d $services_d ) {
 	print STDERR "Error: services.d directory $services_d does not exist.";
 	exit 1;
 }
 
-my $alff_config = Alff::Config->new();
-my $alff_main = Alff::Main->new();
 my $alff_srv = Alff::Service->new( alff_main => $alff_main, services_d => $services_d, debug => $debug );
 
 my @securityClasses = $alff_config->getSecurityClasses();

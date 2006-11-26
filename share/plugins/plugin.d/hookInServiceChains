@@ -12,7 +12,7 @@ use strict;
 use Alff::Config;
 use Alff::Service;
 
-my $config = Alff::Config->new( configfile => "/etc/alff/alff.conf" );
+my $config = Alff::Config->new();
 my $services = Alff::Service->new;
 
 $services->allowWorldOpenServices;
