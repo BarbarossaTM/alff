@@ -26,12 +26,12 @@ DEFAULT_CONFIG_SPACE="default"
 ## Some functions ##
 
 function checkConfigDir() { # Check the configuration (environment) #{{{
-	if [ ! -d "${CONFIG_DIR}" ]; then
+	if [ ! -d "${ALFF_CONFIG_DIR}" ]; then
 		usage
-		echo "Error: CONFIG_DIR \"${CONFIG_DIR}\" does not exist!" >&2
+		echo "Error: ALFF_CONFIG_DIR \"${ALFF_CONFIG_DIR}\" does not exist!" >&2
 
 		# define COMPAT
-		if [ "${CONFIG_SPACE}" = 'default' ]; then
+		if [ "${ALFF_CONFIG_SPACE}" = 'default' ]; then
 			echo "" >&2
 			echo "If you are upgrading from an earlier version of alff, please move your" >&2
 			echo "configuration from /etc/alff to ${CONFIG_BASEDIR}/${DEFAULT_CONFIG_SPACE}." >&2
@@ -41,14 +41,14 @@ function checkConfigDir() { # Check the configuration (environment) #{{{
 		exit 1
 	fi
 
-	if [ ! -f "${CONFIG_FILE}" ]; then
-		echo "Error: There is no alff.conf in \"${CONFIG_DIR}\".">&2
+	if [ ! -f "${ALFF_CONFIG_FILE}" ]; then
+		echo "Error: There is no alff.conf in \"${ALFF_CONFIG_DIR}\".">&2
 		exit 1
 	fi
 
 	if [ ! -d "${PLUGIN_D}" ]; then
 		usage
-		echo "Error: CONFIG_DIR \"${PLUGIN_D}\" does not exist!" >&2
+		echo "Error: Plugin directory \"${PLUGIN_D}\" does not exist!" >&2
 		exit 1
 	fi
 } #}}}
@@ -142,36 +142,36 @@ function preload()
 ##
 # Check for config_space
 if [ "$1" = '-c' ]; then
-	CONFIG_SPACE="${2}"
+	ALFF_CONFIG_SPACE="${2}"
 
 	# Dereference symlink if any
-	if [ -L "${CONFIG_BASEDIR}/${CONFIG_SPACE}" ]; then
-		CONFIG_SPACE=`readlink -e "${CONFIG_SPACE}"`
+	if [ -L "${CONFIG_BASEDIR}/${ALFF_CONFIG_SPACE}" ]; then
+		ALFF_CONFIG_SPACE=`readlink -e "${ALFF_CONFIG_SPACE}"`
 	fi
 
 	# Check if this configspace exists
-	if [ -z "${CONFIG_SPACE}" -o ! -d  "${CONFIG_BASEDIR}/${CONFIG_SPACE}" ]; then
-		echo "ERROR: Config space \"${CONFIG_SPACE}\" does not exist." >&2
+	if [ -z "${ALFF_CONFIG_SPACE}" -o ! -d  "${CONFIG_BASEDIR}/${ALFF_CONFIG_SPACE}" ]; then
+		echo "ERROR: Config space \"${ALFF_CONFIG_SPACE}\" does not exist." >&2
 		exit 1
 	fi
 
 	# OK should be valid
-	# Remove -c $CONFIG_SPACE from the command line parameters
+	# Remove -c $ALFF_CONFIG_SPACE from the command line parameters
 	shift 2
 else
-	CONFIG_SPACE="${DEFAULT_CONFIG_SPACE}"
+	ALFF_CONFIG_SPACE="${DEFAULT_CONFIG_SPACE}"
 fi
 
 ##
 # Configuration stuff
-export CONFIG_SPACE
-export CONFIG_DIR="${CONFIG_BASEDIR}/${CONFIG_SPACE}"
-export CONFIG_FILE="${CONFIG_DIR}/alff.conf"
-PLUGIN_D="${CONFIG_DIR}/plugin.d"
+export ALFF_CONFIG_SPACE
+export ALFF_CONFIG_DIR="${CONFIG_BASEDIR}/${ALFF_CONFIG_SPACE}"
+export ALFF_CONFIG_FILE="${ALFF_CONFIG_DIR}/alff.conf"
+PLUGIN_D="${ALFF_CONFIG_DIR}/plugin.d"
 
 ##
 # Some caches used at runtime
-export CACHE_BASEDIR="/var/cache/alff/${CONFIG_SPACE}"
+export CACHE_BASEDIR="/var/cache/alff/${ALFF_CONFIG_SPACE}"
 export CACHE_DIR_BUILD="${CACHE_BASEDIR}/ruleset.build"
 export CACHE_DIR_CHAINS="${CACHE_BASEDIR}/chains"
 CURRENT_RULESET="${CACHE_BASEDIR}/alff.rules"
@@ -205,7 +205,7 @@ case "$1" in
 
 	generate) # Generate ruleset {{{
 		echo "The ALFF Linux Firewall Framework awakes ..."
-		echo "Using config space ${CONFIG_SPACE}."
+		echo "Using config space ${ALFF_CONFIG_SPACE}."
 		echo ""
 
 		echo -n  "Cleaning up cache dirs... "
@@ -238,8 +238,8 @@ case "$1" in
 		# Create fd3 (all script should output there stuff to fd3, which is redirected to a proper outfile
 		exec 3>&1
 		# export environment variables which will be used by the plugins
-		export PLUGIND_PLUGIN_DIR
-		export CACHE_DIR_CHAINS
+#		export PLUGIND_PLUGIN_DIR
+#		export CACHE_DIR_CHAINS
 		if !  find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
 				if [ -x "${PLUGIN_D}/${plugin}" ]; then
 					if ! sh -c "${PLUGIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"; then
@@ -271,7 +271,7 @@ case "$1" in
 
 	push) # Push ruleset to firewall machine(s) {{{
 		echo "The ALFF Linux Firewall Framework awakes ..."
-		echo "Using config space ${CONFIG_SPACE}."
+		echo "Using config space ${ALFF_CONFIG_SPACE}."
 		echo ""
 
 		if [ ! -s "${CURRENT_RULESET}" ]; then
