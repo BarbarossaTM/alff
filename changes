@@ -9,3 +9,8 @@ Changes between v0.0.3 and v0.0.4:
  * Added 'alff setupPlugins' to help you with the initial alff setup.
  * Implemented new concept of 'config spaces' which allow the management of
    multiple firewalls from one client machine.
+    If you are upgrading from an ealier version of alff, you need to move
+    your configuration from /etc/alff/ to /etc/alff/default/ if you only want
+    to manage one configuration on this machine. Of course you name the
+    config space for your configuration as you like, but "default" will
+    be used without mentioning it to alff :)
