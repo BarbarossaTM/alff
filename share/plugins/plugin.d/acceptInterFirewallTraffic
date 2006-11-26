@@ -29,7 +29,7 @@ if ( scalar ( @machine_IDs ) > 0 ) {
 			exit 1;
 		}
 				
-		$alff->write_cmd("iptables -A INPUT -s $machine_ip -j ACCEPT");
+		$alff->write_line("iptables -A INPUT -s $machine_ip -j ACCEPT");
 	}
 } else {
 	print STDERR "Attention: acceptInterFirewallTraffic: No machines found\n";
