@@ -19,7 +19,7 @@ use XML::Simple;
 my $config_basedir = "/etc/alff";
 
 # The name of the default config space (used if not provided)
-my $default_config_space = "deafult";
+my $default_config_space = "default";
 
 # The name of the main alff configuration file
 my $configfile_name = "alff.conf";
@@ -321,10 +321,12 @@ sub getConfigSpace() { #{{{
 } #}}}
 
 ##
-# Return the basedir where all configurations are stored in.
-# There will be a dir for each config space in the base dir.
-sub getConfigBasedir() { #{{{
-	return $config_basedir;
+# Return the directory where the configuration for the current config space
+# is being stored in.
+sub getConfigDir() { #{{{
+	my $self = shift;
+
+	return $config_basedir . "/" . $self->getConfigSpace();
 } #}}}
 
 ##
