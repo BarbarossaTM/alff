@@ -63,8 +63,8 @@ install: build
 	cp -a $(CURDIR)/perl5/Alff $(CURDIR)/debian/alff-rulegen/usr/share/perl5
 	cp -a $(CURDIR)/bin/* $(CURDIR)/debian/alff-rulegen/usr/sbin
 	# config stuff
-	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff
-	cp -a $(CURDIR)/etc/* $(CURDIR)/debian/alff-rulegen/etc/alff/
+	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/example/
+	cp -a $(CURDIR)/etc/* $(CURDIR)/debian/alff-rulegen/etc/alff/example
 
 	##
 	# alff-agent
