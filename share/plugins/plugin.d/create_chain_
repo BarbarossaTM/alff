@@ -14,13 +14,13 @@ set -e
 # Load the plugin routines
 . /usr/share/alff/lib/plugin-routines
 
-if [ -z "${CACHE_DIR_CHAINS}" ]; then
-	echo "Error: You have to export CACHE_DIR_CHAINS before running this script!" >&2
+if [ -z "${ALFF_CACHE_DIR_CHAINS}" ]; then
+	echo "Error: You have to export ALFF_CACHE_DIR_CHAINS before running this script!" >&2
 	exit 1
 fi
 
-if [ ! -d "${CACHE_DIR_CHAINS}" ]; then
-	echo "Error: CACHE_DIR_CHAINS ${CACHE_DIR_CHAINS} does not exist!" >&2
+if [ ! -d "${ALFF_CACHE_DIR_CHAINS}" ]; then
+	echo "Error: ALFF_CACHE_DIR_CHAINS ${ALFF_CACHE_DIR_CHAINS} does not exist!" >&2
 	exit 1
 fi
 
