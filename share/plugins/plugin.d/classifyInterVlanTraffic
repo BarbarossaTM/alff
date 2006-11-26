@@ -14,24 +14,24 @@ my $VERSION = 1.0;
 
 my $plugin_name = 'classifyInterVlanTraffic';
 
-##
-# Some paths
-my $configfile = "/etc/alff/alff.conf";
-my $rules_d = "/etc/alff/rules.d";
-
 # Debugging
 my $debug = 0;
 
-# Storage for parse configuraton
+# Create instances of used objects
 my $alff = Alff::Main->new( debug => $debug );
-my $config = Alff::Config->new( configfile => $configfile, debug => $debug )
-	or die "Error: could not load configuration from $configfile\n";
+my $config = Alff::Config->new( debug => $debug )
+	or die "Error: could not load configuration.\n";
+
+##
+# Some paths
+my $config_dir = $config->getConfigDir();
+my $rules_d = "$config_dir/rules.d";
 
 # List of all known vlans
 my @vlans = $config->getVlanList;
 
-# The policy for totally unconfigured chains
-my $default_chain_policy = $config->getPluginOption( $plugin_name, "default_chain_target" ) || "REJECT";
+# The target to put into totally unconfigured chains
+my $default_chain_target = $config->getPluginOption( $plugin_name, "default_chain_target" ) || "REJECT";
 my $remove_empty_chains  = $config->getPluginOption( $plugin_name, "remove_empty_chains" ) || 0;
 my $force_x_to_x_chains  = $config->getPluginOption( $plugin_name, "force_x_to_x_chains" ) || 0;
 
@@ -89,7 +89,7 @@ sub classifyTrafficFromTo($$) { #{{{
 
 ##
 # Load user defined rules into the chain for the given vlans if specified in rules.d/,
-# set $default_chain_policy else.
+# set $default_chain_target else.
 sub loadChainRules($$) { # {{{
 	my $src_vlan = shift;
 	my $dst_vlan = shift;
@@ -142,8 +142,8 @@ sub loadChainRules($$) { # {{{
 	}
 
 	if ( $load_count == 0 ) {
-		print STDERR "INFO: No rules found for chain $chain, setting the default_chain_policy...\n" if ( $debug );
-		$alff->write_cmd( "iptables -A $chain -j $default_chain_policy" );
+		print STDERR "INFO: No rules found for chain $chain, setting the default_chain_target...\n" if ( $debug );
+		$alff->write_cmd( "iptables -A $chain -j $default_chain_target" );
 	}
 } #}}}
 
