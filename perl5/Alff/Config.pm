@@ -13,6 +13,7 @@ package Alff::Config;
 my $VERSION="1.0";
 
 use strict;
+use Alff::Main;
 use XML::Simple;
 
 # Where is (are) are the alff configuration(s) stored?
@@ -69,6 +70,8 @@ sub new { #{{{
 	my $config = $obj->loadConfig( $config_file );
 
 	$obj->{config} = $config;
+
+	$obj->{alff} = $args->{alff_main} || Alff::Main->new();
 
 	$obj->checkConfig unless ( $args->{nocheck} );
 	$obj->sanitizeSecurityClasses();
