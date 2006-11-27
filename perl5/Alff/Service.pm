@@ -98,7 +98,7 @@ sub allowServiceFromNetworksOfSecurityClass($) { #{{{
 			}
 
 			foreach my $network ( @networks ) { 
-				$main->write_cmd( "${chain_rule} -s ${network} -j $chain" );
+				$main->write_line( "${chain_rule} -s ${network} -j $chain" );
 			}
 			print ".";
 
@@ -118,7 +118,7 @@ sub allowWorldOpenServices() { #{{{
 	my $main = $self->{alff_main};
 
 	print " * Creating rule to allow access to services configured to be world-wide available...";
-	print $main->write_cmd("iptables -A FORWARD -j allowWorldOpenServices") ? "done.\n" : "FAILED\n";
+	print $main->write_line("iptables -A FORWARD -j allowWorldOpenServices") ? "done.\n" : "FAILED\n";
 } #}}}
 
 ################################################################################
@@ -194,7 +194,7 @@ sub generateServiceChain($) { #{{{
 	}
 
 	# Create a chain for this service
-	$alff->write_cmd( "" );
+	$alff->write_line( "" );
 	$alff->create_chain( $srv_chain, "filter" );
 
 	my @servers = split( /\s+/, $serviceconfig->{servers} );
@@ -225,7 +225,7 @@ sub generateServiceChain($) { #{{{
 
 			if ( $service_port =~ m/([[:digit:]:]+)\/(tcp|udp)/ ) {
 				my ( $port, $proto ) = ( $1, $2 );
-				$alff->write_cmd( "iptables -A $srv_chain -p $proto -d $server --dport $port -j ACCEPT" );
+				$alff->write_line( "iptables -A $srv_chain -p $proto -d $server --dport $port -j ACCEPT" );
 			}
 		}
 	}
@@ -238,7 +238,7 @@ sub generateServiceChain($) { #{{{
 			my $sec_class_chain = "allowServicesFrom" . ucfirst( $sec_class ) . "Nets";
 
 			if ( $alff->chain_exists( $sec_class_chain ) ) {
-				$alff->write_cmd( "iptables -A $sec_class_chain -j $srv_chain" );
+				$alff->write_line( "iptables -A $sec_class_chain -j $srv_chain" );
 			} else {
 				print STDERR "Error: Service $service should be accessable from undefined security class $sec_class, skipping...\n";
 			}
@@ -247,7 +247,7 @@ sub generateServiceChain($) { #{{{
 
 	# public accessable service?
 	if ( defined $serviceconfig->{allow_from_world} and $serviceconfig->{allow_from_world} eq "yes" ) {
-		$alff->write_cmd( "iptables -A allowWorldOpenServices -j $srv_chain" );
+		$alff->write_line( "iptables -A allowWorldOpenServices -j $srv_chain" );
 	}
 } #}}}
 
