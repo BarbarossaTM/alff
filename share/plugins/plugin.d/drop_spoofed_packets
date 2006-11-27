@@ -14,7 +14,18 @@ chain=`getOption "$1"`
 
 if [ "${chain}" ]; then
 
-	if chainExists "${1}" "filter" ; then
+	vaild_chain='false'
+	case "${chain}" in
+		INPUT|FORWARD)
+			valid_chain='true'
+			;;
+		*)
+			if chainExists "${1}" "filter"; then
+				valid_chain='true'
+			fi
+	esac
+
+	if [ "${valid_chain}" = 'true' ]; then
 		echo " * Creating rule to DROP spoofed packets... "
 		echo "iptables -A ${chain} -j spoofcheck" >&3
 	else
