@@ -1,3 +1,21 @@
+alff (0.0.4-0) unstable; urgency=low
+
+  * Remove 'default_chain_policy' and defined new option 'default_chain_target'
+    for plugin 'classifyInterVlanTraffic' instead to avoid confusion.
+  * Renamed plugin 'accept_established_connections' to
+    'accept_established_connections_' to show intended usage by plugin name.
+  * Began to add new fw_type 'host' for securitng a single host.
+  * Added 'alff setupPlugins' to help you with the initial alff setup.
+  * Implemented new concept of 'config spaces' which allow the management of
+    multiple firewalls from one client machine.
+     If you are upgrading from an ealier version of alff, you need to move
+     your configuration from /etc/alff/ to /etc/alff/default/ if you only want
+     to manage one configuration on this machine. Of course you name the
+     config space for your configuration as you like, but "default" will
+     be used without mentioning it to alff :)
+
+ -- Maximilian Wilhelm <max@rfc2324.org>  Sun, 26 Nov 2006 23:22:39 +0100
+
 alff (0.0.3-0) unstable; urgency=low
 
   * Added possibility to include a rules diff in alff-cat status mail.
