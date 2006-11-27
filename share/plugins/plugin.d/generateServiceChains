@@ -19,7 +19,7 @@ my $debug = 0;
 my $alff_config = Alff::Config->new();
 my $alff_main = Alff::Main->new();
 
-my $config_dir = $alff_config->getConfiDir();
+my $config_dir = $alff_config->getConfigDir();
 
 my $services_d = "$config_dir/services.d";
 
