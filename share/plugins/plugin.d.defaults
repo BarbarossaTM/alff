@@ -42,6 +42,12 @@
 		</plugin>
 
 		<plugin>
+			<id> 13 </id>
+			<name> accept_established_connections_ </name>
+			<options> INPUT </options>
+		</plugin>
+
+		<plugin>
 			<id> 15 </id>
 			<name> enable_DHCP_relay_INPUT </name>
 		</plugin>
@@ -79,7 +85,8 @@
 
 		<plugin>
 			<id> 50 </id>
-			<name> accept_established_connections </name>
+			<name> accept_established_connections_ </name>
+			<options> FORWARD </options>
 		</plugin>
 
 		<plugin>
