@@ -31,6 +31,8 @@ $alff->write_line("iptables -A FORWARD -p udp --sport 67:68 --dport 67:68 -j $ch
 foreach my $dhcp_server ( @dhcp_servers ) {
 	$alff->write_line("iptables -A $chain -d $dhcp_server -p udp --sport 68 --dport 67 -j ACCEPT");
 	$alff->write_line("iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 68 -j ACCEPT");
+	# This is neccessary if your firewall isn´t a dhcprelay itself
+	$alff->write_line("iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 67 -j ACCEPT");
 		
 }
 print "done.\n";
