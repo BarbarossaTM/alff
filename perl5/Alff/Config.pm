@@ -115,13 +115,12 @@ sub loadConfig($) { #{{{
 
 	# Load the configuration
 	if ( ! -f $configfile ) {
-		print STDERR "Error: Configfile $configfile does not exist.\n";
-		return undef;
+		die( "Error: Configfile $configfile does not exist.\n" );
 	}
 
 	# Parse the configuration
 	$config = XML::Simple::XMLin( $configfile, NormalizeSpace => 2 )
-			or return undef;
+			or die( "ERROR: Could not load configuration from $configfile.\n" );
 
 	if ( $self->{debug} ) {
 		print STDERR "Found the following vlans: " . join(", ", sort keys %{$config->{vlan}}) . "\n";
@@ -299,6 +298,8 @@ sub getDefaultChainPolicy() { #{{{
 sub getDHCPServers() { #{{{
 	my $self = shift;
 
+	return () unless defined $self->{config}->{options}->{dhcp_server};
+
 	my @dhcp_servers = ref($self->{config}->{options}->{dhcp_server}) ? @{$self->{config}->{options}->{dhcp_server}} : ( $self->{config}->{options}->{dhcp_server} );
 
 	return @dhcp_servers;
@@ -470,7 +471,7 @@ sub getSecurityClassesOfVlan($) { #{{{
 	my $vlan_id = shift;
 
 	# Check if vlan is valid
-	return undef if ( ! $self->isValidVlan( $vlan_id ) );
+	return () if ( ! $self->isValidVlan( $vlan_id ) );
 
 	return sort @{$self->{config}->{vlan}->{$vlan_id}->{securityClasses}}
 } #}}}
