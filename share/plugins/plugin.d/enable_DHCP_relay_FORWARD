@@ -18,17 +18,19 @@ my $chain = "allowDHCP";
 
 my @dhcp_servers = $config->getDHCPServers;
 
-if ( scalar( @dhcp_servers ) > 0 ) {
-
-	print " * Allowing DHCP traffic to configured DHCP servers... ";
-	$alff->create_chain( $chain );
-
-	$alff->write_line("iptables -A FORWARD -p udp --sport 67:68 --dport 67:68 -j $chain");
-
-	foreach my $dhcp_server ( @dhcp_servers ) {
-		$alff->write_line("iptables -A $chain -d $dhcp_server -p udp --sport 68 --dport 67 -j ACCEPT");
-		$alff->write_line("iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 68 -j ACCEPT");
-			
-	}
-	print "done.\n";
+if ( scalar( @dhcp_servers ) == 0 ) {
+	print " * No DHCP servers configured in alff.conf. Staying cool.\n";
+	exit 0;
 }
+
+print " * Allowing DHCP traffic to configured DHCP servers... ";
+$alff->create_chain( $chain );
+
+$alff->write_line("iptables -A FORWARD -p udp --sport 67:68 --dport 67:68 -j $chain");
+
+foreach my $dhcp_server ( @dhcp_servers ) {
+	$alff->write_line("iptables -A $chain -d $dhcp_server -p udp --sport 68 --dport 67 -j ACCEPT");
+	$alff->write_line("iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 68 -j ACCEPT");
+		
+}
+print "done.\n";
