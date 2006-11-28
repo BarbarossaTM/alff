@@ -65,10 +65,10 @@ if ( ! -f $plugin_d_defaults_file ) {
 # OK let´s go
 my $fw_type = $alff_config->getOption( 'fw_type' );
 
-foreach my $plugin_id (  keys %{$plugin_d_defaults->{$fw_type}} ) {
-	my $plugin_name = $plugin_d_defaults->{$fw_type}->{$plugin_id}->{name};
+foreach my $plugin_name (  keys %{$plugin_d_defaults->{$fw_type}->{plugin}} ) {
+	my $plugin_id = $plugin_d_defaults->{$fw_type}->{plugin}->{$plugin_name}->{id};
 	# Get the plugin options if any, use "" otherwise.
-	my $options = $plugin_d_defaults->{$fw_type}->{$plugin_id}->{options} ? $plugin_d_defaults->{$fw_type}->{$plugin_id}->{options} : "";
+	my $options = $plugin_d_defaults->{$fw_type}->{plugin}->{$plugin_name}->{options} ? $plugin_d_defaults->{$fw_type}->{plugin}->{$plugin_name}->{options} : "";
 
 	my $plugin_path = "$plugin_d_plugindir/$plugin_name";
 	my $plugin_d_entry = "$plugin_d/${plugin_id}${plugin_name}${options}";
