@@ -1,12 +1,12 @@
  * New Alff mode 'host' for simple host security.
   + Update alff setupPlugins to read 'fw_type'
 
- * Create config spaces in alff to be able to manage several firewalls
-   on one admin machine in /etc/alff/<config_space>
+ * Add munin-like autoconf option to plugins.
 
  * Write the 'Alff:Ruler' which will read the output of all plugins and
    create an iptables-save like format.
    + This adds an easy possibility to remove unreferenced chains
+   (see branch 'alff_ruler')
 
  * Add extra granularity for allow_icmp option.
 
