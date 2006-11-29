@@ -92,15 +92,6 @@ sub write_line($) { # write_cmd( command_string ) #{{{
 	print $output_fh "$line\n";
 } #}}}
 
-sub write_cmd($) {
-	my $self = shift;
-	my $cmd = shift;
-
-	print STDERR "Warning: Alff::Main->write_cmd should not be used anymore.\n";
-	print STDERR "Use Alff::Main->write_line instead.\n";
-	$self->write_line( $cmd );
-}
-
 ################################################################################
 #				Chain handling				       #
 ################################################################################
