@@ -262,12 +262,11 @@ sub sanitizeSecurityClasses() { #{{{
 # in alff.conf
 sub sanitizeMachines() { # {{{
 	my $self = shift;
-	
-	# If a machine 'id' is defined as this is no ref, there is only
-	# one machine in alff.conf, we have to fix the data structures
-	# resulting of this
-	if ( defined $self->{config}->{machine}->{id} and not 
-	     ref $self->{config}->{machine}->{id} ) {
+
+	# If a machine 'id' is defined and this is no ref, there is only
+	# one machine in alff.conf, we have to fix the resulting data structure
+	if ( defined $self->{config}->{machine}->{id}
+	     and not ref $self->{config}->{machine}->{id} ) {
 
 		my %machine_hash_tmp;
 		foreach my $key ( 'id', 'ip', 'hostname', 'desc' ) {
