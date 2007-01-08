@@ -1,5 +1,9 @@
+ * Push plugin execution into a build-in routine.
+
  * New Alff mode 'host' for simple host security.
   + Update alff setupPlugins to read 'fw_type'
+  ~ Maybe it would be way more usefull to give a complete network topology
+    to alff and let it build rulesets for firewalls and hosts based on this.
 
  * Add munin-like autoconf option to plugins.
 
