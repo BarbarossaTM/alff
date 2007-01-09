@@ -1,3 +1,14 @@
+alff (0.0.4-1) unstable; urgency=low
+
+  * Depend on awk instead of gawk.
+  * Allow unicast DHCP answers from any DHCP server.
+  * Fixed 'alff setupPlugins'.
+  * Fixed programming error in list handling in case of absent of wrong values
+    (undef vs. empty list).
+  * Renamed plugin 'drop_spoofed_packets' to 'drop_spoofed_packets_'.
+
+ -- Maximilian Wilhelm <max@rfc2324.org>  Tue, 09 Jan 2007 11:46:35 +0100
+
 alff (0.0.4-0) unstable; urgency=low
 
   * Remove 'default_chain_policy' and defined new option 'default_chain_target'
