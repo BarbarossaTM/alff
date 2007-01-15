@@ -1,27 +1,31 @@
 #!/usr/bin/perl -w
 #
-# alff-push
+# push-rules (alff build-in routine)
 #
 # Push the ruleset to the given machine
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Tue, 16 Jan 2007 00:28:24 +0100
 #
 
 use strict;
 use Alff::Config;
 use Net::CIDR;
 
-# Where to look for configuration data
-my $config_dir = "/etc/alff";
-my $config_file = "${config_dir}/alff.conf";
-my $filter_d = "${config_dir}/filter.d";
+# Get config data
+my $config = Alff::Config->new();
+my $config_space = $config->getConfigSpace();
+
+my $filter_d = $config->getConfigDir() . "/filter.d";
 my $filter;	 # This will be set to a valid filter file if there is one.
 
 # Get machine_id and rulesfile (default it if not given)
 my $machine_id = $ARGV[0];
-my $ruleset = $ARGV[1] ? $ARGV[1] : "/var/cache/alff/alff.rules";
+my $ruleset = $ARGV[1] ? $ARGV[1] : "/var/cache/alff/$config_space/alff.rules";
 
 # Check for valid machine_id
-if ( ! defined $machine_id ) {	
-	print STDERR "Usage: alff push-rules machine-ID [ - | ruleset_file ]\n";
+if ( ! defined $machine_id ) {
+	print STDERR "No machine_id $machine_id given. I won´t do anything for you...\n";
 	exit 1;
 }
 
@@ -31,8 +35,6 @@ if ( $ruleset ne '-' and ! -f $ruleset ) {
 	exit 1;
 }
 
-# Get config data
-my $config = Alff::Config->new( configfile => $config_file );
 my $machine_hostname = $config->getMachineHostname( $machine_id );
 my $machine_ip = $config->getMachineIP( $machine_id );
 
