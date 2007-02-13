@@ -156,7 +156,8 @@ function setConfigSpace() { #{{{
 	export ALFF_CONFIG_SPACE
 	export ALFF_CONFIG_DIR="${CONFIG_BASEDIR}/${ALFF_CONFIG_SPACE}"
 	export ALFF_CONFIG_FILE="${ALFF_CONFIG_DIR}/alff.conf"
-	PLUGIN_D="${ALFF_CONFIG_DIR}/plugin.d"
+	# exported for buildin-routine execte-plugin
+	export PLUGIN_D="${ALFF_CONFIG_DIR}/plugin.d"
 
 	##
 	# Some caches used at runtime
@@ -236,18 +237,12 @@ while [ "$1" ]; do
 			# Create fd3 (all script should output there stuff to fd3, which is redirected to a proper outfile
 			exec 3>&1
 
-			if !  find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
-					if [ -x "${PLUGIN_D}/${plugin}" ]; then
-						if ! sh -c "${PLUGIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"; then
-							echo "" >&2
-							echo "There occured errors while executing plugin ${plugin}." >&2
-							echo "Alff will stop rule generation now to avoid trouble." >&2
-							exit 1
-						fi
-					fi
-				done ; then
-					# Second exit to stop the 'whole' alff. (remind the "| while" does open a subshell.)
-					exit 1
+			# XXX Make sure excute-plugin will exit with 255 on error to tell xargs to stop imediately.
+			if ! find "${PLUGIN_D}" \( -type l -or -type f \) -print0 | xargs -0 -n1 "${ALFF_FUNCTION_DIR}/build-in/execute-plugin" ; then
+				# Error message should have come from execute-plugin
+				echo "" >&2
+				echo "Alff will stop rule generation now to avoid trouble." >&2
+				exit 1
 			fi
 
 
