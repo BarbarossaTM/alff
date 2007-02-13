@@ -1,3 +1,7 @@
+Changes between v0.0.4 and v0.0.5:
+ * Pushed plugin execution into a built-in routine to allow non-ascii-chars
+   in plugin name.
+ *
 
 Changes between v0.0.3 and v0.0.4:
 
