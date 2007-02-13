@@ -1,3 +1,9 @@
+ * Include Makefiles to make
+  + dist (release)
+  + agent-pkg (tarball to install an alff-agent)
+  + install-rulegen
+  + install-agent
+
  * New Alff mode 'host' for simple host security.
   + Update alff setupPlugins to read 'fw_type'
   ~ Maybe it would be way more usefull to give a complete network topology
