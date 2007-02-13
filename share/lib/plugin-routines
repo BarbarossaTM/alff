@@ -19,6 +19,9 @@ if [ ! -d "${ALFF_CACHE_DIR_CHAINS}" ]; then
 	exit 1
 fi
 
+# Valid iptables tables.
+VALID_TABLES="filter nat mangle raw"
+
 # Check if the given chain exists.
 # If no table is specified, 'filter' is assumed.
 # Usage: chainExists chain [ table ]
@@ -80,5 +83,23 @@ function getOption() { # {{{
 	echo "${chain}"
 }
 # }}}
+
+# Check if the given table name is valid.
+# Usage: isValidTable table
+function isValidTable() { # {{{
+	local table="$1"
+	if [ -z "${table}" ]; then
+		return 1
+	fi
+
+	for valid_table in ${VALID_TABLES}; do
+		if [ "${table}" = "${valid_table}" ]; then
+			return 0
+		fi
+	done
+
+	return 1
+} # }}}
+
 
 # vim:foldmethod=marker
