@@ -85,27 +85,14 @@ binary-arch: build install
 	dh_testroot
 	dh_installchangelogs 
 	dh_installdocs
-	dh_installexamples
-#	dh_install
-#	dh_installmenu
-#	dh_installdebconf	
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
+#	dh_installexamples
 	dh_installinit --noscripts
-#	dh_installcron
-#	dh_installinfo
 	dh_installman -palff-rulegen man/{alff.conf.5,alff.1}
-	dh_link
 #	dh_strip
 	dh_compress
 	dh_fixperms
 #	dh_perl
-#	dh_python
-#	dh_makeshlibs
 	dh_installdeb
-	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
