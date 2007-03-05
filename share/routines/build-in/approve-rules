@@ -12,10 +12,6 @@ use strict;
 use Alff::Config;
 use Net::CIDR;
 
-# Where to look for configuration data
-my $config_dir = "/etc/alff";
-my $config_file = "${config_dir}/alff.conf";
-
 # Where to find things on the alff-aggent
 my $alff_rules_dir = "/var/cache/alff/rules";
 my $rules_loading_token = "${alff_rules_dir}/.loading_new_rules";
@@ -31,7 +27,10 @@ if ( ! defined $machine_id ) {
 }
 
 # Parse configuration and get/validate machine data #{{{
-my $config = Alff::Config->new( configfile => $config_file );
+
+# Do not provide a config file here to let the ${ALFF_CONFIG_SPACE and 
+# environment variables do the trick for us.
+my $config = Alff::Config->new();
 
 if ( ! $config->isValidMachineID( $machine_id ) ) {
 	print STDERR "Error: Invalid machine ID $machine_id.\n";
