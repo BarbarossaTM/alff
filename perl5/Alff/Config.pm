@@ -19,7 +19,7 @@ use XML::Simple;
 # Where is (are) are the alff configuration(s) stored?
 my $config_basedir = "/etc/alff";
 
-# The name of the default config space (used if not provided)
+# The name of the default config space (used if none provided)
 my $default_config_space = "default";
 
 # The name of the main alff configuration file
