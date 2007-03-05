@@ -29,7 +29,7 @@ my $ports = "";					# ports for this service
 my $allow_from_trusted_networks = "no";		# service accessability options
 my $allow_from_filtered_networks = "no";	# ..
 my $allow_from_world = "no";			# ..
-my @allow_from_security_classes;		# Maybe this service should be available from some self defined security classes
+my @allow_from_security_classes = ();		# Maybe this service should be available from some self defined security classes
 
 
 sub readYesNo($) { # {{{
@@ -38,8 +38,8 @@ sub readYesNo($) { # {{{
 	my $input = <STDIN>;
 
 	return $default if ( $input eq "\r" || $input eq "\n" );
-	return "yes" if ( $input =~ m/^[yY][eE][sS]$/ );
-	return "no" if ( $input =~ m/^[nN][oO]$/ );
+	return "yes" if ( $input =~ m/^[yY][eE][sS]$/ or $input =~ m/^[yY]$/ );
+	return "no" if ( $input =~ m/^[nN][oO]$/ or $input =~ m/^[nN]$/ );
 
 	print STDERR "Invalid option: \"$input\"\n";
 	exit 1;
@@ -103,8 +103,7 @@ if ( scalar( @security_classes ) > 0 ) {
 	if ( readYesNo( "no" )  eq "yes" ) {
 		foreach my $security_class ( @security_classes ) {
 			print " Should this service be reachable from all $security_class networks?";
-			my $ret = readYesNo( "no" );
-			if ( $ret eq "yes" ) {
+			if ( readYesNo( "no" ) eq "yes" ) {
 				push @allow_from_security_classes, $security_class;
 			}
 		}
@@ -199,5 +198,7 @@ print SERVICE_FILE "
 }
 # vim:ft=perl:
 ";
+
+close( SERVICE_FILE );
 
 # vim:foldmethod=marker
