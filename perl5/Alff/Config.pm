@@ -13,7 +13,6 @@ package Alff::Config;
 my $VERSION="1.0";
 
 use strict;
-use Alff::Main;
 use XML::Simple;
 
 # Where is (are) are the alff configuration(s) stored?
@@ -71,7 +70,8 @@ sub new { #{{{
 
 	$obj->{config} = $config;
 
-	$obj->{alff} = $args->{alff_main} || Alff::Main->new();
+#	FIXME: Should not be required anymore. (-> default_chain_policy)
+#	$obj->{alff} = $args->{alff_main} || Alff::Main->new();
 
 	$obj->checkConfig unless ( $args->{nocheck} );
 	$obj->sanitizeSecurityClasses();
@@ -142,15 +142,14 @@ sub checkConfig() { #{{{
 		}
 
 		elsif ( $fw_type eq "host" ) {
-			
 		}
 
 		elsif( $fw_type eq "bridge" ) {
-			print STDERR "The bridging mode is not supported by alff atm... Sorry!\n";
+			print STDERR "The bridging mode is not supported by alff atm... Sorry! (Patches are welcome of corse :)\n";
 			exit 1
 		}
 		else {
-			print STDERR "Error: fw_type has to be one of \"router\", \"host\" or \"bridge\"!\n";
+			print STDERR "Error: fw_type has to be one of \"router\", or \"bridge\"!\n";
 		}
 	}
 	else {
@@ -187,28 +186,32 @@ sub checkConfig() { #{{{
 	}
 	#}}}
 
-	# Check the default_chain_policy #{{{
-	if ( defined $self->{config}->{options}->{default_chain_policy} ) {
-
-		my $policy = $self->{config}->{options}->{default_chain_policy};
-
-		# Check if default_chain_policy is *not* on of {ACCEPT, DROP, REJECT, LOG}, and
-		# have a detailed look at the policy, if not.
-		# (Don't check end-of-word at REJECT and LOG because of possible options)
-		if ( ! ( $policy =~ m/^ACCEPT$|^DROP$|^LOG|^REJECT/ ) ) {
-			if ( ! $self->{alff}->chain_exists( $policy ) ) {
-				print STDERR "Error: Invalid default_chain_policy $policy, defaulting to REJECT\n";
-				$self->{config}->{options}->{default_chain_policy} = "REJECT";
-			}
-		} 
-	} else {
-		print STDERR "Warning: default_chain_policy not specified in config, defaulting to REJECT\n";	
-		$self->{config}->{options}->{default_chain_policy} = "REJECT";
-	}
-
-	print STDERR "INFO: default_chain_policy is set to \"$self->{config}->{options}->{default_chain_policy}\"\n" if ( $self->{debug} );
-
-	#}}}
+# FIXME: Do not remove old unused code for now, just comment it out.
+#	# Check the default_chain_policy #{{{
+#	if ( defined $self->{config}->{options}->{default_chain_policy} ) {
+#
+#		my $policy = $self->{config}->{options}->{default_chain_policy};
+#
+#		# Check if default_chain_policy is *not* on of {ACCEPT, DROP, REJECT, LOG}, and
+#		# have a detailed look at the policy, if not.
+#		# (Don't check end-of-word at REJECT and LOG because of possible options)
+#		if ( ! ( $policy =~ m/^ACCEPT$|^DROP$|^LOG|^REJECT/ ) ) {
+#			# XXX global option "default_chain_policy" for the classifyInterVlanTraffic plugins is deprechiated!
+#			# The plugin specific option "default_chain_target" is used now. So no check here.
+#			# (Nice synergy-effect: No Alff::Main required here anymore)
+#			#if ( ! $self->{alff}->chain_exists( $policy ) ) {
+#			#	print STDERR "Error: Invalid default_chain_policy $policy, defaulting to REJECT\n";
+#			#	$self->{config}->{options}->{default_chain_policy} = "REJECT";
+#			#}
+#		} 
+#	} else {
+#		print STDERR "Warning: default_chain_policy not specified in config, defaulting to REJECT\n";	
+#		$self->{config}->{options}->{default_chain_policy} = "REJECT";
+#	}
+#
+#	print STDERR "INFO: default_chain_policy is set to \"$self->{config}->{options}->{default_chain_policy}\"\n" if ( $self->{debug} );
+#
+#	#}}}
 
 } #}}}
 
@@ -257,7 +260,7 @@ sub sanitizeSecurityClasses() { #{{{
 #}}}
 
 ##
-# Ensure that the machine data is store beneith the machine id.
+# Ensure that the machine data is stored beneith the machine id.
 # The data structures only have to be fixed if only one machine is configured
 # in alff.conf
 sub sanitizeMachines() { # {{{
@@ -265,6 +268,7 @@ sub sanitizeMachines() { # {{{
 
 	# If a machine 'id' is defined and this is no ref, there is only
 	# one machine in alff.conf, we have to fix the resulting data structure
+	# to become a list with only one element to have a well-know state.
 	if ( defined $self->{config}->{machine}->{id}
 	     and not ref $self->{config}->{machine}->{id} ) {
 
@@ -284,13 +288,13 @@ sub sanitizeMachines() { # {{{
 #			    Basic config options			       #
 ################################################################################
 
-##
-# Get the default chain policy
-sub getDefaultChainPolicy() { #{{{
-	my $self = shift;
-
-	return $self->{config}->{options}->{default_chain_policy};
-} #}}}
+## FIXME: Do not remove obsolte function, but just comment it out.
+## Get the default chain policy
+#sub getDefaultChainPolicy() { #{{{
+#	my $self = shift;
+#
+#	return $self->{config}->{options}->{default_chain_policy};
+#} #}}}
 
 ##
 # Get a list of the configured DHCP servers
@@ -330,7 +334,7 @@ sub getConfigDir() { #{{{
 } #}}}
 
 ##
-# Get a list of all known securityClasses
+# Get a (sorted) list of all known securityClasses
 sub getSecurityClasses() { #{{{
 	my $self = shift;
 
@@ -343,7 +347,7 @@ sub isValidSecurityClass($) { #{{{
 	my $self = shift;
 	my $securityClass = shift;
 
-	return undef if ( ! $securityClass );
+	return undef if ( ! defined($securityClass) );
 
 	return grep { /^$securityClass$/ } @{$self->{config}->{allSecurityClasses}};
 } #}}}
@@ -353,8 +357,8 @@ sub isValidSecurityClass($) { #{{{
 ################################################################################
 
 ##
-# Return a list of known vlans
-sub getVlanList() { #{{{
+# Return a (sorted) list of known vlans
+sub getVlanList() { # -> ( list of vlans ){{{
 	my $self = shift;
 
 	return sort keys %{$self->{config}->{vlan}};
@@ -362,7 +366,7 @@ sub getVlanList() { #{{{
 
 ##
 # Check if a given vlan id represents a valid vlan id from alff.conf
-sub isValidVlan($) { #{{{
+sub isValidVlan($) { # $vlan_id -> {0, 1} {{{
 	my $self = shift;
 	my $vlan_id = shift;
 
@@ -370,8 +374,8 @@ sub isValidVlan($) { #{{{
 } #}}}
 
 ##
-# Return a list of all vlans of the specified security class
-sub getVlansOfSecurityClass($) { #{{{
+# Return a (sorted) list of all vlans of the specified security class
+sub getVlansOfSecurityClass($) { # -> ( list of vlans ){{{
 	my $self = shift;
 	my $securityClass = shift;
 	my @allSecurityClasses = @{$self->{config}->{allSecurityClasses}};
@@ -389,19 +393,19 @@ sub getVlansOfSecurityClass($) { #{{{
 		}
 	}
 
-	return @vlans;
+	return sort @vlans;
 } #}}}
 
 ##
 # Wrapper for getVlansOfSecurityClass for filtered vlans
-sub getFilteredVlans() { #{{{
+sub getFilteredVlans() { # -> ( list of vlans ) {{{
 	my $self = shift;
 	return $self->getVlansOfSecurityClass( "filtered" );
 } #}}}
 
 ##
 # Wrapper for getVlansOfSecurityClass for trusted vlans
-sub getTrustedVlans() { #{{{
+sub getTrustedVlans() { # -> ( list of vlans ){{{
 	my $self = shift;
 	return $self->getVlansOfSecurityClass( "trusted" );
 } #}}}
@@ -465,7 +469,7 @@ sub getVlanNetworks($) { # $vlan_id -> ( list of networks ) {{{
 
 ##
 # Return a list of all SecurityClasses of this vlan
-sub getSecurityClassesOfVlan($) { #{{{
+sub getSecurityClassesOfVlan($) { # -> ( list of vlans ){{{
 	my $self = shift;
 	my $vlan_id = shift;
 
@@ -481,7 +485,7 @@ sub getSecurityClassesOfVlan($) { #{{{
 
 ##
 # Get a list of all known machine IDs
-sub getMachineIDs() { #{{{
+sub getMachineIDs() { # ( list of machine ids ){{{
 	my $self = shift;
 
 	return sort keys %{$self->{config}->{machine}};
@@ -489,7 +493,7 @@ sub getMachineIDs() { #{{{
 
 ##
 # Check wether the given machine ID is valid.
-sub isValidMachineID { #{{{
+sub isValidMachineID { # ( $machine_id -> {0, 1}{{{
 	my $self = shift;
 	my $machine_ID = shift;
 
@@ -498,7 +502,7 @@ sub isValidMachineID { #{{{
 
 ##
 # Get the hostname for machine ID
-sub getMachineHostname($) { #{{{
+sub getMachineHostname($) { # $machine_id -> string {{{
 	my $self = shift;
 	my $machine_id = shift;
 
@@ -507,7 +511,7 @@ sub getMachineHostname($) { #{{{
 
 ##
 # Get the IP for the machine with the given ID
-sub getMachineIP($) { #{{{
+sub getMachineIP($) { # $machine_id -> string(ip) {{{
 	my $self = shift;
 	my $machine_id = shift;
 
@@ -520,7 +524,7 @@ sub getMachineIP($) { #{{{
 
 ##
 # Get a plugin config parameter
-sub getPluginOption($$) { #{{{
+sub getPluginOption($$) { # ( $plugin, $option ) -> string/ref {{{
 	my $self = shift;
 	my $plugin = shift;
 	my $option = shift;
