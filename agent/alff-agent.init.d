@@ -97,8 +97,8 @@ case "${1}" in
 			load_rules 2>&1 > "${LOGFILE}" && echo "Rules successfully loaded." || echo "FAILED!"
 		fi
 
-		if [ "${MAIL_LOG}" ]; then
-			mail -s "Alff agent startup log" ${MAIL_LOG} < "${LOGFILE}"
+		if [ "${MAIL_TO}" ]; then
+			mail -s "Alff agent startup log" ${MAIL_TO} < "${LOGFILE}"
 		fi
 		;;
 
@@ -113,8 +113,8 @@ case "${1}" in
 			flush_all 2>&1 > "${LOGFILE}" && echo "done." || echo "FAILED!"
 		fi
 
-		if [ "${MAIL_LOG}" ]; then
-			mail -s "Alff shutdown!" ${MAIL_LOG} < "${LOGFILE}"
+		if [ "${MAIL_TO}" ]; then
+			mail -s "Alff shutdown!" ${MAIL_TO} < "${LOGFILE}"
 		fi
 		;;
 
