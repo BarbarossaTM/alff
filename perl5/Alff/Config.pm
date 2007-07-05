@@ -532,7 +532,7 @@ sub getPluginOption($$) { # ( $plugin, $option ) -> string/ref {{{
 	# Sorry, no plugin configuration at all
 	return undef if ( ! defined $self->{config}->{plugins} );
 
-	# If there is no plugin config, there no option...
+	# If there is no plugin config, there is no option...
 	return undef if ( ! defined $self->{config}->{plugins}->{$plugin} );
 
 	# Ok there is something configured for this plugin, but not this option
