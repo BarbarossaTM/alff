@@ -15,9 +15,11 @@
 plugin_path="${1}"
 plugin_name=`basename "${1}"`
 
+my_name=`basename $0`
+
 function die() { # Nice little die function # {{{
 	local msg="$@"
-	echo " ERROR: alff generate: ${msg}" >&2
+	echo " ERROR: ${my_name}: ${msg}" >&2
 	# XXX This exitcode is required to tell xargs (which calls us) to stop processing of further plugins.
 	exit 255
 } #}}}
@@ -71,6 +73,7 @@ if [ ! -x "${plugin_path}" ]; then
 	
 		*)
 			echo " INFO: Plugin \"${plugin_name}\" is not executeable." >&2
+			exit 0
 	esac;
 fi
 
