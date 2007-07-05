@@ -32,8 +32,8 @@ my @vlans = $config->getVlanList;
 
 # The target to put into totally unconfigured chains
 my $default_chain_target = $config->getPluginOption( $plugin_name, "default_chain_target" ) || "REJECT";
-my $remove_empty_chains  = $config->getPluginOption( $plugin_name, "remove_empty_chains" ) || 0;
-my $force_x_to_x_chains  = $config->getPluginOption( $plugin_name, "force_x_to_x_chains" ) || 0;
+my $remove_empty_chains  = $config->getPluginOption( $plugin_name, "remove_empty_chains" )  || 0;
+my $force_x_to_x_chains  = $config->getPluginOption( $plugin_name, "force_x_to_x_chains" )  || 0;
 
 ################################################################################
 #			    Some nifty functions			       #
@@ -189,7 +189,7 @@ foreach my $src_vlan ( @vlans ) {
 	print ".";
 	foreach my $dst_vlan ( @vlans ) {
 		# Skip x <-> x rules (if not forced otherwise)
-		if ( $src_vlan eq $dst_vlan and not $force_x_to_x_chains ) {
+		if ( $src_vlan eq $dst_vlan and $force_x_to_x_chains ne "yes" ) {
 			next;
 		}
 
