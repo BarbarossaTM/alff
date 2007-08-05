@@ -44,10 +44,6 @@ fi
 
 ##
 # Check for bad karma # {{{
-if [ `dirname "${1}"` != "${PLUGIN_D}" ]; then
-	die "I refuse to execute a plugin not from plugin.d"
-fi
-
 if [ ! -f "${plugin_path}" -a ! -L "${plugin_path}" ]; then
 	die "Plugin with name \"${plugin_name}\" is neither a file nor a link. Are you sure this is OK?"
 fi
