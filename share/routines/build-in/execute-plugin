@@ -12,10 +12,30 @@
 #  -- Fri, 09 Feb 2007 18:09:41 +0100
 #
 
+my_name=`basename $0`
+
 plugin_path="${1}"
 plugin_name=`basename "${1}"`
 
-my_name=`basename $0`
+# Check Environment # {{{
+if [ ! "${PLUGIN_D}" ]; then
+	die "PLUGIN_D is not set but required."
+fi
+
+if [ ! "${CACHE_DIR_BUILD}" ]; then
+	die "CACHE_DIR_BUILD is not set but required."
+fi
+
+if [ ! -d "${CACHE_DIR_BUILD}" ]; then
+	die "CACHE_DIR_BUILD does not exist. This should not have happend."
+fi
+
+# Make plugin_path absolute if it is not
+if [ `echo ${plugin_path} | cut -c1` != '/' ]; then
+	plugin_path="${PLUGIN_D}/${plugin_path}"
+fi
+
+# }}}
 
 function die() { # Nice little die function # {{{
 	local msg="$@"
@@ -28,19 +48,6 @@ if [ ! "${1}" ]; then
 	die "Called without arguments."
 fi
 
-# Check Environment # {{{
-if [ ! "${CACHE_DIR_BUILD}" ]; then
-	die "CACHE_DIR_BUILD is not set but required."
-fi
-
-if [ ! -d "${CACHE_DIR_BUILD}" ]; then
-	die "CACHE_DIR_BUILD does not exist. This should not have happend."
-fi
-
-if [ ! "${PLUGIN_D}" ]; then
-	die "PLUGIN_D is not set but required."
-fi
-# }}}
 
 ##
 # Check for bad karma # {{{
