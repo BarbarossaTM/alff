@@ -239,7 +239,7 @@ while [ "$1" ]; do
 
 			if !  find "${PLUGIN_D}"  \( -type l -or -type f \) -exec basename {} \; | sort -n | while read plugin; do	
 					if [ -x "${PLUGIN_D}/${plugin}" ]; then
-						if ! sh -c "${PLUGIN_D}/${plugin}" 3> "${CACHE_DIR_BUILD}/${plugin}"; then
+						if ! "${ALFF_FUNCTION_DIR}/build-in/execute-plugin" "${plugin}"; then
 							echo "" >&2
 							echo "There occured errors while executing plugin ${plugin}." >&2
 							echo "Alff will stop rule generation now to avoid trouble." >&2
