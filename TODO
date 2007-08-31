@@ -11,7 +11,7 @@
 
  * Add munin-like autoconf option to plugins.
 
- * Write the 'Alff:Ruler' which will read the output of all plugins and
+ * Write the 'Alff::Ruler' which will read the output of all plugins and
    create an iptables-save like format.
    + This adds an easy possibility to remove unreferenced chains
    (see branch 'alff_ruler')
@@ -27,5 +27,12 @@
   + Add TRAP to handle problems and restore old ruleset.
 
  * alff.conf:
-  + Add information about routes for networks behind a router
-  + Think about possibility to generate network/interfaces from alff.conf
+  ? Add information about routes for networks behind a router
+  ? Think about possibility to generate network/interfaces from alff.conf
+   o <connected> {yes,no} </connected> for networks, to indicate if a network
+     is directly connected
+   o <ip_offset> [n] </ip_offset> for firewalls, to indicate that [n] has to be
+     added to the first IP of every network, an interface stanza is generated for.
+     Example: Network 192.168.0.0/24 with connected=yes and ip_offset=1 will result
+              in 192.168.0.2 as IP for that interface on that firewall machine.
+	      Rational: First IP is virtual and switched via VRRPD/Hearbteat/...
