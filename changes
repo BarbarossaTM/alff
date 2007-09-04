@@ -1,7 +1,12 @@
 Changes between v0.0.4 and v0.0.5:
- * Pushed plugin execution into a built-in routine to allow non-ascii-chars
-   in plugin name.
- *
+ * Renamed plugins to enforce naming convention:
+  + drop_spoofed_packets -> drop_spoofed_packets_
+ * 'alff setupPlugins' does work now.
+ * Updated some plugins to fix some more previously unhandled cases.
+ * Pushed plugin execution into a built-in routine
+ * Added plugin 'clear_table_' which will "iptables -F, -X, -Z" a given table.
+ * Fixed bug in enable_DHCP_relay_FORWARD to allow the DHCP server to answer
+   DHCP requests
 
 Changes between v0.0.3 and v0.0.4:
 

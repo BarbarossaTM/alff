@@ -1,3 +1,16 @@
+alff (0.0.5-1) unstable; urgency=low
+
+  * Renamed plugins to enforce naming convention:
+   + drop_spoofed_packets -> drop_spoofed_packets_
+  * 'alff setupPlugins' does work now.
+  * Updated some plugins to fix some more previously unhandled cases.
+  * Pushed plugin execution into a built-in routine
+  * Added plugin 'clear_table_' which will "iptables -F, -X, -Z" a given table.
+  * Fixed bug in enable_DHCP_relay_FORWARD to allow the DHCP server to answer
+    DHCP requests
+
+ -- Maximilian Wilhelm <max@rfc2324.org>  Tue, 04 Sep 2007 23:47:24 +0200
+
 alff (0.0.4-1) unstable; urgency=low
 
   * Depend on awk instead of gawk.
