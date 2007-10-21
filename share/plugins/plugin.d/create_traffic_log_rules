@@ -1,0 +1,74 @@
+#!/usr/bin/perl -w
+#
+# create_traffic_log_rules
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Sun, 21 Oct 2007 02:02:46 +0200
+#
+
+use strict;
+use Alff::Config;
+use Alff::Main;
+
+my $VERSION = 1.0;
+
+my $plugin_name = 'create_traffic_log_rules';
+
+
+#
+# Create instances of used objects
+my $alff = Alff::Main->new ();
+my $config = Alff::Config->new ()
+	or die "Error: could not load configuration.\n";
+
+#
+# Read plugin configuration options
+my $log_local_traffic = $config->getPluginOption ($plugin_name, "log_local_traffic");
+my $log_forwarded_traffic = $config->getPluginOption ($plugin_name, "log_forwarded_traffic");
+
+if (! defined $log_local_traffic) {
+	$log_local_traffic = 'yes';
+}
+
+if (! defined $log_forwarded_traffic) {
+	$log_forwarded_traffic = 'yes';
+}
+
+#
+# Store interface names in a hash
+my $interfaces = {};
+
+
+#
+# Get list of all known interfaces
+foreach my $vlan ($config->getVlanList ()) {
+	my $interface = $config->getVlanInterface ($vlan);
+
+	if ($interface) {
+		$interfaces->{$interface} = 42;
+	}
+}
+
+print " * Creating traffic logging rules... ";
+
+#
+# Create rules for all found interfaces
+foreach my $interface (sort keys %{$interfaces}) {
+	if ($log_local_traffic eq 'yes') {
+		$alff->write_line ("iptables -I INPUT -i $interface");
+		$alff->write_line ("iptables -I INPUT -o $interface");
+	}
+
+	if ($log_forwarded_traffic eq 'yes') {
+		$alff->write_line ("iptables -I FORWARD -i $interface");
+		$alff->write_line ("iptables -I FORWARD -o $interface");
+	}
+
+	print ".";
+}
+
+#
+# That`s it
+print " done.\n";
+
+# vim:foldmethod=marker
