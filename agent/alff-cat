@@ -82,13 +82,13 @@ function restore_old_rules() { #{{{
 function dump_tables() { # {{{
 	for table in ${DIFF_TABLES}; do
 		if ! iptables -t ${table} -L -v -n | sed -e 's/^[[:space:]]*[0-9]\+[KMG]\?[[:space:]]\+[0-9]\+[KMG]\?\(.*\)/    0     0\1/' \
-							-e 's/[0-9]\+[KMG]\? packets, [0-9]\+[KMG]\? bytes)/0 packets, 0 bytes)/' ; then	
+							-e 's/[0-9]\+[KMG]\? packets, [0-9]\+[KMG]\? bytes)/0 packets, 0 bytes)/' ; then
 			return 1
 		fi
 	done
 } #}}}
 
-# Save the current ruleset to $OLD_RULES_FILE and 
+# Save the current ruleset to $OLD_RULES_FILE and
 # save a zeroed iptables output dump to $OLD_RULES_FILE.iptables
 function dump_current_rules() { #{{{
 
@@ -135,9 +135,9 @@ The old rules have been restored."
 
 	cat <<- EOMAILHEADER > "${MAIL_FILE}"
 	Hi there!
-	
+
 	$TEXT
-	
+
 	EOMAILHEADER
 
 	# Diff ruleset in iptables format for the admin #{{{
@@ -150,7 +150,7 @@ The old rules have been restored."
 		if [ -s "${RULES_DIFF}" ]; then
 			# Diff of the ruleset
 			cat <<- EODIFF >> "${MAIL_FILE}"
-			
+
 			There are some differences:
 			================================================================================
 			EODIFF
@@ -165,25 +165,25 @@ The old rules have been restored."
 
 	if [ -s "${LOG_FILE}" ]; then #{{{
 		cat <<- EOF >> "${MAIL_FILE}"
-	
+
 		There's something in the logfile (catched from stdout):
 		==============================================================================
 		EOF
-		
+
 		cat "${LOG_FILE}" >> "${MAIL_FILE}"
-	
+
 		echo -e "==============================================================================\n" >> "${MAIL_FILE}"
 	fi #}}}
 
 	if [ -s "${ERROR_LOG}" ]; then #{{{
 		cat <<- EOF >> "${MAIL_FILE}"
-		
+
 		There's something in the error log (catched from stderr):
 		==============================================================================
 		EOF
-		
+
 		cat "${ERROR_LOG}" >> "${MAIL_FILE}"
-		
+
 		echo -e "==============================================================================\n" >> "${MAIL_FILE}"
 	fi #}}}
 
@@ -268,7 +268,7 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 	if [ "${STATUS}" != 'fail' ]; then
 		# Wait for deletion of the rules-dont-work-token.
 		sleep ${SLEEP_TIME:-180}
-	
+
 		# Chillin' time is over... do we have to do a restore?
 		if [ -f "${DELETE_ME_TOKEN}" ]; then
 			# Oh, something went wrong... Let´s restore the old rules
@@ -284,5 +284,5 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 
 	rm -- "${LOG_FILE}" "${ERROR_LOG}" "${MAIL_FILE}" "${RULES_DIFF}"
 ) &
-	
+
 # vim:foldmethod=marker
