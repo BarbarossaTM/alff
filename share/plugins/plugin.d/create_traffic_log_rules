@@ -42,10 +42,13 @@ my $interfaces = {};
 #
 # Get list of all known interfaces
 foreach my $vlan ($config->getVlanList ()) {
-	my $interface = $config->getVlanInterface ($vlan);
+	my @ints = $config->getVlanInterfaces ($vlan);
 
-	if ($interface) {
-		$interfaces->{$interface} = 42;
+	foreach my $interface ( @ints )
+	{
+		if ($interface) {
+			$interfaces->{$interface} = 42;
+		}
 	}
 }
 

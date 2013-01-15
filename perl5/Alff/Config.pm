@@ -429,21 +429,25 @@ sub isFilteredVlan($) { # $vlan_id -> {0, 1} {{{
 } # }}}
 
 ##
-# return the interface name for vlan $vlan, "" if unset 
-sub getVlanInterface($) { # $vlan_id -> string  {{{
+# return the interface names for vlan $vlan, "" if unset 
+sub getVlanInterfaces($) { # $vlan_id -> string  {{{
 	my $self = shift;
 
 	my $vlan_id = shift;
 	my $vlan_ref = $self->{config}->{vlan}->{$vlan_id};
 
 	# If $vlan_id is not configured, there surely is no interface for it
-	return "" unless ( defined $vlan_ref );
+	return ( undef ) unless ( defined $vlan_ref );
 
 	# $vlan_id exists, but <interface> is unset...
-	return "" unless ( exists $vlan_ref->{interface} );
+	return ( undef ) unless ( exists $vlan_ref->{interface} );
 	
-	# Ok, <interface> is set, return it.
-	return $vlan_ref->{interface};
+	# Ok, <interface> is set
+	if ( ref( $vlan_ref->{interface} ) ) {
+		return @{$vlan_ref->{interface}};
+	} else {
+		return ( $vlan_ref->{interface} );
+	}
 } #}}}
 
 ##

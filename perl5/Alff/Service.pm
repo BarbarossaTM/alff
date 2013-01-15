@@ -90,16 +90,19 @@ sub allowServiceFromNetworksOfSecurityClass($) { #{{{
 			# Could be multiple networks
 			my @networks = $config->getVlanNetworks( $vlan );
 			# Maybe there is an interface specified
-			my $interface = $config->getVlanInterface( $vlan );
+			my @interfaces = $config->getVlanInterfaces( $vlan );
 
-			my $chain_rule = "iptables -A FORWARD ";
-			if ( $interface ) {
-				$chain_rule .= " -i $interface ";
+			foreach my $interface (@interfaces)
+			{
+				my $chain_rule = "iptables -A FORWARD ";
+				if ($interface) {
+					$chain_rule .= " -i $interface ";
+				}
+				foreach my $network ( @networks ) { 
+	                        	$main->write_line( "${chain_rule} -s ${network} -j $chain" );
+	                        }
 			}
 
-			foreach my $network ( @networks ) { 
-				$main->write_line( "${chain_rule} -s ${network} -j $chain" );
-			}
 			print ".";
 
 		}

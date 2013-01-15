@@ -48,9 +48,9 @@ sub classifyTrafficFromTo($$) { #{{{
 	my $chain = $src_vlan . "_to_" . $dst_vlan;
 
 	# Try to get interface names
-	my $src_interface = $config->getVlanInterface( $src_vlan );
-	my $dst_interface = $config->getVlanInterface( $dst_vlan );
-
+	my @src_interfaces = $config->getVlanInterfaces( $src_vlan );
+	my @dst_interfaces = $config->getVlanInterfaces( $dst_vlan );
+	
 	# There might be multiple CIDR networks which describe a vlan...
 	# It´s no risk to asume this everytime.
 	my @src_networks = $config->getVlanNetworks( $src_vlan );
@@ -62,26 +62,40 @@ sub classifyTrafficFromTo($$) { #{{{
 	# Not that good runtime(?), but...
 	foreach my $src_network ( @src_networks ) {
 		foreach my $dst_network ( @dst_networks ) {
+			foreach my $dst_interface ( @dst_interfaces ) {
+				foreach my $src_interface ( @src_interfaces ) {
 
-			# Build up the command line
-			my $commandline = "iptables -A FORWARD -s $src_network ";
-
-			if ( $config->getOption( "fw_type" ) eq "router" ) {
-				$commandline .= " -i $src_interface " if ( $src_interface );
-				$commandline .= " -o $dst_interface " if ( $dst_interface );
-			}	
-			elsif( $config->getOption( "fw_type" ) eq "bridge" ) {
-				if ( $src_interface || $dst_interface ) {
-					$commandline .= " -m physdev ";
-					$commandline .= " --physdev-in $src_interface " if ( $src_interface );
-					$commandline .= " --physdev-out $dst_interface " if ( $dst_interface );
+					# Build up the command line
+					my $commandline = "iptables -A FORWARD ";
+		
+					if ($src_network =~ m/!/) {
+							$src_network =~ s/!//;
+							$commandline .= " ! ";
+					}
+					$commandline .= " -s $src_network ";
+		
+					if ( $config->getOption( "fw_type" ) eq "router" ) {
+						$commandline .= " -i $src_interface " if ( $src_interface );
+						$commandline .= " -o $dst_interface " if ( $dst_interface );
+					}	
+					elsif( $config->getOption( "fw_type" ) eq "bridge" ) {
+						if ( $src_interface || $dst_interface ) {
+							$commandline .= " -m physdev ";
+							$commandline .= " --physdev-in $src_interface " if ( $src_interface );
+							$commandline .= " --physdev-out $dst_interface " if ( $dst_interface );
+						}
+						$commandline .= " -m mark --mark $src_vlan ";
+					}
+		
+					if ($dst_network =~ m/!/) {
+						$dst_network =~ s/!//;
+						$commandline .= " ! ";
+					}
+					$commandline .= " -d $dst_network -j $chain";
+		
+					$alff->write_line( $commandline );
 				}
-				$commandline .= " -m mark --mark $src_vlan ";
 			}
-
-			$commandline .= " -d $dst_network -j $chain";
-
-			$alff->write_line( $commandline );
 		}
 	}
 
