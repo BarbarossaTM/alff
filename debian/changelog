@@ -1,3 +1,9 @@
+alff (0.0.6-2) unstable; urgency=low
+
+  * fixed error while generating inter vlan rules
+
+ -- Michael Schwarz <schwarz@upb.de>  Tue, 13 Mar 2013 15:51:23 +0100
+
 alff (0.0.6-1) unstable; urgency=low
 
   * added support for multiple interfaces at one vlan definition

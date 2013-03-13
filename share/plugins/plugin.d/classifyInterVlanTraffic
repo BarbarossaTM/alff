@@ -63,6 +63,10 @@ sub classifyTrafficFromTo($$) { #{{{
 	foreach my $src_network ( @src_networks ) {
 		foreach my $dst_network ( @dst_networks ) {
 			foreach my $dst_interface ( @dst_interfaces ) {
+				# create backup of dst and src network
+				my $src_network_bak = $src_network;
+				my $dst_network_bak = $dst_network;
+
 				foreach my $src_interface ( @src_interfaces ) {
 
 					# Build up the command line
@@ -94,6 +98,11 @@ sub classifyTrafficFromTo($$) { #{{{
 					$commandline .= " -d $dst_network -j $chain";
 		
 					$alff->write_line( $commandline );
+
+					# restore old networks
+					$src_network = $src_network_bak;
+					$dst_network = $dst_network_bak;
+
 				}
 			}
 		}
