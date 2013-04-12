@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Execute an alff plugin and redirect fd3 to an outfile named like $1.
 #

@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 #
 # Flush all chains in the given table, remove all non-build-in chains
 # and zero all counters in the build-in chains.
