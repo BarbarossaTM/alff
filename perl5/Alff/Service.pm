@@ -75,7 +75,7 @@ sub allowServiceFromNetworksOfSecurityClass($) { #{{{
 	my $config = $self->{config};
 	my $main = $self->{alff_main};
 
-	my $chain = "allowServicesFrom" . ucfirst ${securityClass} . "Nets";
+	my $chain = "allowSrvFrom" . ucfirst ${securityClass} . "Nets";
 	my @vlans = $config->getVlansOfSecurityClass( $securityClass );
 
 	if ( scalar( @vlans ) > 0 ) {
@@ -238,7 +238,7 @@ sub generateServiceChain($) { #{{{
 		# search for security classes
 		if ( $config_key =~ m/allow_from_(\w+)_networks/ && $serviceconfig->{$config_key} eq "yes" ) {
 			my $sec_class = $1;
-			my $sec_class_chain = "allowServicesFrom" . ucfirst( $sec_class ) . "Nets";
+			my $sec_class_chain = "allowSrvFrom" . ucfirst( $sec_class ) . "Nets";
 
 			if ( $alff->chain_exists( $sec_class_chain ) ) {
 				$alff->write_line( "iptables -A $sec_class_chain -j $srv_chain" );

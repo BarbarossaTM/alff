@@ -40,7 +40,7 @@ if ( $debug ) {
 
 print " * Creating security class chains...\n";
 foreach my $secClass ( @securityClasses ) {
-	my $chain = "allowServicesFrom" . ucfirst( ${secClass} ) . "Nets";
+	my $chain = "allowSrvFrom" . ucfirst( ${secClass} ) . "Nets";
 	print "  - $chain\n" if ( $debug );
 	$alff_main->create_chain( $chain );
 }
