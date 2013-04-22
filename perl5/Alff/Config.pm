@@ -514,13 +514,24 @@ sub getMachineHostname($) { # $machine_id -> string {{{
 } #}}}
 
 ##
-# Get the IP for the machine with the given ID
+# Get the IPv4 address for the machine with the given ID
 sub getMachineIP($) { # $machine_id -> string(ip) {{{
 	my $self = shift;
 	my $machine_id = shift;
 
 	return $self->isValidMachineID( $machine_id ) ? $self->{config}->{machine}->{$machine_id}->{ip} : undef;
 } #}}}
+
+##
+# Get the IPv6 address for the machine with the given ID
+sub getMachineIP6($) { # $machine_id -> string(ip) {{{
+	my $self = shift;
+	my $machine_id = shift;
+
+	return $self->isValidMachineID( $machine_id ) ? $self->{config}->{machine}->{$machine_id}->{ip6} : undef;
+} #}}}
+
+
 
 ################################################################################
 #				Plugin configuration			       #

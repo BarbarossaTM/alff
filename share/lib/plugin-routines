@@ -62,6 +62,11 @@ cat << EOF >&3
 if ! iptables -t ${table} -F ${chain} >/dev/null 2>&1; then
 	iptables -t ${table} -N ${chain}
 fi
+
+if ! ip6tables -t ${table} -F ${chain} >/dev/null 2>&1; then
+	ip6tables -t ${table} -N ${chain}
+fi
+
 EOF
 	fi
 } #}}}

@@ -14,6 +14,7 @@ $VERSION="1.0";
 use strict;
 use File::Basename;
 use IO::Handle;
+use Net::IP;
 
 # Default table for chain handling functions if none specified
 my $default_table = 'filter';
@@ -114,6 +115,7 @@ sub create_chain($) { # create_chain( chain_name [, table_name] ) #{{{
 	}
 
 	print $output_fh "iptables -t $table -N $chain\n";
+	print $output_fh "ip6tables -t $table -N $chain\n";
 } #}}}
 
 ##
@@ -127,6 +129,16 @@ sub chain_exists($) { # chain_exists( chain_name [, table_name] ) #{{{
 
 	return ( -f $chain_file );
 }
+
+##
+# Check if given ip is of version 4 or 6
+sub getIpVersion($) { # getIpVersion( ip ) #{{{
+	my $self = shift;
+	my $ip = shift;
+	my @ip = split('/', $ip);
+	my $net_ip = new Net::IP ($ip[0]) || return 0;
+	return $net_ip->version();
+} #}}}
 
 1;
 # vim:foldmethod=marker:

@@ -95,12 +95,21 @@ sub allowServiceFromNetworksOfSecurityClass($) { #{{{
 			foreach my $interface (@interfaces)
 			{
 				my $chain_rule = "iptables -A FORWARD ";
+				my $chain6_rule = "ip6tables -A FORWARD ";
 				if ($interface) {
 					$chain_rule .= " -i $interface ";
+					$chain6_rule .= " -i $interface ";
 				}
 				foreach my $network ( @networks ) { 
-	                        	$main->write_line( "${chain_rule} -s ${network} -j $chain" );
+					if($main->getIpVersion($network) == 4) {
+		                        	$main->write_line( "${chain_rule} -s ${network} -j $chain" );
+					} elsif($main->getIpVersion($network) == 6) {
+						$main->write_line( "${chain6_rule} -s ${network} -j $chain" );
+					} else {
+						print "ERROR: this is not a valid ipv4/6 network: $network\n";
+					}
 	                        }
+
 			}
 
 			print ".";
@@ -121,7 +130,9 @@ sub allowWorldOpenServices() { #{{{
 	my $main = $self->{alff_main};
 
 	print " * Creating rule to allow access to services configured to be world-wide available...";
-	print $main->write_line("iptables -A FORWARD -j allowWorldOpenServices") ? "done.\n" : "FAILED\n";
+	print $main->write_line("iptables -A FORWARD -j allowWorldOpenServices") ? "done (v4). " : "FAILED (v4) ";
+	print $main->write_line("ip6tables -A FORWARD -j allowWorldOpenServices") ? "done (v6). " : "FAILED (v6) ";
+	print "\n";
 } #}}}
 
 ################################################################################
@@ -221,15 +232,34 @@ sub generateServiceChain($) { #{{{
 		chomp $server;
 		next if ( $server eq "" );
 
-		foreach my $service_port ( @valid_ports ) {
-			# Beware of to much spaces in config file...
-			chomp $service_port;
-			next if ( $service_port eq "" );
+		if ( $alff->getIpVersion($server) == 4 )
+		{
+			# Its an ipv4 host
+			foreach my $service_port ( @valid_ports ) {
+				# Beware of to much spaces in config file...
+				chomp $service_port;
+				next if ( $service_port eq "" );
 
-			if ( $service_port =~ m/([[:digit:]:]+)\/(tcp|udp)/ ) {
-				my ( $port, $proto ) = ( $1, $2 );
-				$alff->write_line( "iptables -A $srv_chain -p $proto -d $server --dport $port -j ACCEPT" );
+				if ( $service_port =~ m/([[:digit:]:]+)\/(tcp|udp)/ ) {
+					my ( $port, $proto ) = ( $1, $2 );
+					$alff->write_line( "iptables -A $srv_chain -p $proto -d $server --dport $port -j ACCEPT" );
+				}
 			}
+		} elsif ( $alff->getIpVersion($server) == 6 )
+		{
+			# let's assume this is an ipv6 host
+			foreach my $service_port ( @valid_ports ) {
+				# Beware of to much spaces in config file...
+				chomp $service_port;
+				next if ( $service_port eq "" );
+
+				if ( $service_port =~ m/([[:digit:]:]+)\/(tcp|udp)/ ) {
+					my ( $port, $proto ) = ( $1, $2 );
+					$alff->write_line( "ip6tables -A $srv_chain -p $proto -d $server --dport $port -j ACCEPT" );
+				}
+			}
+		} else {
+			print "ERROR: this is not a valid ipv4/6 address: $server\n";
 		}
 	}
 
@@ -242,6 +272,7 @@ sub generateServiceChain($) { #{{{
 
 			if ( $alff->chain_exists( $sec_class_chain ) ) {
 				$alff->write_line( "iptables -A $sec_class_chain -j $srv_chain" );
+				$alff->write_line( "ip6tables -A $sec_class_chain -j $srv_chain" );
 			} else {
 				print STDERR "Error: Service $service should be accessable from undefined security class $sec_class, skipping...\n";
 			}
@@ -251,6 +282,7 @@ sub generateServiceChain($) { #{{{
 	# public accessable service?
 	if ( defined $serviceconfig->{allow_from_world} and $serviceconfig->{allow_from_world} eq "yes" ) {
 		$alff->write_line( "iptables -A allowWorldOpenServices -j $srv_chain" );
+		$alff->write_line( "ip6tables -A allowWorldOpenServices -j $srv_chain" );
 	}
 } #}}}
 
