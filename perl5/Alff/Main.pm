@@ -135,8 +135,10 @@ sub chain_exists($) { # chain_exists( chain_name [, table_name] ) #{{{
 sub getIpVersion($) { # getIpVersion( ip ) #{{{
 	my $self = shift;
 	my $ip = shift;
-	my @ip = split('/', $ip);
-	my $net_ip = new Net::IP ($ip[0]) || return 0;
+	$ip =~ s/!//; # strip negation
+	$ip =~ s/^\s+|\s+$//g; # strip whitespaces
+	$ip =~ s/\/.+$//; # strip netmask
+	my $net_ip = new Net::IP ($ip) || return 0;
 	return $net_ip->version();
 } #}}}
 
