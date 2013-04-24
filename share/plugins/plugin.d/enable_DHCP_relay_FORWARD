@@ -27,12 +27,22 @@ print " * Allowing DHCP traffic to configured DHCP servers... ";
 $alff->create_chain( $chain );
 
 $alff->write_line("iptables -A FORWARD -p udp --sport 67:68 --dport 67:68 -j $chain");
+$alff->write_line("ip6tables -A FORWARD -p udp --sport 546:547 --dport 546:547 -j $chain");
 
 foreach my $dhcp_server ( @dhcp_servers ) {
-	$alff->write_line("iptables -A $chain -d $dhcp_server -p udp --sport 68 --dport 67 -j ACCEPT");
-	$alff->write_line("iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 68 -j ACCEPT");
-	# This is neccessary if your firewall isn´t a dhcprelay itself
-	$alff->write_line("iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 67 -j ACCEPT");
+	if($alff->getIpVersion($dhcp_server) == 4) {
+		$alff->write_line("iptables -A $chain -d $dhcp_server -p udp --sport 68 --dport 67 -j ACCEPT");
+		$alff->write_line("iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 68 -j ACCEPT");
+		# This is neccessary if your firewall isn´t a dhcprelay itself
+		$alff->write_line("iptables -A $chain -s $dhcp_server -p udp --sport 67 --dport 67 -j ACCEPT");
+	} elsif ($alff->getIpVersion($dhcp_server) == 6) {
+		$alff->write_line("ip6tables -A $chain -d $dhcp_server -p udp --sport 546 --dport 547 -j ACCEPT");
+		$alff->write_line("ip6tables -A $chain -s $dhcp_server -p udp --sport 547 --dport 546 -j ACCEPT");
+		# This is neccessary if your firewall isn´t a dhcprelay itself
+		$alff->write_line("ip6tables -A $chain -s $dhcp_server -p udp --sport 547 --dport 547 -j ACCEPT");
+	} else {
+		print "ERROR: can't determine ip version of dhcp server $dhcp_server\n";
+	}
 		
 }
 print "done.\n";
