@@ -19,6 +19,7 @@ my $allow_icmp = $config->getOption( "allow_icmp" );
 
 $alff->create_chain( $chain );
 $alff->write_line("iptables -A FORWARD -p icmp -j $chain");
+$alff->write_line("ip6tables -A FORWARD -p icmpv6 -j $chain");
 
 # ICMP (partly) allowed
 if ( $allow_icmp ne "none" ) {
