@@ -28,6 +28,7 @@ if [ "${chain}" ]; then
 	if [ "${valid_chain}" = 'true' ]; then
 		echo " * Creating rule to DROP spoofed packets... "
 		echo "iptables -A ${chain} -j spoofcheck" >&3
+		echo "ip6tables -A ${chain} -j spoofcheck" >&3
 	else
 		echo "Error: Chain \"spoofcheck\" does not exist, but should be hooked in into ${chain}!">&2
 	fi

@@ -43,3 +43,28 @@ iptables -A spoofcheck -p all -i ! lo -s 127.0.0.0/8 -j LOG --log-prefix "alff s
 iptables -A spoofcheck -p all -i ! lo -s 127.0.0.0/8 -j DROP
 
 EOF
+
+# do the same for ipv6
+cat << EOF >&3
+##
+# Some sample networks to block, there might be more
+
+##
+# site local unicast is deprecated (RFC3879)
+ip6tables -A spoofcheck -p all -i ! lo -s fec0::/10 -j LOG --log-prefix "alff spoofed: "
+ip6tables -A spoofcheck -p all -i ! lo -s fec0::/10 -j DROP
+
+##
+# Uniqe local unicast (RFC4193) should be opt in
+ip6tables -A spoofcheck -p all -i ! lo -s fc00::/7 -j LOG --log-prefix "alff spoofed: "
+ip6tables -A spoofcheck -p all -i ! lo -s fc00::/7 -j DROP
+
+##
+# Some more deprecated networks
+
+##
+# ipv4 compability, deprecated by RFC4291
+ip6tables -A spoofcheck -p all -i ! lo -s ::/96 -j LOG --log-prefix "alff spoofed: "
+ip6tables -A spoofcheck -p all -i ! lo -s ::/96 -j DROP
+
+EOF
