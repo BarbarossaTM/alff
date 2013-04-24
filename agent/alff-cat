@@ -19,6 +19,7 @@ export LOG_FILE=`tempfile`
 export ERROR_LOG=`tempfile`
 export MAIL_FILE=`tempfile`
 export RULES_DIFF=`tempfile`
+export RULES_V6_DIFF=`tempfile`
 
 # Try to load configuration
 if [ -f /etc/alff/alff-agent.conf ]; then
@@ -77,6 +78,7 @@ function emergency_break() { #{{{
 function restore_old_rules() { #{{{
 	echo -n "Retoring old ruleset..."
 	iptables-restore < "${OLD_RULES_FILE}" && echo "done."
+	ip6tables-restore < "${OLD_RULES_FILE_V6}" && echo "done."
 } #}}}
 
 function dump_tables() { # {{{
@@ -84,6 +86,17 @@ function dump_tables() { # {{{
 		if ! iptables -t ${table} -L -v -n | sed -e 's/^[[:space:]]*[0-9]\+[KMG]\?[[:space:]]\+[0-9]\+[KMG]\?\(.*\)/    0     0\1/' \
 							-e 's/[0-9]\+[KMG]\? packets, [0-9]\+[KMG]\? bytes)/0 packets, 0 bytes)/' ; then
 			return 1
+		fi
+	done
+} #}}}
+
+function dump_v6_tables() { # {{{
+	for table in ${DIFF_TABLES}; do
+		if [ $table != "nat" ] ; then 
+			if ! ip6tables -t ${table} -L -v -n | sed -e 's/^[[:space:]]*[0-9]\+[KMG]\?[[:space:]]\+[0-9]\+[KMG]\?\(.*\)/    0     0\1/' \
+								-e 's/[0-9]\+[KMG]\? packets, [0-9]\+[KMG]\? bytes)/0 packets, 0 bytes)/' ; then
+				return 1
+			fi
 		fi
 	done
 } #}}}
@@ -96,10 +109,15 @@ function dump_current_rules() { #{{{
 	if ! iptables-save > "${OLD_RULES_FILE}"; then
 		return 1
 	fi
+        if ! ip6tables-save > "${OLD_RULES_FILE_V6}"; then
+                return 1
+        fi
+
 
 	# Save rules in iptables-print-format for possible diff
 	if [ "${DIFF_TABLES}" ]; then
 		dump_tables > "${OLD_RULES_FILE}.iptables"
+		dump_v6_tables > "${OLD_RULES_FILE}.ip6tables"
 	fi
 } #}}}
 
@@ -144,14 +162,16 @@ The old rules have been restored."
 	if [ "${1}" = 'success' -a "${DIFF_TABLES}" ]; then
 
 		dump_tables > "${CURRENT_RULES_FILE}.iptables"
+		dump_v6_tables > "${CURRENT_RULES_FILE}.ip6tables"
 
 		diff -Nup "${OLD_RULES_FILE}.iptables" "${CURRENT_RULES_FILE}.iptables" > "${RULES_DIFF}"
+		diff -Nup "${OLD_RULES_FILE}.ip6tables" "${CURRENT_RULES_FILE}.ip6tables" > "${RULES_V6_DIFF}"
 
 		if [ -s "${RULES_DIFF}" ]; then
 			# Diff of the ruleset
 			cat <<- EODIFF >> "${MAIL_FILE}"
 
-			There are some differences:
+			There are some differences in the IPv4 rules:
 			================================================================================
 			EODIFF
 
@@ -159,8 +179,24 @@ The old rules have been restored."
 
 			echo -e "==============================================================================\n" >> "${MAIL_FILE}"
 		else
-			echo -e "\n There are no differences in the rules. \n" >> "${MAIL_FILE}"
+			echo -e "\n There are no differences in the IPv4 rules. \n" >> "${MAIL_FILE}"
 		fi
+
+		if [ -s "${RULES_V6_DIFF}" ]; then
+			# Diff of the ruleset
+			cat <<- EODIFF >> "${MAIL_FILE}"
+
+			There are some differences in the IPv6 rules:
+			================================================================================
+			EODIFF
+
+			cat "${RULES_V6_DIFF}" >> "${MAIL_FILE}"
+
+			echo -e "==============================================================================\n" >> "${MAIL_FILE}"
+		else
+			echo -e "\n There are no differences in the IPv6 rules. \n" >> "${MAIL_FILE}"
+		fi
+	
 	fi #}}}
 
 	if [ -s "${LOG_FILE}" ]; then #{{{
@@ -282,7 +318,7 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 
 	send_mail ${STATUS}
 
-	rm -- "${LOG_FILE}" "${ERROR_LOG}" "${MAIL_FILE}" "${RULES_DIFF}"
+	rm -- "${LOG_FILE}" "${ERROR_LOG}" "${MAIL_FILE}" "${RULES_DIFF}" "${RULES_DIFF}"
 ) &
 
 # vim:foldmethod=marker

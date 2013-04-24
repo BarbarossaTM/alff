@@ -43,6 +43,23 @@ function flush_all() { #{{{
 	iptables -t mangle -X
 	iptables -t mangle -Z
 	#}}}
+
+	# And the same for ipv6
+	# Reset filter chains #{{{
+	ip6tables -t filter -P INPUT ACCEPT
+	ip6tables -t filter -P OUTPUT ACCEPT
+	ip6tables -t filter -P FORWARD ACCEPT
+	ip6tables -t filter -F
+	ip6tables -t filter -X
+	ip6tables -t filter -Z
+	#}}}
+
+	# Reset mangle chains #{{{
+	ip6tables -t mangle -F
+	ip6tables -t mangle -X
+	ip6tables -t mangle -Z
+	#}}}
+
 }
 #}}}
 
@@ -55,6 +72,9 @@ function load_rules() { #{{{
 		echo "rules were not approved. Trying to load the old rules to avoid trouble..." >&2
 		if [ -f "${OLD_RULES_FILE}" ]; then
 			iptables-restore < "${OLD_RULES_FILE}"
+		fi
+		if [ -f "${OLD_RULES_FILE_V6}" ]; then
+			ip6tables-restore < "${OLD_RULES_FILE_V6}"
 		fi
 
 	# OK, everything looks good, just load the ruleset if there is any
