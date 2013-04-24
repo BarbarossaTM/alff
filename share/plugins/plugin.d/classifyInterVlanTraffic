@@ -61,48 +61,58 @@ sub classifyTrafficFromTo($$) { #{{{
 
 	# Not that good runtime(?), but...
 	foreach my $src_network ( @src_networks ) {
+		my $src_network_version = $alff->getIpVersion($src_network);
 		foreach my $dst_network ( @dst_networks ) {
-			foreach my $dst_interface ( @dst_interfaces ) {
-				# create backup of dst and src network
-				my $src_network_bak = $src_network;
-				my $dst_network_bak = $dst_network;
+			if($src_network_version == $alff->getIpVersion($dst_network)) {
+				foreach my $dst_interface ( @dst_interfaces ) {
+					# create backup of dst and src network
+					my $src_network_bak = $src_network;
+					my $dst_network_bak = $dst_network;
 
-				foreach my $src_interface ( @src_interfaces ) {
+					foreach my $src_interface ( @src_interfaces ) {
 
-					# Build up the command line
-					my $commandline = "iptables -A FORWARD ";
-		
-					if ($src_network =~ m/!/) {
-							$src_network =~ s/!//;
-							$commandline .= " ! ";
-					}
-					$commandline .= " -s $src_network ";
-		
-					if ( $config->getOption( "fw_type" ) eq "router" ) {
-						$commandline .= " -i $src_interface " if ( $src_interface );
-						$commandline .= " -o $dst_interface " if ( $dst_interface );
-					}	
-					elsif( $config->getOption( "fw_type" ) eq "bridge" ) {
-						if ( $src_interface || $dst_interface ) {
-							$commandline .= " -m physdev ";
-							$commandline .= " --physdev-in $src_interface " if ( $src_interface );
-							$commandline .= " --physdev-out $dst_interface " if ( $dst_interface );
+						# Build up the command line
+						my $commandline = "";
+						if($src_network_version == 4) {
+							$commandline .= "iptables -A FORWARD ";
+						} elsif($src_network_version == 6) {
+							$commandline .= "ip6tables -A FORWARD ";
+						} else {
+							$commandline .= "# $src_network isn't a known network ";
 						}
-						$commandline .= " -m mark --mark $src_vlan ";
-					}
-		
-					if ($dst_network =~ m/!/) {
-						$dst_network =~ s/!//;
-						$commandline .= " ! ";
-					}
-					$commandline .= " -d $dst_network -j $chain";
-		
-					$alff->write_line( $commandline );
+			
+						if ($src_network =~ m/!/) {
+								$src_network =~ s/!//;
+								$commandline .= " ! ";
+						}
+						$commandline .= " -s $src_network ";
+			
+						if ( $config->getOption( "fw_type" ) eq "router" ) {
+							$commandline .= " -i $src_interface " if ( $src_interface );
+							$commandline .= " -o $dst_interface " if ( $dst_interface );
+						}	
+						elsif( $config->getOption( "fw_type" ) eq "bridge" ) {
+							if ( $src_interface || $dst_interface ) {
+								$commandline .= " -m physdev ";
+								$commandline .= " --physdev-in $src_interface " if ( $src_interface );
+								$commandline .= " --physdev-out $dst_interface " if ( $dst_interface );
+							}
+							$commandline .= " -m mark --mark $src_vlan ";
+						}
+			
+						if ($dst_network =~ m/!/) {
+							$dst_network =~ s/!//;
+							$commandline .= " ! ";
+						}
+						$commandline .= " -d $dst_network -j $chain";
+			
+						$alff->write_line( $commandline );
 
-					# restore old networks
-					$src_network = $src_network_bak;
-					$dst_network = $dst_network_bak;
+						# restore old networks
+						$src_network = $src_network_bak;
+						$dst_network = $dst_network_bak;
 
+					}
 				}
 			}
 		}
@@ -167,6 +177,7 @@ sub loadChainRules($$) { # {{{
 	if ( $load_count == 0 ) {
 		print STDERR "INFO: No rules found for chain $chain, setting the default_chain_target...\n" if ( $debug );
 		$alff->write_line( "iptables -A $chain -j $default_chain_target" );
+		$alff->write_line( "ip6tables -A $chain -j $default_chain_target" );
 	}
 } #}}}
 

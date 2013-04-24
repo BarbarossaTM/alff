@@ -13,4 +13,8 @@ iptables -A INPUT -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "al
 iptables -A INPUT -p tcp -j REJECT --reject-with tcp-reset
 iptables -A INPUT -j REJECT --reject-with icmp-admin-prohibited
 
+ip6tables -A INPUT -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "alff incoming: "
+ip6tables -A INPUT -p tcp -j REJECT --reject-with tcp-reset
+ip6tables -A INPUT -j REJECT --reject-with icmp6-adm-prohibited
+
 EOF

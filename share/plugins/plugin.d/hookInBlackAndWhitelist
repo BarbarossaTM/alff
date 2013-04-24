@@ -18,6 +18,7 @@ for chain in ${CHAINS}; do
 	fi
 
 	echo "iptables -A FORWARD -j ${chain}" >&3
+	echo "ip6tables -A FORWARD -j ${chain}" >&3
 done
 
 echo " done."

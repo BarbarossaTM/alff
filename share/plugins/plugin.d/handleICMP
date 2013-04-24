@@ -40,3 +40,6 @@ if ( $allow_icmp ne "none" ) {
 	print " * Rejecting all icmp traffic!\n";
 	$alff->write_line("iptables -A $chain -p icmp -j REJECT --reject-with icmp-admin-prhobited");		# REJECT everything genlty
 }
+
+# Fuer IPv6 ist ICMP notwendig!
+$alff->write_line("ip6tables -A $chain -p icmp6 -j ACCEPT");

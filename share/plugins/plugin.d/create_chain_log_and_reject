@@ -17,11 +17,14 @@ createChain log_and_reject
 cat << EOF >&3
 # LOG the traffic to be rejected, but restrict the amount of logs...
 iptables -A log_and_reject -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "alff rejected: "
+ip6tables -A log_and_reject -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "alff rejected: "
 
 # REJECT tcp connections gently by sending a tcp-reset
 iptables -A log_and_reject -p tcp -j REJECT --reject-with tcp-reset
+ip6tables -A log_and_reject -p tcp -j REJECT --reject-with tcp-reset
 
 # REJECT anything else via an ICMP message with icmp-admin-prohibited
 iptables -A log_and_reject -j REJECT --reject-with icmp-admin-prohibited
+ip6tables -A log_and_reject -j REJECT --reject-with icmp6-adm-prohibited
 
 EOF

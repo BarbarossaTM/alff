@@ -32,3 +32,14 @@ iptables -t ${table} -X
 iptables -t ${table} -Z
 
 EOF
+
+##
+# ip6tables kann kein nat
+if [ ${table} != "nat" ] ; then
+	cat << EOF >&3
+ip6tables -t ${table} -F
+ip6tables -t ${table} -X
+ip6tables -t ${table} -Z
+
+EOF
+fi

@@ -16,6 +16,7 @@ CHAIN=`getOption $1`
 if [ "${CHAIN}" ]; then
 	echo " * Creating rule to ACCEPT established connections... "
 	echo "iptables -A ${CHAIN} -m state --state RELATED,ESTABLISHED -j ACCEPT" >&3
+	echo "ip6tables -A ${CHAIN} -m state --state RELATED,ESTABLISHED -j ACCEPT" >&3
 else
 	echo "Error: You did not specify the chain in which established connection should be hooked in" >&2
 fi
