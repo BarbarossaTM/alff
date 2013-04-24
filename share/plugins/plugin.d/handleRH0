@@ -1,0 +1,27 @@
+#!/bin/bash -e
+#
+# handleRH0
+#
+# Drop all packets with routing header 0 enabled. 
+# See http://www.secdev.org/conf/IPv6_RH_security-csw07.pdf
+# for more information about this.
+#
+# Michael Schwarz <mschwar2@math.uni-paderborn.de>
+#
+
+. /usr/share/alff/lib/plugin-routines
+
+##
+# Make sure we have (an empty) chain handle_RH0
+createChain log_and_drop_rh0
+
+cat << EOF >&3
+# log and drop all packets with rh0 enabled
+ip6tables -A log_and_drop_rh0 -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "alff dropped rh0 packet: "
+ip6tables -A log_and_drop_rh0 -m rt --rt-type 0 -j DROP
+
+# hook in log_and_drop_rh0
+ip6tables -A INPUT -m rt --rt-type 0 -j log_and_drop_rh0
+ip6tables -A FORWARD -m rt --rt-type 0 -j log_and_drop_rh0
+
+EOF

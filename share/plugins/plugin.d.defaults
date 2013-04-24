@@ -16,6 +16,11 @@
 		</plugin>
 
 		<plugin>
+			<id> 02 </id>
+			<name> handleRH0 </name>
+		</plugin>
+
+		<plugin>
 			<id> 04 </id>
 			<name> create_chain_spoofcheck </name>
 		</plugin>
@@ -116,6 +121,11 @@
 		<plugin>
 			<id> 01 </id>
 			<name> create_chain_log_and_reject </name>
+		</plugin>
+
+		<plugin>
+			<id> 02 </id>
+			<name> handleRH0 </name>
 		</plugin>
 
 		<plugin>
