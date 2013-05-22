@@ -1,3 +1,26 @@
+alff (0.1.1-1) unstable; urgency=low
+
+  * On wheezy, we want to use bash instead of sh
+  * reduced lenth of service chains
+  * Implemented basic ipv6 functionality
+  * First bucket of adjusted plugins
+  * Added check for nasty routing header 0
+  * protocol should be ipv6-icmp
+  * Modified alff-cat to manage ipv6 rules
+  * Do some spoofcheks even in ipv6. This is probably not complete
+  * Enable DHCP on ipv6
+  * Adjusted some more plugins for ipv6
+  * Added LSB-tags to alff-agent init script
+
+ -- Michael Schwarz <schwarz@upb.de>  Wed, 22 May 2013 09:42:23 +0200
+
+alff (0.1.0-1) unstable; urgency=low
+
+  * set version to 0.1.0
+
+ -- Michael Schwarz <schwarz@upb.de>  Tue, 13 Mar 2013 16:21:23 +0100
+
+
 alff (0.0.6-2) unstable; urgency=low
 
   * fixed error while generating inter vlan rules

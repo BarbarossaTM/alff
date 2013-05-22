@@ -1,12 +1,17 @@
 #!/bin/bash
 #
-# /etc/init.d/alff
-#
-# Alff-Agent start/stop script for init
-#
 # Maximilian Wilhelm <max@rfc2324.org>
 #  -- Sat, 17 Jun 2006 23:19:08 +0200
 #
+
+### BEGIN INIT INFO
+# Provides:             alff-agent
+# Required-Start:       $network
+# Required-Stop:        $network
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    Alff-Agent start/stop script for init
+### END INIT INFO
 
 # Check if run interactivly or from init
 function interactive_run() { #{{{
