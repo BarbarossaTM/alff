@@ -16,9 +16,6 @@ use Net::CIDR;
 my $config = Alff::Config->new();
 my $config_space = $config->getConfigSpace();
 
-my $filter_d = $config->getConfigDir() . "/filter.d";
-my $filter;	 # This will be set to a valid filter file if there is one.
-
 # Get machine_id and rulesfile (default it if not given)
 my $machine_id = $ARGV[0];
 my $ruleset = $ARGV[1] ? $ARGV[1] : "/var/cache/alff/$config_space/alff.rules";
@@ -56,27 +53,11 @@ if ( ! Net::CIDR::cidrvalidate( $machine_ip ) ) {
 }
 #}}}
 
-# Check for existing and valid filter #{{{
-if ( -e "$filter_d/$machine_id" ) {
-	$filter = "$filter_d/$machine_id";
-	if ( ! -s $filter or ! -x $filter ){
-		print STDERR "Error: The filter for machine $machine_id, is not executable or empty.\n";
-		print STDERR " You may want to fix this before pushing new rules to this machine.\n";
-		exit 2;
-	}
-}
-#}}}
-
 if ( $ruleset eq '-' ) {
 	print "Reading rules from stdin...\n";
 }
 
-my $status;
-if ( $filter ) {
-	$status = system( "cat $ruleset | $filter | ssh -x -l root $machine_ip \"alff-cat -\"" );
-} else {
-	$status = system( "cat $ruleset | ssh -x -l root $machine_ip \"alff-cat -\"" );
-}
+my $status = system( "cat $ruleset | ssh -x -l root $machine_ip \"alff-cat -\"" );
 
 if ( $status ) {
 	print STDERR "Error: Could not push rulset from $ruleset to $machine_id\n";
