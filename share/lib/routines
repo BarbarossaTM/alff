@@ -7,47 +7,6 @@
 #
 
 ##
-function configureFirewallNetworkOptions() { # {{{
-
-	# Get fw_type configuration option
-	# Little trick to run exec_buildin_function defined by alff
-	FW_TYPE=`exec_function getOption -nocheck fw_type`
-
-	echo  " * Configuring networking feature for ${FW_TYPE} mode..."
-
-	case "${FW_TYPE}" in 
-		bridge)
-			# If we are running as a bridge, 
-			#- enable hooks only for used filter features
-			cat <<- EOCONF >&3
-			echo 0 > /proc/sys/net/bridge/bridge-nf-call-arptables
-			echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
-			echo 0 > /proc/sys/net/bridge/bridge-nf-call-ip6tables
-			echo 1 > /proc/sys/net/bridge/bridge-nf-filter-vlan-tagged
-			
-			EOCONF
-
-			echo "" >&2
-			echo "" >&2
-			echo "WARNING: You are using bridging mode firewall..." >&2
-			echo "This part of alff is not tested very well anymore!" >&2
-			echo ""
-			sleep 3
-			;;
-
-		router)
-			cat <<- EOCONF >&3
-			echo 1 > /proc/sys/net/ipv4/ip_forward
-			echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
-			
-			EOCONF
-			;;
-
-	esac
-}
-# }}}
-
-##
 # Check if there are hooks of the given type
 function hooksExist () { #{{{
 	local HOOK_TYPE="${1}"

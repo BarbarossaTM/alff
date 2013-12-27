@@ -223,13 +223,6 @@ while [ "$1" ]; do
 				exit 1
 			fi
 
-			# FIXME: Need concept of putting shell commands to the firewall machines.
-			# Maybe as prefix to the iptables-restore rules?
-			echo ""
-			echo ""
-			configureFirewallNetworkOptions 3> "${CACHE_DIR_BUILD}/000_proc_options"
-			echo ""
-
 			echo "Generating rules... "
 			##
 			# pimp my "run-parts"
