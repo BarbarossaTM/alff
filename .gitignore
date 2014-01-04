@@ -1,3 +1,5 @@
 *-stamp
 debian/*.debhelper.log
 debian/*.substvars
+
+*.pyc
