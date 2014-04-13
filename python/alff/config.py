@@ -12,14 +12,23 @@ from xml.etree import ElementTree
 from alff.errors import *
 from alff.utils import *
 
+DEFAULT_CONFIG_DIR = "/etc/alff/default"
 CONFIG_DIRS = ( 'plugin.d', 'rules.d', 'services.d' )
 CONFIG_FILE_NAME = "alff.conf"
 
+CACHE_BASE_DIR = "/var/cache/alff"
 
 class Config (object):
 
-	def __init__ (self, config_dir):
+	def __init__ (self, config_dir = DEFAULT_CONFIG_DIR):
+		# Remeber which config dir was used for the current run
 		self.config_dir = config_dir
+
+		# We have to cache the generated rules for pushing them later.
+		# Therefore we use a separate rules directory for every config directory and site
+		# we were called with to maintain the principle of least surprise for the user,
+		# who may even use the same site and firewall names in the different configurations.
+		self.rules_base_dir = "%s/%s/rules/" % (CACHE_BASE_DIR, config_dir.replace ("/", "_"))
 
 		self._check_config_dir (config_dir)
 
@@ -70,6 +79,9 @@ class Config (object):
 
 	def get_config_dir (self):
 		return self.config_dir
+
+	def get_rules_base_dir (self):
+		return self.rules_base_dir
 
 	def get_option (self, option):
 		if option in self.config['options']:
