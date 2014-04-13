@@ -15,9 +15,12 @@ from alff.utils import *
 CONFIG_DIRS = ( 'plugin.d', 'rules.d', 'services.d' )
 CONFIG_FILE_NAME = "alff.conf"
 
+
 class Config (object):
 
 	def __init__ (self, config_dir):
+		self.config_dir = config_dir
+
 		self._check_config_dir (config_dir)
 
 		self.config = Parser (self.config_file).get_config ()
@@ -60,6 +63,33 @@ class Config (object):
 
 		self.security_classes = all_sec_classes.keys ()
 
+
+	########################################
+	# global stuff
+	########################################
+
+	def get_config_dir (self):
+		return self.config_dir
+
+	def get_option (self, option):
+		if option in self.config['options']:
+			return self.config['options'][option]
+
+		raise ConfigError ("Unknown option '%s'" % option)
+
+
+	""" Get a list of all DHCP servers found in the configuration file """
+	def get_dhcp_servers (self):
+		return self.config['options']['dhcp_server']
+
+
+	def get_security_classes (self):
+		return self.security_classes
+
+	def is_valid_security_class (self, sec_class):
+		return sec_class in self.security_classes
+
+
 	########################################
 	# site handling
 	########################################
@@ -71,23 +101,12 @@ class Config (object):
 		return site_id in self.config['sites']
 
 	def get_default_interface (self, site):
-		if not self.self.is_valid_site (site):
+		if not self.is_valid_site (site):
 			raise RuntimeError ("Invalid site id '%s'." % site)
 
 		def_int = self.config['sites'][site]['interface_map'].get ('default')
 
 		return def_int['interface'] if def_int else None
-
-
-	""" Get a list of all DHCP servers found in the configuration file """
-	def get_dhcp_servers (self):
-		return self.config['options']['dhcp_server']
-
-	def get_security_classes (self):
-		return self.security_classes
-
-	def is_valid_security_class (self, sec_class):
-		return sec_class in self.security_classes
 
 
 	########################################
@@ -125,7 +144,7 @@ class Config (object):
 		if not self.is_valid_vlan (vlan):
 			raise RuntimeError ("Invalid vlan id '%s'." % vlan)
 
-		if not self.self.is_valid_site (site):
+		if not self.is_valid_site (site):
 			raise RuntimeError ("Invalid site id '%s'." % site)
 
 		iface = self.config['sites'][site]['interface_map'].get (vlan)
@@ -155,7 +174,7 @@ class Config (object):
 
 
 	########################################
-	# Machineh handling
+	# Machine handling
 	########################################
 
 	def get_machine_ids (self, site):
@@ -200,6 +219,7 @@ class Config (object):
 	def get_plugin_option (self, plugin, option):
 		if plugin not in self.config['plugins']:
 			return None
+
 		return self.config['plugins'][plugin].get (option, None)
 
 
@@ -211,8 +231,8 @@ class Parser (object):
 	default_options = {
 		'fw_type' : 'router',
 		'allow_icmp' : 'all',
-		'allow_traceroute_udp' : 'no',
-		'allow_multicast' : 'yes',
+		'allow_traceroute_udp' : False,
+		'suppress_empty_chains' : False,
 		'dhcp_server' : [],
 	}
 
@@ -248,8 +268,11 @@ class Parser (object):
 				if opt_elem.tag in Parser.multi_opt:
 					options[opt_elem.tag].append (opt_elem.text.strip ())
 				else:
-					options[opt_elem.tag] = opt_elem.text.strip ()
-
+					# If we have a default value and it's a boolean, except value to be boolean
+					if opt_elem.tag in options and type (options[opt_elem.tag]) == bool:
+						options[opt_elem.tag] = self.__get_true_false (opt_elem.text)
+					else:
+						options[opt_elem.tag] = opt_elem.text.strip ()
 		return options
 
 
@@ -395,3 +418,13 @@ class Parser (object):
 			else:
 				# If there is no text value we assume that it's a boolean
 				dst_dict[subelem.tag] = "yes"
+
+	def __get_true_false (self, string):
+		match = string.strip ()
+
+		if re.match ("yes", match, re.I):
+			return True
+		elif re.match ("no", match, re.I):
+			return False
+
+		raise ConfigError ("Expected boolean value ('yes', 'no'), got '%s'" % string)
