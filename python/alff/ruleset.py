@@ -306,6 +306,16 @@ class Ruleset (object):
 			self.ruleset[protocol][table]["num_rules"] += 1
 
 
+	def add_rules_from_file (self, path):
+		try:
+			with open (path, "r") as f:
+				for line in f.readlines ():
+					# Ignore empty lines and comments starting with #
+					if not re.match ("^\s*$\|^\s*#", line):
+						self.add_rule (line)
+		except IOError as i:
+			raise RulesetError ("Error while reading rules from file '%s': %s" % (path, i))
+
 
 	def save_ruleset (self, protocol):
 		if protocol not in self.ruleset:
