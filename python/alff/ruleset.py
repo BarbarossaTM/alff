@@ -261,7 +261,7 @@ class Ruleset (object):
 			chains = table_dict["chains"]
 			if chain:
 				if chain not in chains:
-					raise RulesetError ("Chain '%s' does not exist, you may want to create it.")
+					raise RulesetError ("Chain '%s' does not exist, you may want to create it." % chain)
 
 				table_dict["num_rules"] -= len (chains[chain]["rules"])
 				chains[chain]["rules"] = []
@@ -280,7 +280,7 @@ class Ruleset (object):
 
 		# Chain already existant?
 		if chain not in self.ruleset[protocol][table]["chains"]:
-			raise RulesetError ("Chain '%s' does not exist, you may want to create it.")
+			raise RulesetError ("Chain '%s' does not exist, you may want to create it." % chain)
 
 		# Policy
 		if mode == "P":
