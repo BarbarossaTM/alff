@@ -228,11 +228,11 @@ class Config (object):
 	# Plugin configuration
 	########################################
 
-	def get_plugin_option (self, plugin, option):
+	def get_plugin_option (self, plugin, option, default = None):
 		if plugin not in self.config['plugins']:
 			return None
 
-		return self.config['plugins'][plugin].get (option, None)
+		return self.config['plugins'][plugin].get (option, default)
 
 
 ################################################################################
