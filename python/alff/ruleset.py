@@ -43,8 +43,8 @@ class Ruleset (object):
 		self.suppress_empty_chains = self.config.get_option ("suppress_empty_chains")
 
 		self.ruleset = {
-			"4" : {},
-			"6" : {},
+			4 : {},
+			6 : {},
 		}
 
 
@@ -76,6 +76,9 @@ class Ruleset (object):
 	def create_chain (self, protocol, chain, table = "filter"):
 		if len (chain) > 30:
 			raise RulesetError ("Invalid chain name '%s'. Must be under 30 chars." % chain)
+
+		protocol = _proto_to_int (protocol)
+
 		if protocol not in self.ruleset:
 			raise RulesetError ("Invalid protocol '%s'. Try one of %s." % (protocol, ", ".join (self.ruleset.keys ())))
 
@@ -108,9 +111,9 @@ class Ruleset (object):
 			return
 
 		if cmd[0] == "iptables":
-			protocol = "4"
+			protocol = 4
 		elif cmd[0] == "ip6tables":
-			protocol = "6"
+			protocol = 6
 		else:
 			raise RulesetError ("Rule should start with 'iptables' or 'ip6tables', found '%s'.." % cmd[0])
 
@@ -318,6 +321,7 @@ class Ruleset (object):
 
 
 	def save_ruleset (self, protocol):
+		protocol = _proto_to_int (protocol)
 		if protocol not in self.ruleset:
 			raise AlffError ("I don't have a ruleset for protocol '%s'. Try one of %s." % (protocol, ", ".join (self.ruleset.keys ())))
 
@@ -358,3 +362,10 @@ class Ruleset (object):
 
 			fh.write ("COMMIT\n")
 			fh.write ("# Completed on %s\n" % now ())
+
+
+def _proto_to_int (protocol):
+	try:
+		return int (protocol)
+	except ValueError:
+		raise RulesetError ("Invalid protocol '%s'. Expected '4' or '6'")
