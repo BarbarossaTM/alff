@@ -115,7 +115,7 @@ class Ruleset (object):
 		elif cmd[0] == "ip6tables":
 			protocol = 6
 		else:
-			raise RulesetError ("Rule should start with 'iptables' or 'ip6tables', found '%s'.." % cmd[0])
+			raise RulesetError ("Rule should start with 'iptables' or 'ip6tables', found '%s'.." % cmd[0], string)
 
 		# Strip first component
 		cmd = cmd[1:]
@@ -140,7 +140,7 @@ class Ruleset (object):
 
 				# Pointless actions
 				if re.match ("-[CDELRSXZ]", word):
-					raise RulesetError ("Operation '%s' is pointless in alff.." % word)
+					raise RulesetError ("Operation '%s' is pointless in alff.." % word, string)
 
 				# Table specification?
 				if word in ("-t", "--table"):
@@ -148,14 +148,14 @@ class Ruleset (object):
 					i += 1
 
 					if table not in TABLES:
-						raise RulesetError ("Invalid table '%s'. Try one of %s." % (table, ", ".join (TABLES)))
+						raise RulesetError ("Invalid table '%s'. Try one of %s." % (table, ", ".join (TABLES)), string)
 
 					continue
 
 				# Commands with chain as paramter
 				if re.match ("-[AINP]", word):
 					if mode:
-						raise RulesetError ("Trying to reset command!")
+						raise RulesetError ("Trying to reset command!", string)
 
 					chain = cmd[i]
 					i += 1
@@ -179,8 +179,8 @@ class Ruleset (object):
 							# There is another parameter, but it isn't an int value, let's see
 							# if it's just another parameter spec, which would be fine, or something
 							# unexpected, which we will treat as an error.
-							if not cmd[i+1].startswith ("-"):
-								raise RulesetError ("Bad index parameter to insert rule: %s" % cmd[i+1])
+							if not cmd[i].startswith ("-"):
+								raise RulesetError ("Bad index parameter to insert rule: %s" % cmd[i+1], string)
 						else:
 							# There was another parameter and it was an int value.
 							# Skip it when reading further arguments.
@@ -191,7 +191,7 @@ class Ruleset (object):
 						mode = "N"
 
 						if i != len (cmd):
-							raise RulesetError ("Trailing garbage after '-N' rule: %s" % " ".join (cmd [i+1:]))
+							raise RulesetError ("Trailing garbage after '-N' rule: %s" % " ".join (cmd [i+1:]), string)
 
 
 					# Set policy
@@ -217,7 +217,7 @@ class Ruleset (object):
 						chain = cmd[i]
 						i += 1
 						if chain not in self.ruleset[protocol][table]["chains"]:
-							raise RulesetError ("Cannot flush nonexisting chain '%s'." % chain)
+							raise RulesetError ("Cannot flush nonexisting chain '%s'." % chain, string)
 					except IndexError:
 						# There may be no chain given here, which means we have to flush the
 						# entire table, which we happily will do.
@@ -236,16 +236,21 @@ class Ruleset (object):
 						iface = self.config.get_vlan_interface (vlan, self.site, False)
 
 						if not iface:
-							raise RulesetError ("Failed to lookup interface for vlan %s at site %s." % (vlan, self.site))
+							raise RulesetError ("Failed to lookup interface for vlan %s at site %s." % (vlan, self.site), string)
 
 					rule += " %s %s" % (word, iface)
 					continue
+
+
+				# Stop parsing the line if we hit a comment at the end of the line
+				if word == "#":
+					break
 
 				# If we reach this line, it's just some rule specification we don't have to
 				# act upon, so just store it.
 				rule += " %s" % word
 		except IndexError:
-			raise RulesetError ("Premature end of arguments..")
+			raise RulesetError ("Premature end of arguments..", string)
 
 
 		#
@@ -254,7 +259,7 @@ class Ruleset (object):
 		# if neccessary.
 		#
 		if not mode:
-			raise RulesetError ("Rule is lacking some mode (-[AFINP])..")
+			raise RulesetError ("Rule is lacking some mode (-[AFINP])..", string)
 
 
 		table_dict = self.ruleset[protocol][table]
@@ -264,7 +269,7 @@ class Ruleset (object):
 			chains = table_dict["chains"]
 			if chain:
 				if chain not in chains:
-					raise RulesetError ("Chain '%s' does not exist, you may want to create it." % chain)
+					raise RulesetError ("Chain '%s' does not exist, you may want to create it." % chain, string)
 
 				table_dict["num_rules"] -= len (chains[chain]["rules"])
 				chains[chain]["rules"] = []
@@ -283,15 +288,15 @@ class Ruleset (object):
 
 		# Chain already existant?
 		if chain not in self.ruleset[protocol][table]["chains"]:
-			raise RulesetError ("Chain '%s' does not exist, you may want to create it." % chain)
+			raise RulesetError ("Chain '%s' does not exist, you may want to create it." % chain, string)
 
 		# Policy
 		if mode == "P":
 			if policy not in ("ACCEPT", "DROP"):
-				raise RulesetError ("Invalid policy '%s'. Expected 'ACCEPT' or 'DROP'." % policy)
+				raise RulesetError ("Invalid policy '%s'. Expected 'ACCEPT' or 'DROP'." % policy, string)
 
 			if self.ruleset[protocol][table]["chains"][chain]["policy"] == "-":
-				raise RulesetError ("Trying to set policy for user-defined chain!")
+				raise RulesetError ("Trying to set policy for user-defined chain!", string)
 
 			self.ruleset[protocol][table]["chains"][chain]["policy"] = policy
 			return
