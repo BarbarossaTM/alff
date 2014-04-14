@@ -125,7 +125,7 @@ class Config (object):
 	# vlan handling
 	########################################
 
-	def get_vlan_list (self):
+	def get_vlans (self):
 		return self.config['vlans'].keys ()
 
 
