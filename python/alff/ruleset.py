@@ -92,6 +92,32 @@ class Ruleset (object):
 			}
 
 
+	def chain_exists (self, protocol, chain, table = "filter"):
+		""" Return if the given chain exists in the given table (or filter) for the given protocol. """
+		""" Will raise RulesetError on invalid protocol or table. """
+
+		self._validate_table (protocol, table)
+
+		return chain in self.ruleset[protocol][table]["chains"]
+
+
+	def chain_has_rules (self, protocol, chain, table = "filter"):
+		""" Return if the given chain in the given table (or filter) for the given protocol has at least one rule. """
+		""" Will raise RulesetError on invalid protocol or table. """
+
+		self._validate_chain (protocol, chain, table)
+
+		return len (self.ruleset[protocol][table]["chains"][chain]["rules"]) != 0
+
+
+	def remove_chain (self, protocol, chain, table = "filter"):
+		""" Remove the given chain in the given table (or filter) for the given protocol, regardless of if it has rules. """
+		""" Will raise RulesetError on invalid protocol or table. """
+
+		self._validate_chain (protocol, chain, table)
+
+		del self.ruleset[protocol][table]["chains"][chain]
+
 
 	def add_rule (self, string):
 		protocol = ""
@@ -369,8 +395,26 @@ class Ruleset (object):
 			fh.write ("# Completed on %s\n" % now ())
 
 
+	def _validate_protocol (self, protocol):
+		if protocol not in self.ruleset:
+			raise RulesetError ("Invalid protocol '%s'. Try one of %s" % (protocol, ", ".join (self.ruleset.keys ())))
+
+	def _validate_table (self, protocol, table):
+		self._validate_protocol (protocol)
+
+		if table not in self.ruleset[protocol]:
+			raise RulesetError ("Invalid table '%s' for protocol '%s'." % (table, protocol))
+
+	def _validate_chain (self, protocol, chain, table):
+		self._validate_table (protocol, table)
+
+		if chain not in self.ruleset[protocol][table]["chains"]:
+			raise RulesetError ("Invalid chain '%s' (table: %s, protocol %s)." % (chain, table, protocol))
+
+
 def _proto_to_int (protocol):
 	try:
 		return int (protocol)
 	except ValueError:
 		raise RulesetError ("Invalid protocol '%s'. Expected '4' or '6'")
+
