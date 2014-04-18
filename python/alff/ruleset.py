@@ -28,9 +28,10 @@ def now ():
 
 class Ruleset (object):
 
-	def __init__ (self, config, site):
+	def __init__ (self, config, site, log):
 		self.config = config
 		self.site = site
+		self.log = log
 		self.rules_dir = "%s/%s" % (self.config.get_rules_base_dir (), site)
 
 		if not os.path.isdir (self.rules_dir):
@@ -357,6 +358,7 @@ class Ruleset (object):
 			raise AlffError ("I don't have a ruleset for protocol '%s'. Try one of %s." % (protocol, ", ".join (self.ruleset.keys ())))
 
 		filename = "%s/%s_%s.rules" % (self.rules_dir, self.site, protocol)
+		self.log.info ("Saving IPv%d ruleset for site %s.." % (protocol, self.site))
 
 		try:
 			fh = open (filename, "w")

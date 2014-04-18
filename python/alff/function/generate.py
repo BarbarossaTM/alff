@@ -63,8 +63,9 @@ class Function (BaseFunction):
 		for site in self.sites:
 			self.log.info ("Generating rules for site %s ..." % site)
 
+			logger = logging.getLogger ("alff.ruleset.%s" % site)
 			# Create ruleset object for this site
-			ruleset = Ruleset (self.config, site)
+			ruleset = Ruleset (self.config, site, logger)
 			self.rulesets[site] = ruleset
 
 			# Clear ruleset cache for this site
