@@ -135,6 +135,8 @@ class Ruleset (object):
 		mode = None
 		insert_at = 0
 		policy = None
+		# Target chain for possible jump
+		target = None
 
 		# Split command line at white-space boundaries
 		cmd = string.split (None)
@@ -275,8 +277,21 @@ class Ruleset (object):
 					continue
 
 
+				# If the rule contains a jump statement, extract and remember the target so we can validate it
+				# later on and increase the reference counter for it.
+				elif word in ("-j", "--jump"):
+					if target:
+						raise RulesetError ("Error: Multiple jump statements found in rule '%s'." % string)
+
+					target = cmd[i]
+					i += 1
+
+					rule += " %s %s" % (word, target)
+					continue
+
+
 				# Stop parsing the line if we hit a comment at the end of the line
-				if word == "#":
+				elif word == "#":
 					break
 
 				# If we reach this line, it's just some rule specification we don't have to
@@ -332,6 +347,14 @@ class Ruleset (object):
 			self.ruleset[protocol][table]["chains"][chain]["policy"] = policy
 			return
 
+		# If this rule contains a jump and we should jump to an existing chain,
+		# increase the ref counter of the chain. As we maybe jump to any given
+		# internal or user build ip/ip6/xtables target as well, we've no chance
+		# to validate the target name in any way here and have to trust in the
+		# user, iptables-restore and alff-cat that it won't blow.
+		if target and target in self.ruleset[protocol][table]["chains"]:
+			self.ruleset[protocol][table]["chains"][target]["refs"] += 1
+
 		rule = "-A %s" % chain + rule
 
 		# Append
@@ -381,26 +404,42 @@ class Ruleset (object):
 			chains_dict = table_dict["chains"]
 			chains = sorted (chains_dict.keys ())
 
-			ignored_chains = {}
+			ignore_chain = {}
+			ignore_target = {}
 
 			for chain in chains:
 				policy = chains_dict[chain]["policy"]
 
-				# If this is a user created chain, it does not contain any rules, isn't referenced anywhere
-				# and we should remove empty chains, silently ignore it.
-				if policy == "-" and self.suppress_unreferenced_chains and chains_dict[chain]["refs"] == 0:
-					self.log.debug ("Supressing unreferenced chain '%s'." % chain)
-					ignored_chains[chain] = True
-					continue
+				# If this is a user defined chain we _maybe_ want to ignore it.
+				if policy == "-":
+
+					# If this chain isn't referenced anywhere and we should remove empty chains
+					# silently ignore it.
+					if self.suppress_unreferenced_chains and chains_dict[chain]["refs"] == 0:
+						self.log.debug ("Suppressing unreferenced chain '%s'." % chain)
+						ignore_chain[chain] = True
+						continue
+
+					if self.suppress_empty_chains and len (chains_dict[chain]["rules"]) == 0:
+						self.log.debug ("Suppressing empty chain '%s'." % chain)
+						ignore_target[chain] = True
+						continue
+
 
 				fh.write (":%s %s [0:0]\n" % (chain, policy))
 
 			for chain in chains:
-				# Don't print rules for suppressed chains
-				if chain in ignored_chains:
+				# Ignore rules for suppressed chains
+				if chain in ignore_chain:
 					continue
 
 				for rule in chains_dict[chain]["rules"]:
+					# Ignore rules with jump to suppressed target chain
+					match = re.search (r"-j\s+(\S+)", rule)
+					if match and match.group (1) in ignore_target:
+						self.log.debug ("Suppressing jump to empty chain '%s'." % match.group (1))
+						continue
+
 					fh.write (rule + "\n")
 
 			fh.write ("COMMIT\n")
