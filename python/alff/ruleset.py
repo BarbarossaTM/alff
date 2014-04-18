@@ -42,6 +42,7 @@ class Ruleset (object):
 
 		# Store relevant config option for speedup
 		self.suppress_empty_chains = self.config.get_option ("suppress_empty_chains")
+		self.suppress_unreferenced_chains = self.config.get_option ("suppress_unreferenced_chains")
 
 		self.ruleset = {
 			4 : {},
@@ -59,6 +60,7 @@ class Ruleset (object):
 					ruleset[table]["chains"][chain] = {
 						"policy" : "ACCEPT",
 						"rules" : [],
+						"refs" : 1,
 					}
 
 	def clear_cache (self):
@@ -89,6 +91,7 @@ class Ruleset (object):
 			self.ruleset[protocol][table]["chains"][chain] = {
 				"policy" : "-",
 				"rules" : [],
+				"refs" : 0,
 			}
 
 
@@ -115,6 +118,10 @@ class Ruleset (object):
 		""" Will raise RulesetError on invalid protocol or table. """
 
 		self._validate_chain (protocol, chain, table)
+
+		refs = self.ruleset[protocol][table]["chains"][chain]["refs"]
+		if refs > 0:
+			raise RulesetError ("Cannot remove chain '%s'. Used by %d other chain(s)." % (chain, refs))
 
 		del self.ruleset[protocol][table]["chains"][chain]
 
@@ -374,16 +381,25 @@ class Ruleset (object):
 			chains_dict = table_dict["chains"]
 			chains = sorted (chains_dict.keys ())
 
+			ignored_chains = {}
+
 			for chain in chains:
 				policy = chains_dict[chain]["policy"]
 
-				# If this is a user created chain, we may want to omit it, if it's empty
-				if policy == "-" and self.suppress_empty_chains:
+				# If this is a user created chain, it does not contain any rules, isn't referenced anywhere
+				# and we should remove empty chains, silently ignore it.
+				if policy == "-" and self.suppress_unreferenced_chains and chains_dict[chain]["refs"] == 0:
+					self.log.debug ("Supressing unreferenced chain '%s'." % chain)
+					ignored_chains[chain] = True
 					continue
 
 				fh.write (":%s %s [0:0]\n" % (chain, policy))
 
 			for chain in chains:
+				# Don't print rules for suppressed chains
+				if chain in ignored_chains:
+					continue
+
 				for rule in chains_dict[chain]["rules"]:
 					fh.write (rule + "\n")
 

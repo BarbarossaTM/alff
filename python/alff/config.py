@@ -245,6 +245,7 @@ class Parser (object):
 		'allow_icmp' : 'all',
 		'allow_traceroute_udp' : False,
 		'suppress_empty_chains' : False,
+		'suppress_unreferenced_chains' : False,
 		'dhcp_server' : [],
 	}
 
