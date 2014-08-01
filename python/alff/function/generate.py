@@ -228,7 +228,7 @@ class Function (BaseFunction):
 		for line in plugin.stdout.readlines ():
 			ruleset.add_rule (line)
 
-		plugin.poll ()
+		plugin.wait ()
 		if plugin.returncode == None:
 			raise AlffError ("Plugin '%s' didn't terminate after reading rules." % path)
 
