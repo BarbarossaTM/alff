@@ -1,0 +1,25 @@
+#!/bin/bash -e
+#
+# Gracefully close the INPUT and FORWARD chain
+# log and reject all remaining packets
+#
+# Michael Schwarz <schwarz@upb.de>
+#  -- Thu, 14 Aug 2014 10:28:00 +0200
+
+cat << EOF 
+iptables -A FORWARD -m limit --limit 3/sec -j LOG --limit-burst 5 --log-prefix "alff rejected: "
+iptables -A FORWARD -p tcp -j REJECT --reject-with tcp-reset
+iptables -A FORWARD -j REJECT --reject-with icmp-admin-prohibited
+
+ip6tables -A FORWARD -m limit --limit 3/sec -j LOG --limit-burst 5 --log-prefix "alff rejected: "
+ip6tables -A FORWARD -p tcp -j REJECT --reject-with tcp-reset
+ip6tables -A FORWARD -j REJECT --reject-with icmp6-adm-prohibited
+
+iptables -A INPUT -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "alff incoming: "
+iptables -A INPUT -p tcp -j REJECT --reject-with tcp-reset
+iptables -A INPUT -j REJECT --reject-with icmp-admin-prohibited
+
+ip6tables -A INPUT -m limit --limit 3/sec --limit-burst 5 -j LOG --log-prefix "alff incoming: "
+ip6tables -A INPUT -p tcp -j REJECT --reject-with tcp-reset
+ip6tables -A INPUT -j REJECT --reject-with icmp6-adm-prohibited
+EOF

@@ -1,0 +1,41 @@
+#!/bin/bash -e
+#
+# tcp_pre-analysis
+#
+# Check the headers of TCP connections for unusual flag combinations
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 24 Apr 2006 20:04:15 +0200
+#
+
+cat << EOF
+## 
+# create chains
+iptables -N tcp_header_check
+ip6tables -N tcp_header_check
+
+##
+# If packet has SYN/ACK set and is new to ct, someone is trying nasty things
+iptables -A tcp_header_check -p tcp --tcp-flags SYN,ACK SYN,ACK -m state --state NEW -m limit --limit 3/m --limit-burst 5 -j LOG --log-prefix "alff syn-ack-but-new: "
+iptables -A tcp_header_check -p tcp --tcp-flags SYN,ACK SYN,ACK -m state --state NEW -j REJECT --reject-with tcp-reset 
+
+##
+# If the paket is new to conntrack but does not have 'syn' set, someone is trying nasty things, too
+iptables -A tcp_header_check -p tcp ! --syn -m state --state NEW -m limit --limit 3/m --limit-burst 5 -j LOG --log-prefix "alff new-without-syn: "
+iptables -A tcp_header_check -p tcp ! --syn -m state --state NEW -j DROP
+
+##
+# If packet has SYN/ACK set and is new to ct, someone is trying nasty things
+ip6tables -A tcp_header_check -p tcp --tcp-flags SYN,ACK SYN,ACK -m state --state NEW -m limit --limit 3/m --limit-burst 5 -j LOG --log-prefix "alff syn-ack-but-new: "
+ip6tables -A tcp_header_check -p tcp --tcp-flags SYN,ACK SYN,ACK -m state --state NEW -j REJECT --reject-with tcp-reset 
+
+##
+# If the paket is new to conntrack but does not have 'syn' set, someone is trying nasty things, too
+ip6tables -A tcp_header_check -p tcp ! --syn -m state --state NEW -m limit --limit 3/m --limit-burst 5 -j LOG --log-prefix "alff new-without-syn: "
+ip6tables -A tcp_header_check -p tcp ! --syn -m state --state NEW -j DROP
+
+iptables -A INPUT -j tcp_header_check
+iptables -A FORWARD -j tcp_header_check
+ip6tables -A INPUT -j tcp_header_check
+ip6tables -A FORWARD -j tcp_header_check
+EOF

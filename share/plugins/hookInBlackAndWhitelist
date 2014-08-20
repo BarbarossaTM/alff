@@ -1,0 +1,16 @@
+#!/bin/bash -e
+#
+# hookInBlackAndWhitelist
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  -- Mon, 17 Jul 2006 16:24:50 +0200
+#
+
+CHAINS="blacklist whitelist"
+
+for chain in ${CHAINS}; do
+	echo "iptables -N ${chain}"
+	echo "ip6tables -N ${chain}"
+	echo "iptables -A FORWARD -j ${chain}"
+	echo "ip6tables -A FORWARD -j ${chain}"
+done
