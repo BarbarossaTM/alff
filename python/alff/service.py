@@ -22,54 +22,75 @@
 #  --  Sat 04 Jan 2014 01:38:09 AM CET
 #
 
-import os.path
+import os
+import json
+import re
 
 from alff.errors import *
 from alff.utils  import *
 
 class Service (object):
 
-	def __init__ (self, config, ruleset, site, log):
+	def __init__ (self, config, log, service_name):
 		self.config = config
-		self.ruleset = ruleset
-		self.site = site
 		self.log = log
+		self.service_name = service_name
 
 		self.services_d = join_path (self.config.get_config_dir (), "services.d")
 
 		if not os.path.isdir (self.services_d):
 			raise ConfigError ("Error: Missing 'services.d' directory in config dir '%s'." % self.config.get_config_dir ())
+	
+		# Read in service config as json file
+		service_file = self.services_d + "/" + service_name
+		if os.path.isfile (service_file):
+			f = open(service_file, 'r').read()
+			self.service_config = json.loads(f)
+		else:
+			raise ConfigError ("Error: Serviceconfiguration for service name '%s' does not exist." % service_name)
 
+	def get_ports(self):
+		temp = []
+		for port in self.service_config['ports']:
+			if self._validate_port(port):
+				temp.append(port)
+			else:
+				raise ConfigError("Error: invalid port specification: %s in service %s" % (port, self.service_name))
+		return temp
 
-	def allow_service_from_networks_of_security_class (self, sec_class):
-		chain = "allowSrvFrom" + sec_class.capitalize () + "Nets"
-		vlans = self.config.get_vlans_of_security_class (sec_class)
+	def get_hosts(self, ipversion = 0):
+		if ipversion == 4:
+			temp = []
+			for ip in self.service_config['servers']:
+				if ip_version(ip) == 4:
+					temp.append(ip)
+			return temp
+		elif ipversion == 6:	
+			temp = []
+			for ip in self.service_config['servers']:
+				if ip_version(ip) == 6:
+					temp.append(ip)
+			return temp
+		else:
+			return self.service_config['servers']
 
-		self.log.info ("Allowing access to services configured to be available from networks of sec. class %s..." % sec_class)
+	def get_chain_name(self):
+		return "allowSrv"+self.service_name
 
-		if len (vlans) == 0:
-			self.log.warn ("Attention: There are not networks of security class %s, staying cool." % sec_class)
-			return
+	def allow_from_world(self):
+		if self.service_config['allow_from_world'] == "yes":
+			return True
+		else:
+			return False
 
-		for vlan in vlans:
-			networks = self.config.get_vlan_networks (vlan)
-			# XXX Gute Idee, hier immer auch das default-if zu nehmen?
-			interface = self.config.get_vlan_interface (vlan, self.site, use_default = True)
+	def get_allowed_networks(self):
+		networks = []
+		for key in self.service_config.keys():
+			m = re.search('allow_from_(\w+)_networks', key)
+			if m:
+				networks.append(m.group(1).title())
+		return networks
 
-			for net in networks:
-				cmd = "iptables" if ip_version (net) == 4 else "ip6tables"
-				self.ruleset.add_rule (cmd + "-A FORWARD -s %s -i %s -j %s" % (net, interface, chain))
-
-
-	def allow_world_open_services (self):
-		pass
-
-	def read_service_names (self):
-		pass
-
-	def read_service_configuration (self):
-		pass
-
-	def generate_service_chain (self):
-		pass
-
+	# internal methods
+	def _validate_port(self, port):
+		return True
