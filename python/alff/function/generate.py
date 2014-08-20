@@ -215,7 +215,7 @@ class Function (BaseFunction):
 		except AlffError as a:
 			raise AlffError ("An alff error occured while executing plugin '%s': '%s'" % (plugin_name, a))
 		except Exception as e:
-			raise AlffError ("An unhandled occured while executing plugin '%s': '%s'" % (plugin_name, e))
+			raise AlffError ("An unhandled error occured while executing plugin '%s': '%s'" % (plugin_name, e))
 
 
 
