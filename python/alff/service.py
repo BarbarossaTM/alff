@@ -78,10 +78,16 @@ class Service (object):
 		return "allowSrv"+self.service_name
 
 	def allow_from_world(self):
-		if self.service_config['allow_from_world'] == "yes":
-			return True
-		else:
+		# well, allow from world isn't always set
+		try:
+			self.service_config['allow_from_world']
+		except:
 			return False
+		else:
+			if self.service_config['allow_from_world'] == "yes":
+				return True
+			else:
+				return False
 
 	def get_allowed_networks(self):
 		networks = []
