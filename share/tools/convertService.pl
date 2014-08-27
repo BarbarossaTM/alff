@@ -2,8 +2,6 @@
 #
 # Convert old Service-Configs to json-files
 #
-# Michael Schwarz <schwarz@upb.de>
-# -- Tue 27 Aug 2014 07:55:55 PM CEST
 
 if ($#ARGV + 1 < 2) {
 	print "FEHLER: Keine Source und Destination-Datei übergeben\n";
@@ -34,17 +32,31 @@ if (-e $src_file) {
 	print DSTFILE "{\n";
 	print DSTFILE "\t\"servers\" : [\n";
 
+	my $first = 1;
 	foreach my $server (@servers) {
-		print DSTFILE "\t\t\"$server\",\n";
+		if (length $server > 1) {
+			if (!$first) {
+				print DSTFILE ",\n";
+			}
+			print DSTFILE "\t\t\"$server\"";
+			$first = 0;
+		}
 	}
 
-	print DSTFILE "\t],\n";
+	print DSTFILE "\n\t],\n";
 	print DSTFILE "\t\"ports\" : [\n";
 
+	$first = 1;
 	foreach my $port (@ports) {
-		print DSTFILE "\t\t\"$port\",\n";
+		if (length $port > 1) {
+			if (!$first) {
+				print DSTFILE",\n";
+			}
+			print DSTFILE "\t\t\"$port\"";
+			$first = 0;
+		}
 	}
-	print DSTFILE "\t]";
+	print DSTFILE "\n\t]";
 
 	foreach my $config_key ( keys %{$serviceConfig} ) {
 		if ($config_key =~ m/allow_from_.+/) {
