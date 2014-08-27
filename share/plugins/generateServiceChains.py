@@ -67,29 +67,29 @@ class Plugin (BasePlugin):
 					ruleset.add_rule(rule)
 
 
-		# tie servicechain into ruleset
-		# allow from special networks
-		for network in service.get_allowed_networks():
-			sec_class_chain = "allowSrvFrom%sNets" % network
-
-			if not ruleset.chain_exists(4, sec_class_chain):
-				ruleset.create_chain(4, sec_class_chain)
-				ruleset.add_rule("iptables -A FORWARD -j %s" % sec_class_chain)
-			if not ruleset.chain_exists(6, sec_class_chain):
-				ruleset.create_chain(6, sec_class_chain)
-				ruleset.add_rule("ip6tables -A FORWARD -j %s" % sec_class_chain)
-
-			ruleset.add_rule("iptables -A %s -j %s" % (sec_class_chain, srv_chain))
-			ruleset.add_rule("ip6tables -A %s -j %s" % (sec_class_chain, srv_chain))
-
-		# is service supposed to be public accessible
-		if not ruleset.chain_exists(4, 'allowWorldOpenServices'):
-			ruleset.create_chain(4, 'allowWorldOpenServices')
-			ruleset.add_rule("iptables -A FORWARD -j allowWorldOpenServices")
-		if not ruleset.chain_exists(6, 'allowWorldOpenServices'):
-			ruleset.create_chain(6, 'allowWorldOpenServices')
-			ruleset.add_rule("ip6tables -A FORWARD -j allowWorldOpenServices")
-
-		if service.allow_from_world():
-			ruleset.add_rule("iptables -A allowWorldOpenServices -j %s" % srv_chain)
-			ruleset.add_rule("ip6tables -A allowWorldOpenServices -j %s" % srv_chain)
+			# tie servicechain into ruleset
+			# allow from special networks
+			for network in service.get_allowed_networks():
+				sec_class_chain = "allowSrvFrom%sNets" % network
+	
+				if not ruleset.chain_exists(4, sec_class_chain):
+					ruleset.create_chain(4, sec_class_chain)
+					ruleset.add_rule("iptables -A FORWARD -j %s" % sec_class_chain)
+				if not ruleset.chain_exists(6, sec_class_chain):
+					ruleset.create_chain(6, sec_class_chain)
+					ruleset.add_rule("ip6tables -A FORWARD -j %s" % sec_class_chain)
+	
+				ruleset.add_rule("iptables -A %s -j %s" % (sec_class_chain, srv_chain))
+				ruleset.add_rule("ip6tables -A %s -j %s" % (sec_class_chain, srv_chain))
+	
+			# is service supposed to be public accessible
+			if not ruleset.chain_exists(4, 'allowWorldOpenServices'):
+				ruleset.create_chain(4, 'allowWorldOpenServices')
+				ruleset.add_rule("iptables -A FORWARD -j allowWorldOpenServices")
+			if not ruleset.chain_exists(6, 'allowWorldOpenServices'):
+				ruleset.create_chain(6, 'allowWorldOpenServices')
+				ruleset.add_rule("ip6tables -A FORWARD -j allowWorldOpenServices")
+	
+			if service.allow_from_world():
+				ruleset.add_rule("iptables -A allowWorldOpenServices -j %s" % srv_chain)
+				ruleset.add_rule("ip6tables -A allowWorldOpenServices -j %s" % srv_chain)
