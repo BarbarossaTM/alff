@@ -434,12 +434,12 @@ class Ruleset (object):
 					# If this chain isn't referenced anywhere and we should remove empty chains
 					# silently ignore it.
 					if self.suppress_unreferenced_chains and chains_dict[chain]["refs"] == 0:
-						self.log.debug ("Suppressing unreferenced chain '%s'." % chain)
+						self.log.debug ("Suppressing unreferenced chain '%s' (IPv%s)." % (chain, protocol))
 						ignore_chain[chain] = True
 						continue
 
 					if self.suppress_empty_chains and len (chains_dict[chain]["rules"]) == 0:
-						self.log.debug ("Suppressing empty chain '%s'." % chain)
+						self.log.debug ("Suppressing empty chain '%s' (IPv%s)." % (chain, protocol))
 						ignore_target[chain] = True
 						continue
 
@@ -455,7 +455,7 @@ class Ruleset (object):
 					# Ignore rules with jump to suppressed target chain
 					match = re.search (r"-j\s+(\S+)", rule)
 					if match and match.group (1) in ignore_target:
-						self.log.debug ("Suppressing jump to empty chain '%s'." % match.group (1))
+						self.log.debug ("Suppressing jump to empty chain '%s' (IPv%s)." % (match.group (1), protocol))
 						continue
 
 					fh.write (rule + "\n")
