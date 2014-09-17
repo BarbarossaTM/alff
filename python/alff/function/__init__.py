@@ -29,7 +29,7 @@ import os.path
 from   alff.errors import *
 from   alff.utils  import *
 
-FUNCTION_DIRS = ( "/usr/share/alff/function", "/etc/alff/functions" )
+FUNCTION_DIRS = ( "/usr/lib/python2.7/dist-packages/alff/alff/function", "/etc/alff/functions" )
 
 class BaseFunction (object):
 
