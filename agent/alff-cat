@@ -41,23 +41,8 @@ if [ `id -u` != 0 ]; then
 	exit 1
 fi
 
-# Check args
-if [ -z "${1}" ]; then
-	echo "usage: ${MY_NAME} [ - | filename ]" >&2
-	exit 1
-fi
-
-# Check if rules file is readable, if not reading from stdin
-RULES_FILE="${1}"
-if [ "${RULES_FILE}" != '-' ]; then
-	if [ ! -r "${RULES_FILE}" ]; then
-		echo "Error: Rules file ${RULES_FLIE} does not exist or is not readable!" >&2
-		exit 1
-	fi
-fi
-
 # Check for some needed binaries
-for tool in tempfile iptables-save iptables-restore; do
+for tool in tempfile iptables-save iptables-restore ip6tables-restore ip6tables-save; do
 	if ! command -v "${tool}" >/dev/null; then
 		echo "Error: '${tool}' is required by ${MY_NAME}, but was not found!" >&2
 		exit 2
@@ -225,6 +210,8 @@ The old rules have been restored."
 
 	echo -e "\nYour alff cat." >> "${MAIL_FILE}"
 
+	cat ${MAIL_FILE}
+
 	# Send out the mail
 	mail -s "${SUBJECT}" ${MAIL_TO:-root} < "${MAIL_FILE}"
 } #}}}
@@ -241,17 +228,17 @@ else
 	emergency_break
 fi
 
-# Save new rules to disk, to keep them over reboot
-echo -n " 2"
-if cat "${RULES_FILE}" > "${CURRENT_RULES_FILE}"; then
-	echo -n "."
-else
-	echo "FAILED to save new ruleset!"
-	emergency_break
-fi
+## Save new rules to disk, to keep them over reboot
+#echo -n " 2"
+#if cat "${RULES_FILE}" > "${CURRENT_RULES_FILE}"; then
+#	echo -n "."
+#else
+#	echo "FAILED to save new ruleset!"
+#	emergency_break
+#fi
 
 # Try to create the delete-me token
-echo -n " 3"
+echo -n " 2"
 if touch "${DELETE_ME_TOKEN}"; then
 	echo -n "."
 else
@@ -266,7 +253,7 @@ else
 	exit 4
 fi
 
-echo -n " 4"
+echo -n " 3"
 if touch "${RULES_LOADING_TOKEN}"; then
 	echo -n "."
 else
@@ -289,9 +276,19 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 	STATUS=""
 
 	# Load new rules by just executing the shell script
-	if ! sh -e "${CURRENT_RULES_FILE}"; then
+	if ! iptables-restore "${CURRENT_RULES_FILE}"; then
 		# Something went wrong while loading the new rules
 		# Restore the old ones to prevent trouble
+		echo "HILFE!"
+		restore_old_rules
+		STATUS="fail"
+	fi
+
+	# Load new rules by just executing the shell script
+	if ! ip6tables-restore "${CURRENT_RULES_FILE_V6}"; then
+		# Something went wrong while loading the new rules
+		# Restore the old ones to prevent trouble
+		echo "HILFE! HILFE!"
 		restore_old_rules
 		STATUS="fail"
 	fi
@@ -305,9 +302,9 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 		# Wait for deletion of the rules-dont-work-token.
 		sleep ${SLEEP_TIME:-180}
 
-		# Chillin' time is over... do we have to do a restore?
+		# Chillin time is over... do we have to do a restore?
 		if [ -f "${DELETE_ME_TOKEN}" ]; then
-			# Oh, something went wrong... Let´s restore the old rules
+			# Oh, something went wrong... Lets restore the old rules
 			restore_old_rules
 			STATUS="token"
 		else
