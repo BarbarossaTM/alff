@@ -33,9 +33,9 @@ install: build
 	# tools, plugins and libraries
 	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/sbin
 	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share
-	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/share/perl5
+	mkdir -p $(CURDIR)/debian/alff-rulegen/usr/lib/python2.7/dist-packages/alff
 	cp -a $(CURDIR)/share $(CURDIR)/debian/alff-rulegen/usr/share/alff
-	cp -a $(CURDIR)/perl5/Alff $(CURDIR)/debian/alff-rulegen/usr/share/perl5
+	cp -a $(CURDIR)/python/* $(CURDIR)/debian/alff-rulegen/usr/lib/python2.7/dist-packages/alff
 	cp -a $(CURDIR)/bin/* $(CURDIR)/debian/alff-rulegen/usr/sbin
 	# config stuff
 	mkdir -p $(CURDIR)/debian/alff-rulegen/etc/alff/example/
@@ -62,7 +62,7 @@ binary-arch: build install
 	dh_installdocs
 #	dh_installexamples
 	dh_installinit --noscripts
-	dh_installman -palff-rulegen man/{alff.conf.5,alff.1}
+	dh_installman -palff-rulegen man/alff.conf.5 man/alff.1
 	dh_compress
 	dh_fixperms
 	dh_installdeb

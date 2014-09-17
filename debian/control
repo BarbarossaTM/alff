@@ -7,7 +7,7 @@ Standards-Version: 3.6.2
 
 Package: alff-rulegen
 Architecture: all
-Depends: perl, libnet-cidr-perl, libnet-dns-perl, libxml-simple-perl, awk, bash
+Depends: python (>=2.7.0), python-ipaddr, awk, bash
 Description: A Linux Firewall Framework - rule generation
  This package is part of "A Linux Firewall Framework".
  .
