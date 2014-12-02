@@ -279,18 +279,20 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 	if ! iptables-restore "${CURRENT_RULES_FILE}"; then
 		# Something went wrong while loading the new rules
 		# Restore the old ones to prevent trouble
-		echo "HILFE!"
+		echo "Failed to load IPv4 rules"
 		restore_old_rules
 		STATUS="fail"
 	fi
 
-	# Load new rules by just executing the shell script
-	if ! ip6tables-restore "${CURRENT_RULES_FILE_V6}"; then
-		# Something went wrong while loading the new rules
-		# Restore the old ones to prevent trouble
-		echo "HILFE! HILFE!"
-		restore_old_rules
-		STATUS="fail"
+	if [ "${STATUS}" != 'fail' ] ; then
+		# Load new rules by just executing the shell script
+		if ! ip6tables-restore "${CURRENT_RULES_FILE_V6}"; then
+			# Something went wrong while loading the new rules
+			# Restore the old ones to prevent trouble
+			echo "Failed to load IPv6 rules"
+			restore_old_rules
+			STATUS="fail"
+		fi
 	fi
 
 	# Rule loading has finished.
@@ -300,7 +302,7 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 	# If the rules did load without error, try to get them approved
 	if [ "${STATUS}" != 'fail' ]; then
 		# Wait for deletion of the rules-dont-work-token.
-		sleep ${SLEEP_TIME:-180}
+		sleep ${SLEEP_TIME:-60}
 
 		# Chillin time is over... do we have to do a restore?
 		if [ -f "${DELETE_ME_TOKEN}" ]; then
