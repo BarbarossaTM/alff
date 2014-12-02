@@ -122,7 +122,7 @@ class Function (BaseFunction):
 			raise RuntimeError ("Invalid ip specification for machine '%s', specify either hostname, ipv4 or ipv6 address." % machine)
 
 
-		command = ["/usr/bin/ssh", "-q", "root@%s" % host, "/usr/bin/alff-cat"]
+		command = ["/usr/bin/ssh", "-q", "root@%s" % host, "/usr/sbin/alff-cat"]
 		ssh = subprocess.call (command)
 		if ssh != 0:
 			raise AlffError ("Failed to load rules on '%s' ..." % machine)
