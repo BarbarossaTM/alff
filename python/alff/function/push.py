@@ -25,6 +25,7 @@
 import subprocess
 from alff.errors	import *
 from alff.function	import *
+import time
 
 
 # argparse configuration
@@ -122,7 +123,17 @@ class Function (BaseFunction):
 
 
 		command = ["/usr/bin/ssh", "-q", "root@%s" % host, "/usr/bin/alff-cat"]
-		scp = subprocess.call (command)
-		if scp != 0:
+		ssh = subprocess.call (command)
+		if ssh != 0:
 			raise AlffError ("Failed to load rules on '%s' ..." % machine)
 		pass
+
+		time.sleep(1)
+
+		self.log.info("\t\tValidating")
+		command = ["/usr/bin/ssh", "-q", "root@%s" % host, "source /etc/alff/alff-defaults.conf ; if [ -f ${DELETE_ME_TOKEN} ] ; then rm -f ${DELETE_ME_TOKEN} ; fi" ]
+		ssh = subprocess.call (command)
+		if ssh != 0:
+			raise AlffError ("Sorry i couldn't delete the security token. Ruleset will be reverted in some seconds")
+		pass
+
