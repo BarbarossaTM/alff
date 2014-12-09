@@ -21,6 +21,16 @@ export MAIL_FILE=`tempfile`
 export RULES_DIFF=`tempfile`
 export RULES_V6_DIFF=`tempfile`
 
+
+# exit if anz(parameter) != 2
+if [ $# -eq 2 ] ; then
+	MD5_SUM_V4_PARAM=$1	
+	MD5_SUM_V6_PARAM=$2
+else
+	echo "Error: Wrong parameter count: alff-cat <md5sum ipv4> <md5sum ipv6>"
+	exit 1
+fi
+
 # Try to load configuration
 if [ -f /etc/alff/alff-agent.conf ]; then
 	. /etc/alff/alff-agent.conf
@@ -49,11 +59,33 @@ for tool in tempfile iptables-save iptables-restore ip6tables-restore ip6tables-
 	fi
 done
 
-# Create rules backup dir, if not there
-if [ ! -d "${RULES_DIR}" ]; then
-	mkdir -p "${RULES_DIR}"
+# Check if there are new rulesets
+if [ ! -f ${CURRENT_RULES_FILE} -o ! -f ${CURRENT_RULES_FILE_V6} ]; then
+	echo "Sorry can't find new rulesets to load"
+	exit 1
 fi
 
+# Check md5sums of rulesets
+MD5_SUM_V4=""
+MD5_SUM_V6=""
+if [ -f ${CURRENT_RULES_FILE} ] ; then
+	MD5_SUM_V4=$(md5sum ${CURRENT_RULES_FILE} | cut -f1 -d' ')
+fi
+
+if [ -f ${CURRENT_RULES_FILE_V6} ] ; then
+	MD5_SUM_V6=$(md5sum ${CURRENT_RULES_FILE_V6} | cut -f1 -d' ')
+fi
+
+if [ "${MD5_SUM_V4}" != "${MD5_SUM_V4_PARAM}" ] ; then
+	echo "MD5Sum of IPv4 rules mismatch"
+	exit 1
+fi
+	
+if [ "${MD5_SUM_V6}" != "${MD5_SUM_V6_PARAM}" ] ; then
+	echo "MD5Sum of IPv6 rules mismatch"
+	exit 1
+fi
+	
 function emergency_break() { #{{{
 	echo "There occured unkown errors!" >&2
 	echo "alff-cat will exit now to prevent future breakage..." >&2

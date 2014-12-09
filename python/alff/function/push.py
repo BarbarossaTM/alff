@@ -26,6 +26,7 @@ import subprocess
 from alff.errors	import *
 from alff.function	import *
 import time
+import hashlib
 
 
 # argparse configuration
@@ -108,6 +109,13 @@ class Function (BaseFunction):
 
 
 	def _init_and_validate_loading(self, site, machine):
+		# calculate md5sum of rulesets
+		filename_v4 = "%s/%s/%s_4.rules" % (self.config.get_rules_base_dir(), site, site)
+		filename_v6 = "%s/%s/%s_6.rules" % (self.config.get_rules_base_dir(), site, site)
+
+		md5sum_v4 = hashlib.md5(open(filename_v4, 'rb').read()).hexdigest()
+		md5sum_v6 = hashlib.md5(open(filename_v6, 'rb').read()).hexdigest()
+
 		self.log.info("\tLoading ruleset on '%s'" % machine)
 
 		# prefer ipv6-address of firewall
@@ -122,7 +130,7 @@ class Function (BaseFunction):
 			raise RuntimeError ("Invalid ip specification for machine '%s', specify either hostname, ipv4 or ipv6 address." % machine)
 
 
-		command = ["/usr/bin/ssh", "-q", "root@%s" % host, "/usr/sbin/alff-cat"]
+		command = ["/usr/bin/ssh", "-q", "root@%s" % host, "/usr/sbin/alff-cat %s %s" % (md5sum_v4, md5sum_v6) ]
 		ssh = subprocess.call (command)
 		if ssh != 0:
 			raise AlffError ("Failed to load rules on '%s' ..." % machine)
