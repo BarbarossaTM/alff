@@ -1,8 +1,62 @@
-alff (0.2.0~exp20140917) unstable; urgency=low
+alff (0.2.0-rc1) unstable; urgency=low
+  
+  Main Features:
+  * Complete rewrite in python
+  * Support multiple Sites
+  * Use iptables-save instead of multiple iptables calls
 
-  * DUMMY
+  [ Maximilian Wilhelm ]
+  * Remove configureFirewallNetworkOptions routine
+  * Groundwork for Alff rewrite in Python.
+  * Add basic ruleset management.
+  * Improve option handling in new config module + small fixes.
+  * Add handling of ruleset cache dirs and print rules into files.
+  * Add support to read rules from file.
+  * Fix exception messages for missing chains in ruleset.
+  * Use integer as internal protocol identifiers.
+  * Rename config.get_vlan_list() to get_vlans().
+  * Allow plugins to provide default value for get_plugin_option().
+  * (Allow to and) print problematic rule in RulesetErrors.
+  * Extent ruleset API to query and remove chains.
+  * Add misc utils for module/class loading and other nifty stuff.
+  * Add basic function loading framework and base class.
+  * Add 'generate' function and base plugin.
+  * Add classify_inter_vlan_traffic plugin.
+  * Add alff.py main programm providing full site awareness.
+  * Add logging support to ruleset module.
+  * Never ever at all remove empty table from the ruleset.
+  * Add support to remove unreferenced chains from ruleset.
+  * Add support to remove empty chains and refs from ruleset.
+  * Add Copyright notice and GPLv2 license header for every new file.
+  * Add first draft to services module.
+  * Add base work for push function.
 
- -- Michael Schwarz <schwarz@upb.de>  Wed, 17 Sep 2014 14:43:13 +0200
+  [ Michael Schwarz ]
+  * Really wait for termination of the subprocess, not just check
+  * Wiped out old perl-stuff, will be completely rewritten in python
+  * Moved plugin out of pythontree, to store all the plugins in one directory
+  * Fix errormessage
+  * Rewritten class Service as Configwrapper for Servicedefinitions
+  * Plugin for generation of servicechains
+  * Some more plugins
+  * Whiped out old perl-stuff
+  * Simple script to convert old service definitions to new json format
+  * Fixed some typos
+  * Be a little more verbose when suppressing chains
+  * Fix wrong indent
+  * Test if allow_from_world is set, otherwise plugins may break
+  * Do not create table nat for ipv6 unless the user wants this
+  * First version of push function
+  * Updated alff.conf sample config to new format
+  * Changed the cat a little bit to load the new iptables-save rules
+  * Fixed path in function module, installed wrapper to call alff.py
+  * Changed debian files for first version of NEW alff ;)
+  * Delete token on firewalls
+  * Some changes in loading Rulesets
+  * Changed path of alff-cat
+  * Create md5sums to prove rulesets
+
+ -- Michael Schwarz <mschwar2@math.uni-paderborn.de>  Wed, 17 Dec 2014 10:08:22 +0100
 
 alff (0.1.1-1) unstable; urgency=low
 
