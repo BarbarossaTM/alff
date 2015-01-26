@@ -83,8 +83,9 @@ function load_rules() { #{{{
 		fi
 
 	# OK, everything looks good, just load the ruleset if there is any
-	elif [ -f "${CURRENT_RULES_FILE}" ]; then
-			sh "${CURRENT_RULES_FILE}"
+	elif [ -f "${CURRENT_RULES_FILE}" -a -f "${CURRENT_RULES_FILE_V6}" ]; then
+			iptables-restore < "${CURRENT_RULES_FILE}"
+			ip6tables-restore < "${CURRENT_RULES_FILE_V6}"
 
 	# No rules :-(
 	else

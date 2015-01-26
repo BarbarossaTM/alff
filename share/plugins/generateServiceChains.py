@@ -45,6 +45,27 @@ class Plugin (BasePlugin):
 		# find all files in service.d-dir
 		configured_services = [ f for f in os.listdir(self.services_d) if os.path.isfile(self.services_d+'/'+f) ]
 
+		# create chains for security classes
+		for sec_class in self.config.security_classes:
+			sec_class_chain = "allowSrvFrom%sNets" % sec_class.title()
+
+			if not ruleset.chain_exists(4, sec_class_chain):
+				ruleset.create_chain(4, sec_class_chain)
+				for vlan in self.config.get_vlans_of_security_class(sec_class):
+					for ip in self.config.get_vlan_networks(vlan):
+						if ip_version(ip) == 4:
+							interface = self.config.get_vlan_interface(vlan, site)
+							if interface:
+								ruleset.add_rule("iptables -A FORWARD -i %s -s %s -j %s" % (interface, ip, sec_class_chain))
+			if not ruleset.chain_exists(6, sec_class_chain):
+				ruleset.create_chain(6, sec_class_chain)
+				for vlan in self.config.get_vlans_of_security_class(sec_class):
+					for ip in self.config.get_vlan_networks(vlan):
+						if ip_version(ip) == 6:
+							interface = self.config.get_vlan_interface(vlan, site)
+							if interface:
+								ruleset.add_rule("ip6tables -A FORWARD -i %s -s %s -j %s" % (interface, ip, sec_class_chain))
+
 		# create and set up service chains
 		for service_name in configured_services:
 			self.log.debug("Processing service %s ..." % service_name)
@@ -71,17 +92,10 @@ class Plugin (BasePlugin):
 			# allow from special networks
 			for network in service.get_allowed_networks():
 				sec_class_chain = "allowSrvFrom%sNets" % network
-	
-				if not ruleset.chain_exists(4, sec_class_chain):
-					ruleset.create_chain(4, sec_class_chain)
-					ruleset.add_rule("iptables -A FORWARD -j %s" % sec_class_chain)
-				if not ruleset.chain_exists(6, sec_class_chain):
-					ruleset.create_chain(6, sec_class_chain)
-					ruleset.add_rule("ip6tables -A FORWARD -j %s" % sec_class_chain)
-	
+
 				ruleset.add_rule("iptables -A %s -j %s" % (sec_class_chain, srv_chain))
 				ruleset.add_rule("ip6tables -A %s -j %s" % (sec_class_chain, srv_chain))
-	
+
 			# is service supposed to be public accessible
 			if not ruleset.chain_exists(4, 'allowWorldOpenServices'):
 				ruleset.create_chain(4, 'allowWorldOpenServices')
