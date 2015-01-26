@@ -57,7 +57,7 @@ class Plugin (BasePlugin):
 		for src_vlan in self.vlans:
 			for dst_vlan in self.vlans:
 				# Skip x <-> x rules (if not forced otherwise)
-				if src_vlan == dst_vlan and self.force_x_to_x_chains == 'yes':
+				if src_vlan == dst_vlan and self.force_x_to_x_chains != 'yes':
 					self.log.debug( "Skipping %s_to_%s" % (src_vlan, dst_vlan) )
 					continue
 
