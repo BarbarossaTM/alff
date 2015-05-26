@@ -40,63 +40,59 @@ class Service (object):
 
 		if not os.path.isdir (self.services_d):
 			raise ConfigError ("Error: Missing 'services.d' directory in config dir '%s'." % self.config.get_config_dir ())
-	
+
 		# Read in service config as json file
 		service_file = self.services_d + "/" + service_name
 		if os.path.isfile (service_file):
-			f = open(service_file, 'r').read()
-			self.service_config = json.loads(f)
+			f = open (service_file, 'r').read()
+			self.service_config = json.loads (f)
 		else:
 			raise ConfigError ("Error: Serviceconfiguration for service name '%s' does not exist." % service_name)
 
-	def get_ports(self):
+	def get_ports (self):
 		temp = []
 		for port in self.service_config['ports']:
-			if self._validate_port(port):
-				temp.append(port)
+			if self._validate_port (port):
+				temp.append (port)
 			else:
-				raise ConfigError("Error: invalid port specification: %s in service %s" % (port, self.service_name))
+				raise ConfigError ("Error: invalid port specification: %s in service %s" % (port, self.service_name))
 		return temp
 
-	def get_hosts(self, ipversion = 0):
+	def get_hosts (self, ipversion = 0):
 		if ipversion == 4:
 			temp = []
 			for ip in self.service_config['servers']:
-				if ip_version(ip) == 4:
-					temp.append(ip)
+				if ip_version (ip) == 4:
+					temp.append (ip)
 			return temp
-		elif ipversion == 6:	
+
+		elif ipversion == 6:
 			temp = []
 			for ip in self.service_config['servers']:
-				if ip_version(ip) == 6:
-					temp.append(ip)
+				if ip_version (ip) == 6:
+					temp.append (ip)
 			return temp
+
 		else:
 			return self.service_config['servers']
 
-	def get_chain_name(self):
-		return "allowSrv"+self.service_name
+	def get_chain_name (self):
+		return "allowSrv" + self.service_name
 
-	def allow_from_world(self):
-		# well, allow from world isn't always set
-		try:
-			self.service_config['allow_from_world']
-		except:
-			return False
-		else:
-			if self.service_config['allow_from_world'] == "yes":
-				return True
-			else:
-				return False
+	def allow_from_world (self):
+		if self.service_config.get ('allow_from_world', 'no') == "yes":
+			return True
 
-	def get_allowed_networks(self):
+		return False
+
+	def get_allowed_networks (self):
 		networks = []
-		for key in self.service_config.keys():
-			m = re.search('allow_from_(\w+)_networks', key)
+		for key in self.service_config.keys ():
+			m = re.search ('allow_from_(\w+)_networks', key)
 			if m:
-				networks.append(m.group(1).title())
+				networks.append (m.group (1).title ())
 		return networks
 
 	# internal methods
-	def _validate_port(self, port):
+	def _validate_port (self, port):
 		return True
