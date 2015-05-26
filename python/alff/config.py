@@ -101,9 +101,12 @@ class Config (object):
 	def get_rules_base_dir (self):
 		return self.rules_base_dir
 
-	def get_option (self, option):
+	def get_option (self, option, default = None):
 		if option in self.config['options']:
 			return self.config['options'][option]
+
+		if default != None:
+			return default
 
 		raise ConfigError ("Unknown option '%s'" % option)
 
