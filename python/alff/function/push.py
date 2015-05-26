@@ -59,22 +59,22 @@ class Function (BaseFunction):
 
 		for site in self.args.site:
 			if not self.config.is_valid_site (site):
-				raise ConfigError ("Site '%s' no found in configuration." % site)
+				raise ConfigError ("Site '%s' not found in configuration." % site)
 
 		self.sites = self.args.site
 
 	def run (self):
 		# TODO Regeln an einzelne Maschinen uebertragen
 		for site in self.sites:
-			self.log.info("Pushing Rules to (specified) Firewalls of site '%s'" % site)
+			self.log.info("Pushing Rules to (specified) Firewalls at site '%s'" % site)
 			machines = self.config.get_machine_ids(site)
 			for machine in machines:
-				# We will do pushing the ruleset and loading it in two steps.
+				# We will push and load the ruleset in two steps.
 				# This will prevent loading rules only on some of the firewalls.
 				self._push_ruleset(site, machine)
 
 		for site in self.sites:
-			self.log.info("Loading rulesets of site '%s'" % site)
+			self.log.info("Loading rulesets at site '%s'" % site)
 			machines = self.config.get_machine_ids(site)
 			for machine in machines:
 				# finally load the previously pushed rules
