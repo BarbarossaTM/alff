@@ -23,11 +23,11 @@ export RULES_V6_DIFF=`tempfile`
 
 
 # exit if anz(parameter) != 2
-if [ $# -eq 2 ] ; then
-	MD5_SUM_V4_PARAM=$1	
+if [ $# -eq 2 ]; then
+	MD5_SUM_V4_PARAM=$1
 	MD5_SUM_V6_PARAM=$2
 else
-	echo "Error: Wrong parameter count: alff-cat <md5sum ipv4> <md5sum ipv6>"
+	echo "Usage: alff-cat <md5sum ipv4> <md5sum ipv6>" >&2
 	exit 1
 fi
 
@@ -80,12 +80,12 @@ if [ "${MD5_SUM_V4}" != "${MD5_SUM_V4_PARAM}" ] ; then
 	echo "MD5Sum of IPv4 rules mismatch"
 	exit 1
 fi
-	
+
 if [ "${MD5_SUM_V6}" != "${MD5_SUM_V6_PARAM}" ] ; then
 	echo "MD5Sum of IPv6 rules mismatch"
 	exit 1
 fi
-	
+
 function emergency_break() { #{{{
 	echo "There occured unkown errors!" >&2
 	echo "alff-cat will exit now to prevent future breakage..." >&2
@@ -109,7 +109,7 @@ function dump_tables() { # {{{
 
 function dump_v6_tables() { # {{{
 	for table in ${DIFF_TABLES}; do
-		if [ $table != "nat" ] ; then 
+		if [ $table != "nat" ] ; then
 			if ! ip6tables -t ${table} -L -v -n | sed -e 's/^[[:space:]]*[0-9]\+[KMG]\?[[:space:]]\+[0-9]\+[KMG]\?\(.*\)/    0     0\1/' \
 								-e 's/[0-9]\+[KMG]\? packets, [0-9]\+[KMG]\? bytes)/0 packets, 0 bytes)/' ; then
 				return 1
@@ -213,7 +213,7 @@ The old rules have been restored."
 		else
 			echo -e "\n There are no differences in the IPv6 rules. \n" >> "${MAIL_FILE}"
 		fi
-	
+
 	fi #}}}
 
 	if [ -s "${LOG_FILE}" ]; then #{{{
@@ -260,15 +260,6 @@ else
 	emergency_break
 fi
 
-## Save new rules to disk, to keep them over reboot
-#echo -n " 2"
-#if cat "${RULES_FILE}" > "${CURRENT_RULES_FILE}"; then
-#	echo -n "."
-#else
-#	echo "FAILED to save new ruleset!"
-#	emergency_break
-#fi
-
 # Try to create the delete-me token
 echo -n " 2"
 if touch "${DELETE_ME_TOKEN}"; then
@@ -300,14 +291,13 @@ else
 	exit 5
 fi
 
-#echo "Will now go to background and load new rules and wait ${SLEEP_TIME:-180} sec. for deletion of the token."
 echo -n " ..."
 
 exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 (
 	STATUS=""
 
-	# Load new rules by just executing the shell script
+	# Load new IPv4 rules
 	if ! iptables-restore "${CURRENT_RULES_FILE}"; then
 		# Something went wrong while loading the new rules
 		# Restore the old ones to prevent trouble
@@ -317,7 +307,7 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 	fi
 
 	if [ "${STATUS}" != 'fail' ] ; then
-		# Load new rules by just executing the shell script
+		# Load new IPv6 rules
 		if ! ip6tables-restore "${CURRENT_RULES_FILE_V6}"; then
 			# Something went wrong while loading the new rules
 			# Restore the old ones to prevent trouble
@@ -328,7 +318,7 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 	fi
 
 	# Rule loading has finished.
-	# (If the rules did load successfull does not matter here!)
+	# (If the rules did load successfully doesnt matter here!)
 	rm -- "${RULES_LOADING_TOKEN}"
 
 	# If the rules did load without error, try to get them approved
@@ -342,7 +332,7 @@ exec < /dev/null 1> "${LOG_FILE}" 2> "${ERROR_LOG}"
 			restore_old_rules
 			STATUS="token"
 		else
-			# Yeha, everything went fine
+			# Yeah, everything went fine
 			STATUS="success"
 		fi
 	fi
