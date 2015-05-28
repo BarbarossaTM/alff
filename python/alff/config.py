@@ -358,10 +358,10 @@ class Parser (object):
 
 		xml_networks = self.root.findall ('network')
 
-		if not xml_networks:
-			xml_networks = self.root.findall ('vlan')
-			if xml_networks:
-				AlffDeprecated ("Config tag <vlan>", "<network>")
+		vlans = self.root.findall ('vlan')
+		if len (vlans):
+			xml_networks.extend (vlans)
+			AlffDeprecated ("Config tag <vlan>", "<network>")
 
 		for network in xml_networks:
 			network_dict = {
@@ -445,10 +445,11 @@ class Parser (object):
 			# Get interface_map
 			int_map = site_dict['interface_map']
 			networks = site.findall ("interface_map/network")
-			if len (networks) == 0:
-				networks = site.findall ("interface_map/vlan")
-				if networks:
-					AlffDeprecated ("<vlan>", "<network>")
+			# Compatibility glue
+			vlan_networks = site.findall ("interface_map/vlan")
+			if len (vlan_networks):
+				networks.extend (vlan_networks)
+				AlffDeprecated ("<vlan>", "<network>")
 
 			if len (networks) == 0:
 				raise ConfigError ("Empty interface map for site %s!" % site_id)
