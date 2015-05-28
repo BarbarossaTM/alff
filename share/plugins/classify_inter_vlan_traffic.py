@@ -39,8 +39,8 @@ class Plugin (BasePlugin):
 
 		self.rules_dir = "%s/%s" % (self.config.get_config_dir (), CONFIG_DIR)
 
-		# Get global vlan list
-		self.vlans = sorted (self.config.get_vlans ())
+		# Get global network list
+		self.networks = sorted (self.config.get_networks ())
 
 		#
 		# Plugin configuration options
@@ -49,55 +49,55 @@ class Plugin (BasePlugin):
 		self.default_chain_target = self.config.get_plugin_option (plugin_name, "default_chain_target", "REJECT")
 		# Should we silenty ignore chains without rules?
 		self.remove_empty_chains  = self.config.get_plugin_option (plugin_name, "remove_empty_chains",  True)
-		# Should we create chains for traffic from vlan x into vlan x?
+		# Should we create chains for traffic from network x into network x?
 		self.force_x_to_x_chains  = self.config.get_plugin_option (plugin_name, "force_x_to_x_chains",  False)
 
 
 	def run (self, ruleset, site):
-		for src_vlan in self.vlans:
-			for dst_vlan in self.vlans:
+		for src_network in self.networks:
+			for dst_network in self.networks:
 				# Skip x <-> x rules (if not forced otherwise)
-				if src_vlan == dst_vlan and self.force_x_to_x_chains != 'yes':
-					self.log.debug( "Skipping %s_to_%s" % (src_vlan, dst_vlan) )
+				if src_network == dst_network and self.force_x_to_x_chains != 'yes':
+					self.log.debug( "Skipping %s_to_%s" % (src_network, dst_network) )
 					continue
 
-				# If both vlans are *not* behind this firewall, there is nothing we could do for them...
-				if not self.config.is_filtered_vlan (src_vlan) and not self.config.is_filtered_vlan (dst_vlan):
+				# If both networks are *not* behind this firewall, there is nothing we could do for them...
+				if not self.config.is_filtered_network (src_network) and not self.config.is_filtered_network (dst_network):
 					continue
 
 				# Skip this traversal if there are no rule files for it at all.
 				# Beware: There might be empty rule files or rule files only containig rules
 				# for on protocol. We check this later and remove any created empty chain.
-				if self.remove_empty_chains and not self._has_rule_files (src_vlan, dst_vlan):
+				if self.remove_empty_chains and not self._has_rule_files (src_network, dst_network):
 					continue
 
 				# OK, just do it[tm]
-				self._classify_traffic_from_to (src_vlan, dst_vlan, ruleset, site)
+				self._classify_traffic_from_to (src_network, dst_network, ruleset, site)
 
 
-	def _classify_traffic_from_to (self, src_vlan, dst_vlan, ruleset, site):
-		""" Create <src_vlan>_to_<dst_vlan> chain and rules to direct traffic from any networks """
-		""" of src_vlan to any networks of dst_vlan into that chain in FORWAR chain. """
+	def _classify_traffic_from_to (self, src_network, dst_network, ruleset, site):
+		""" Create <src_network>_to_<dst_network> chain and rules to direct traffic from any prefixes """
+		""" of src_network to any prefixes of dst_network into that chain in FORWAR chain. """
 
-		chain = "%s_to_%s" % (src_vlan, dst_vlan)
+		chain = "%s_to_%s" % (src_network, dst_network)
 
-		# Try to gexplicitly et interface names for vlan for this site
-		src_int = self.config.get_vlan_interface (src_vlan, site, use_default = False)
-		dst_int = self.config.get_vlan_interface (dst_vlan, site, use_default = False)
+		# Try to gexplicitly et interface names for network for this site
+		src_int = self.config.get_network_interface (src_network, site, use_default = False)
+		dst_int = self.config.get_network_interface (dst_network, site, use_default = False)
 
-		# If there's no interface to any vlan at this site, there traversion isn't relevant here.
+		# If there's no interface to any network at this site, there traversion isn't relevant here.
 		if not src_int and not dst_int:
 			return
 
 		# If we're still here, we got a least one interface for this site, so ask again,
-		# now accepting the default interface for this site, as one of the vlans may not
+		# now accepting the default interface for this site, as one of the networks may not
 		# be local while the other one is.
-		src_int = self.config.get_vlan_interface (src_vlan, site, use_default = True)
-		dst_int = self.config.get_vlan_interface (dst_vlan, site, use_default = True)
+		src_int = self.config.get_network_interface (src_network, site, use_default = True)
+		dst_int = self.config.get_network_interface (dst_network, site, use_default = True)
 
-		# Get IP networks of vlans
-		src_networks = self.config.get_vlan_networks (src_vlan)
-		dst_networks = self.config.get_vlan_networks (dst_vlan)
+		# Get IP prefixes of networks
+		src_prefixes = self.config.get_network_prefixes (src_network)
+		dst_prefixes = self.config.get_network_prefixes (dst_network)
 
 		# Create the chains for this network transition
 		ruleset.create_chain ("4", chain, "filter")
@@ -105,7 +105,7 @@ class Plugin (BasePlugin):
 
 		# Chains created, so let's load any rules for it so when can see if there are any
 		# for both protocols.
-		self._load_chain_rules (src_vlan, dst_vlan, ruleset)
+		self._load_chain_rules (src_network, dst_network, ruleset)
 		rules = {}
 
 		for protocol in (4, 6):
@@ -114,12 +114,12 @@ class Plugin (BasePlugin):
 				ruleset.remove_chain (protocol, chain)
 
 		# Generate classification rules
-		for src_net in src_networks:
-			# Get src network version (v4/v6), strip possible leading ! (negation) before.
+		for src_net in src_prefixes:
+			# Get src prefix version (v4/v6), strip possible leading ! (negation) before.
 			src_net_version = ip_version (src_net.replace ("!", "").strip ())
 
-			for dst_net in dst_networks:
-				# Ignore this combinaton IF one network is v4 and the other is v6
+			for dst_net in dst_prefixes:
+				# Ignore this combinaton IF one prefix is v4 and the other is v6
 				if src_net_version != ip_version (dst_net.replace ("!", "").strip ()):
 					continue
 
@@ -140,16 +140,16 @@ class Plugin (BasePlugin):
 
 
 
-	def _load_chain_rules (self, src_vlan, dst_vlan, ruleset):
-		""" Load rules for <src_vlan>_to_<dst_vlan> chain from <src_vlan>_to_default, """
-		""" default_to_<dst_vlan> and <<src_vlan>_to_<dst_vlan> config files OR create """
+	def _load_chain_rules (self, src_network, dst_network, ruleset):
+		""" Load rules for <src_network>_to_<dst_network> chain from <src_network>_to_default, """
+		""" default_to_<dst_network> and <<src_network>_to_<dst_network> config files OR create """
 		""" rule jumping to self.default_chain_target instead IF 'remove_empty_chains' """
 		""" is set. Otherwise remove any empty chain. """
 
-		chain = "%s_to_%s" % (src_vlan, dst_vlan)
+		chain = "%s_to_%s" % (src_network, dst_network)
 
 		# Load default rules from the following files in this order
-		default_files = ("%s_to_default" % src_vlan, "default_to_%s" % dst_vlan)
+		default_files = ("%s_to_default" % src_network, "default_to_%s" % dst_network)
 
 		# Load any default files, if any
 		try:
@@ -165,8 +165,8 @@ class Plugin (BasePlugin):
 						if re.match ("^\s*$\|^\s*#", line):
 							continue
 
-						line = re.sub ("default_", "%s_" % src_vlan, line)
-						line = re.sub ("_default", "_%s" % dst_vlan, line)
+						line = re.sub ("default_", "%s_" % src_network, line)
+						line = re.sub ("_default", "_%s" % dst_network, line)
 						ruleset.add_rule (line)
 
 					self.log.debug ("Sucessfully loaded default rules '%s' for chain '%s'" % (default_file, chain))
@@ -190,13 +190,13 @@ class Plugin (BasePlugin):
 				ruleset.add_rule ("%s -A %s -j %s" % (cmd, chain, self.default_chain_target))
 
 
-	def _has_rule_files (self, src_vlan, dst_vlan):
+	def _has_rule_files (self, src_network, dst_network):
 		""" Check if there is at least on file containing rules for the transition """
-		""" from src_vlan to dst_vlan. """
+		""" from src_network to dst_network. """
 
-		chain = "%s_to_%s" % (src_vlan, dst_vlan)
+		chain = "%s_to_%s" % (src_network, dst_network)
 
-		files = ("%s_to_default" % src_vlan, "default_to_%s" % dst_vlan, chain)
+		files = ("%s_to_default" % src_network, "default_to_%s" % dst_network, chain)
 
 		for f in files:
 			if os.path.isfile (join_path (self.rules_dir, f)):
