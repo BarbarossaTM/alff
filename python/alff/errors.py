@@ -22,6 +22,9 @@
 #  --  Sat 04 Jan 2014 01:33:51 AM CET
 #
 
+import warnings
+
+
 class AlffError (Exception):
 	def __init__ (self, message):
 		self.message = message
@@ -46,3 +49,7 @@ class ConfigError (AlffError): pass
 class PluginError (AlffError): pass
 class UnhandledError (AlffError): pass
 class NotImplementedError (AlffError): pass
+
+
+def AlffDeprecated (old, new):
+	warnings.warn ("%s is deprecated, use %s instead." % (old, new), Warning, stacklevel = 3)
