@@ -30,10 +30,10 @@ class Plugin (BasePlugin):
 	def __init__ (self, config, log):
 		BasePlugin.__init__ (self, config, log)
 
-		self.allow_traceroute_udp = self.config.get_option ("allow_traceroute_udp") 
+		self.allow_traceroute_udp = self.config.get_option ("allow_traceroute_udp")
 
 	def run (self, ruleset, site):
-		if self.allow_traceroute_udp == "yes":
-			ruleset.add_rule("iptables -A FORWARD -p udp --dport 33434:33523 -j ACCEPT")
+		if self.allow_traceroute_udp:
+			ruleset.add_rule("iptables  -A FORWARD -p udp --dport 33434:33523 -j ACCEPT")
 			ruleset.add_rule("ip6tables -A FORWARD -p udp --dport 33434:33523 -j ACCEPT")
 
