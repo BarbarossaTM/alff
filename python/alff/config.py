@@ -265,6 +265,7 @@ class Parser (object):
 		'fw_type' : 'router',
 		'allow_icmp' : 'all',
 		'allow_traceroute_udp' : False,
+		'support_ipv6_nat': False,
 		'suppress_empty_chains' : False,
 		'suppress_unreferenced_chains' : False,
 		'dhcp_server' : [],
@@ -448,17 +449,21 @@ class Parser (object):
 	def __get_text_elements (self, elem, dst_dict):
 		for subelem in list (elem):
 			if subelem.text is not None:
-				dst_dict[subelem.tag] = subelem.text.strip ()
+				# Try to convert boolean text value into real boolean (if any)
+				dst_dict[subelem.tag] = self.__get_true_false (subelem.text, noerror = True)
 			else:
 				# If there is no text value we assume that it's a boolean
-				dst_dict[subelem.tag] = "yes"
+				dst_dict[subelem.tag] = True
 
-	def __get_true_false (self, string):
+	def __get_true_false (self, string, noerror = False):
 		match = string.strip ()
 
-		if re.match ("yes", match, re.I):
+		if re.search ("^(yes|true)$", match, re.I):
 			return True
-		elif re.match ("no", match, re.I):
+		elif re.search ("^(no|false)$", match, re.I):
 			return False
+
+		if noerror:
+			return match
 
 		raise ConfigError ("Expected boolean value ('yes', 'no'), got '%s'" % string)

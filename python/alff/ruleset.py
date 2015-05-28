@@ -61,6 +61,7 @@ class Ruleset (object):
 		# Store relevant config option for speedup
 		self.suppress_empty_chains = self.config.get_option ("suppress_empty_chains")
 		self.suppress_unreferenced_chains = self.config.get_option ("suppress_unreferenced_chains")
+		self.support_ipv6_nat = self.config.get_option("support_ipv6_nat")
 
 		self.ruleset = {
 			4 : {},
@@ -71,7 +72,7 @@ class Ruleset (object):
 		for protocol, ruleset in self.ruleset.iteritems ():
 			for table in TABLES:
 				# Do not create nat table for ipv6 unless the user forced this
-				if protocol == 6 and table == "nat" and self.config.get_option("support_ipv6_nat") != "yes":
+				if protocol == 6 and table == "nat" and not self.support_ipv6_nat:
 					continue
 
 				ruleset[table] = {
@@ -415,7 +416,7 @@ class Ruleset (object):
 
 		for table in TABLES:
 			# Do not create nat table for ipv6 unless the user forced this
-			if protocol == 6 and table == "nat" and self.config.get_option ("support_ipv6_nat", "no") != "yes":
+			if protocol == 6 and table == "nat" and not self.support_ipv6_nat:
 				self.log.debug ("Suppressing table 'nat' for ipv6")
 				continue
 
