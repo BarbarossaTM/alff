@@ -78,15 +78,15 @@ class Config (object):
 			'trusted' : 1,
 		}
 
-		for vlan_id in self.config['vlans'].keys ():
-			vlan = self.config['vlans'][vlan_id]
+		for network_id in self.config['networks'].keys ():
+			network = self.config['networks'][network_id]
 
-			for sec_class in vlan['security_class']:
+			for sec_class in network['security_class']:
 				all_sec_classes[sec_class] = 1
 
 			for magic_class in ('filtered', 'trusted'):
-				if magic_class in vlan and re.search ('yes|true', vlan[magic_class], re.I):
-					vlan['security_class'].append (magic_class)
+				if magic_class in network and re.search ('yes|true', network[magic_class], re.I):
+					network['security_class'].append (magic_class)
 
 		self.security_classes = all_sec_classes.keys ()
 
@@ -143,44 +143,65 @@ class Config (object):
 
 
 	########################################
-	# vlan handling
+	# network handling
 	########################################
 
 	def get_vlans (self):
-		return self.config['vlans'].keys ()
+		AlffDeprecated ("get_vlans()", "get_networks()")
+		return self.get_networks ()
+	def get_networks (self):
+		return self.config['networks'].keys ()
 
 
 	def is_valid_vlan (self, vlan):
-		return vlan in self.config['vlans']
+		AlffDeprecated ("is_valid_vlan()", "is_valid_network()")
+		return self.is_valid_network (vlan)
+	def is_valid_network (self, network):
+		return network in self.config['networks']
 
 
 	def get_vlans_of_security_class (self, sec_class):
-		return [vlan for vlan in self.config['vlans'].keys () if sec_class in self.config['vlans'][vlan]['security_class']]
+		AlffDeprecated ("get_vlans_of_security_class()", "get_networks_of_security_class()")
+		return self.get_networks_of_security_class (sec_class)
+	def get_networks_of_security_class (self, sec_class):
+		return [network for network in self.config['networks'].keys () if sec_class in self.config['networks'][network]['security_class']]
 
 
 	def get_filtered_vlans (self):
-		return self.get_vlans_of_security_class ("filtered")
+		AlffDeprecated ("get_filtered_vlans()", "get_filtered_networks()")
+		return self.get_filtered_networks ()
+	def get_filtered_networks (self):
+		return self.get_networks_of_security_class ("filtered")
 
 
 	def get_trusted_vlans (self):
-		return self.get_vlans_of_security_class ("trusted")
+		AlffDeprecated ("get_trusted_vlans()", "get_trusted_networks()")
+		return self.get_trusted_networks ()
+	def get_trusted_networks (self):
+		return self.get_networks_of_security_class ("trusted")
 
 
 	def is_filtered_vlan (self, vlan):
-		if not self.is_valid_vlan (vlan):
-			raise RuntimeError ("Invalid vlan id '%s'." % vlan)
+		AlffDeprecated ("is_filtered_vlan()", "is_filtered_network()")
+		return self.is_filtered_network (vlan)
+	def is_filtered_network (self, network):
+		if not self.is_valid_network (network):
+			raise RuntimeError ("Invalid network id '%s'." % network)
 
-		return "filtered" in self.config['vlans'][vlan]['security_class']
+		return "filtered" in self.config['networks'][network]['security_class']
 
 
 	def get_vlan_interface (self, vlan, site, use_default = False):
-		if not self.is_valid_vlan (vlan):
-			raise RuntimeError ("Invalid vlan id '%s'." % vlan)
+		AlffDeprecated ("get_vlan_interface()", "get_network_interface()")
+		return self.get_network_interface (vlan, site, use_default)
+	def get_network_interface (self, network, site, use_default = False):
+		if not self.is_valid_network (network):
+			raise RuntimeError ("Invalid network id '%s'." % network)
 
 		if not self.is_valid_site (site):
 			raise RuntimeError ("Invalid site id '%s'." % site)
 
-		iface = self.config['sites'][site]['interface_map'].get (vlan)
+		iface = self.config['sites'][site]['interface_map'].get (network)
 
 		if iface is None:
 			if use_default:
@@ -192,17 +213,22 @@ class Config (object):
 
 
 	def get_vlan_networks (self, vlan):
-		if not self.is_valid_vlan (vlan):
-			raise RuntimeError ("Invalid vlan id '%s'." % vlan)
+		AlffDeprecated ("get_vlan_networks()", "get_network_prefixes()")
+		return self.get_network_prefixes (vlan)
+	def get_network_prefixes (self, network):
+		if not self.is_valid_network (network):
+			raise RuntimeError ("Invalid network id '%s'." % network)
 
-		return self.config['vlans'][vlan]['network']
-
+		return self.config['networks'][network]['prefix']
 
 	def get_security_classes_of_vlan (self, vlan):
-		if not self.is_valid_vlan (vlan):
-			raise RuntimeError ("Invalid vlan id '%s'." % vlan)
+		AlffDeprecated ("get_security_classes_of_vlan()", "get_security_classes_of_network()")
+		return self.get_security_classes_of_network (vlan)
+	def get_security_classes_of_network (self, network):
+		if not self.is_valid_network (network):
+			raise RuntimeError ("Invalid network id '%s'." % network)
 
-		return self.config['vlans'][vlan]['security_class']
+		return self.config['networks'][network]['security_class']
 
 
 
@@ -256,6 +282,8 @@ class Config (object):
 		return self.config['plugins'][plugin].get (option, default)
 
 
+
+
 ################################################################################
 #                          XML config file parser                              #
 ################################################################################
@@ -283,10 +311,10 @@ class Parser (object):
 
 	def get_config (self):
 		config = {
-			'options' : self._get_options (),
-			'plugins' : self._get_plugin_options (),
-			'vlans'   : self._get_vlans (),
-			'sites'   : self._get_sites (),
+			'options'  : self._get_options (),
+			'plugins'  : self._get_plugin_options (),
+			'networks' : self._get_networks (),
+			'sites'    : self._get_sites (),
 		}
 
 		return config
@@ -324,32 +352,46 @@ class Parser (object):
 		return plugins
 
 
-	""" Parse vlan list """
-	def _get_vlans (self):
-		vlans = {}
+	""" Parse network list """
+	def _get_networks (self):
+		networks = {}
 
-		for vlan in self.root.findall ('vlan'):
-			vlan_dict = {
+		xml_networks = self.root.findall ('network')
+
+		if not xml_networks:
+			xml_networks = self.root.findall ('vlan')
+			if xml_networks:
+				AlffDeprecated ("Config tag <vlan>", "<network>")
+
+		for network in xml_networks:
+			network_dict = {
 				'network' : [],
+				'prefix' : [],
 				'security_class' : [],
 			}
 
-			# Fetch vlan elements
-			for elem in list (vlan):
-				if elem.tag in ('network', 'security_class'):
-					vlan_dict[elem.tag].append (elem.text.strip ())
+			# Fetch network elements
+			for elem in list (network):
+				if elem.tag in ('network', 'prefix', 'security_class'):
+					network_dict[elem.tag].append (elem.text.strip ())
 				else:
-					vlan_dict[elem.tag] = elem.text.strip ()
+					network_dict[elem.tag] = elem.text.strip ()
 
-			# Fetch vlan attributes (if any)
-			self.__get_attributes (vlan, vlan_dict)
+			if len (network_dict['network']):
+				AlffDeprecated ("Old <vlan> element <network>", "<prefix>")
+				network_dict['prefix'].extend (network_dict['network'])
 
-			if 'id' not in vlan_dict:
-				raise ConfigError ("Vlan without ID found!")
+			del network_dict['network']
 
-			vlans[vlan_dict['id']] = vlan_dict
+			# Fetch network attributes (if any)
+			self.__get_attributes (network, network_dict)
 
-		return vlans
+			if 'id' not in network_dict:
+				raise ConfigError ("No ID found for network!")
+
+			networks[network_dict['id']] = network_dict
+
+		return networks
 
 
 	""" Parse sites """
@@ -402,38 +444,43 @@ class Parser (object):
 
 			# Get interface_map
 			int_map = site_dict['interface_map']
-			vlans = site.findall ("interface_map/vlan")
-			if len (vlans) == 0:
+			networks = site.findall ("interface_map/network")
+			if len (networks) == 0:
+				networks = site.findall ("interface_map/vlan")
+				if networks:
+					AlffDeprecated ("<vlan>", "<network>")
+
+			if len (networks) == 0:
 				raise ConfigError ("Empty interface map for site %s!" % site_id)
 
-			for vlan in vlans:
-				vlan_dict = {}
+			for network in networks:
+				network_dict = {}
 
-				self.__get_attributes (vlan, vlan_dict)
-				self.__get_text_elements (vlan, vlan_dict)
+				self.__get_attributes (network, network_dict)
+				self.__get_text_elements (network, network_dict)
 
-				if 'id' not in vlan_dict:
-					raise ConfigError ("Vlan without 'id' found in site '%s'!" % site_id)
+				if 'id' not in network_dict:
+					raise ConfigError ("Network without 'id' found in site '%s'!" % site_id)
 
-				vlan_id = vlan_dict['id']
+				network_id = network_dict['id']
 
-				if 'interface' not in vlan_dict:
-					raise ConfigError ("No 'interface' specified for vlan '%s' at site '%s'!" % (vlan_id, site_id))
+				if 'interface' not in network_dict:
+					raise ConfigError ("No 'interface' specified for network '%s' at site '%s'!" % (network_id, site_id))
 
-				if vlan_id in int_map:
-					raise ConfigError ("Duplicate vlan id '%s' found in interface map for site '%s'!" (vlan_id, site_id))
+				if network_id in int_map:
+					raise ConfigError ("Duplicate network id '%s' found in interface map for site '%s'!" (network_id, site_id))
 
-				int_map[vlan_id] = vlan_dict
+				int_map[network_id] = network_dict
 
 				# Default interace found?
-				if 'default' in vlan_dict:
+				if 'default' in network_dict:
 					if 'default' in int_map:
-						raise ConfigError ("Duplicate default interface found: '%s' vs. '%s'!" % (int_map['default']['interface'], vlan_dict['interface']))
+						raise ConfigError ("Duplicate default interface found: '%s' vs. '%s'!" % (int_map['default']['interface'], network_dict['interface']))
 
 					int_map['default'] = {
 						'id' : 'default',
-						'interface' : vlan_dict['interface'],
-						'orig_vlan' : vlan_dict['id'],
+						'interface' : network_dict['interface'],
+						'orig_network' : network_dict['id'],
 					}
 
 			# Store this site
