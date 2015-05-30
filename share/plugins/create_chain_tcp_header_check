@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 #
 # tcp_pre-analysis
 #
@@ -9,7 +9,7 @@
 #
 
 cat << EOF
-## 
+##
 # create chains
 iptables -N tcp_header_check
 ip6tables -N tcp_header_check

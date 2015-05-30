@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 #
 # 01drop_spoofed
 #
@@ -8,7 +8,7 @@
 #  -- Wed, 12 Apr 2006 19:00:04 +0200
 #
 
-cat << EOF 
+cat << EOF
 ## create chains
 iptables -N spoofcheck
 ip6tables -N spoofcheck

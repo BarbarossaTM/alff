@@ -7,7 +7,7 @@ Standards-Version: 3.6.2
 
 Package: alff-rulegen
 Architecture: all
-Depends: python (>=2.7.0), python-ipaddr, awk, bash
+Depends: python (>=2.7.0), python-ipaddr
 Description: A Linux Firewall Framework - rule generation
  This package is part of "A Linux Firewall Framework".
  .

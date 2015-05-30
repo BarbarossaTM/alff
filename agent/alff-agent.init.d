@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Maximilian Wilhelm <max@rfc2324.org>
 #  -- Sat, 17 Jun 2006 23:19:08 +0200
