@@ -51,18 +51,18 @@ class Plugin (BasePlugin):
 
 			if not ruleset.chain_exists(4, sec_class_chain):
 				ruleset.create_chain(4, sec_class_chain)
-				for vlan in self.config.get_vlans_of_security_class(sec_class):
-					for ip in self.config.get_vlan_networks(vlan):
+				for vlan in self.config.get_networks_of_security_class(sec_class):
+					for ip in self.config.get_network_prefixes(vlan):
 						if ip_version(ip) == 4:
-							interface = self.config.get_vlan_interface(vlan, site, True)
+							interface = self.config.get_network_interface(vlan, site, True)
 							if interface:
 								ruleset.add_rule("iptables -A FORWARD -i %s -s %s -j %s" % (interface, ip, sec_class_chain))
 			if not ruleset.chain_exists(6, sec_class_chain):
 				ruleset.create_chain(6, sec_class_chain)
-				for vlan in self.config.get_vlans_of_security_class(sec_class):
-					for ip in self.config.get_vlan_networks(vlan):
+				for vlan in self.config.get_networks_of_security_class(sec_class):
+					for ip in self.config.get_network_prefixes(vlan):
 						if ip_version(ip) == 6:
-							interface = self.config.get_vlan_interface(vlan, site, True)
+							interface = self.config.get_network_interface(vlan, site, True)
 							if interface:
 								ruleset.add_rule("ip6tables -A FORWARD -i %s -s %s -j %s" % (interface, ip, sec_class_chain))
 
