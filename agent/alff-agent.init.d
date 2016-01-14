@@ -6,15 +6,15 @@
 
 ### BEGIN INIT INFO
 # Provides:             alff-agent
-# Required-Start:       $network
-# Required-Stop:        $network
+# Required-Start:       $network $local_fs
+# Required-Stop:        $network $local_fs
 # Default-Start:        2 3 4 5
 # Default-Stop:         0 1 6
 # Short-Description:    Alff-Agent start/stop script for init
 ### END INIT INFO
 
 # Check if run interactivly or from init
-function interactive_run() { #{{{
+interactive_run () { #{{{
 	if [ -x /bin/readlink ]; then
 		tty=`readlink --silent /proc/self/fd/0`
 		if [ -z "${tty}" -o "${tty}" == "/dev/console" ]; then
@@ -24,7 +24,7 @@ function interactive_run() { #{{{
 } #}}}
 
 # Flush all chains
-function flush_all() { #{{{
+flush_all () { #{{{
 	# Reset filter chains #{{{
 	iptables -t filter -P INPUT ACCEPT
 	iptables -t filter -P OUTPUT ACCEPT
@@ -69,7 +69,7 @@ function flush_all() { #{{{
 #}}}
 
 # Load current rules via alff-cat
-function load_rules() { #{{{
+load_rules () { #{{{
 	# First check for an existing DELETE_ME_TOKEN, to be aware of a reboot while
 	# alff-cat was running. Maybe something went wrong.
 	if [ -f "${DELETE_ME_TOKEN}" ]; then
@@ -145,7 +145,7 @@ case "${1}" in
 		;;
 
 	# Restart the whole firewall system
-	restart)
+	restart|force-reload)
 		$0 stop
 		$0 start
 		;;
@@ -155,7 +155,7 @@ case "${1}" in
 		$0 start
 		;;
 	*)
-		echo "Usage: $0 { start | stop | reload | restart }" >&2
+		echo "Usage: $0 { start | stop | reload | restart | force-reload }" >&2
 		exit 1
 		;;
 esac

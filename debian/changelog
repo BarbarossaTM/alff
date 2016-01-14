@@ -1,4 +1,4 @@
-alff (0.2.0) unstable; urgency=low
+alff (0.2.0-1) unstable; urgency=low
   
   Main Features:
   * Complete rewrite in python
@@ -22,7 +22,7 @@ alff (0.2.0) unstable; urgency=low
   * Add basic function loading framework and base class.
   * Add 'generate' function and base plugin.
   * Add classify_inter_vlan_traffic plugin.
-  * Add alff.py main programm providing full site awareness.
+  * Add alff.py main program providing full site awareness.
   * Add logging support to ruleset module.
   * Never ever at all remove empty table from the ruleset.
   * Add support to remove unreferenced chains from ruleset.

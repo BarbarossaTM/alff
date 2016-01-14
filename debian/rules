@@ -63,6 +63,7 @@ binary-arch: build install
 #	dh_installexamples
 	dh_installinit --noscripts
 	dh_installman -palff-rulegen man/alff.conf.5 man/alff.1
+	dh_installman -palff-agent man/alff-cat.1
 	dh_compress
 	dh_fixperms
 	dh_installdeb

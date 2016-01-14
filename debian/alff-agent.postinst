@@ -1,14 +1,13 @@
-#!/bin/sh
+#!/bin/sh -e
 #
 # alff-agent.postinst
 #
 
 if [ -x "/etc/init.d/alff-agent" ]; then
 	# start alff-agent as soon as possible after the network has been initialized.
-	#update-rc.d alff-agent start 41 S . >/dev/null
-	insserv alff-agent
+	update-rc.d alff-agent defaults >/dev/null
 fi
 
 # create rules dir
-source /etc/alff/allf-defaults.conf
-mkdir -p ${RULES_DIR}
+. /etc/alff/allf-defaults.conf
+[ -d ${RULES_DIR} ] || mkdir -p ${RULES_DIR}

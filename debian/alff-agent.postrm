@@ -1,0 +1,8 @@
+#!/bin/sh -e
+#
+# alff-agent.postrm
+#
+
+if [ "$1" = purge ]; then
+	update-rc.d alff-agent remove
+fi

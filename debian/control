@@ -16,7 +16,7 @@ Description: A Linux Firewall Framework - rule generation
 
 Package: alff-agent
 Architecture: all
-Depends: iptables, mailx, bash
+Depends: iptables, bsd-mailx, bash (>=3.0.0)
 Description: A Linux Firewall Framework - rule loading agent
  This package is part of "A Linux Firewall Framework".
  .
