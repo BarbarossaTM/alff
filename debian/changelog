@@ -1,4 +1,4 @@
-alff (0.2.0-rc1) unstable; urgency=low
+alff (0.2.0) unstable; urgency=low
   
   Main Features:
   * Complete rewrite in python
