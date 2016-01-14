@@ -8,3 +8,7 @@ if [ -x "/etc/init.d/alff-agent" ]; then
 	#update-rc.d alff-agent start 41 S . >/dev/null
 	insserv alff-agent
 fi
+
+# create rules dir
+source /etc/alff/allf-defaults.conf
+mkdir -p ${RULES_DIR}
