@@ -9,5 +9,5 @@ if [ -x "/etc/init.d/alff-agent" ]; then
 fi
 
 # create rules dir
-. /etc/alff/allf-defaults.conf
+. /etc/alff/alff-defaults.conf
 [ -d ${RULES_DIR} ] || mkdir -p ${RULES_DIR}
