@@ -78,6 +78,8 @@ class Function (BaseFunction):
 	def run (self):
 		self._setup_plugins ()
 
+		execute_hooks ("pregenerate", "ALL", self.config, self.log)
+
 		for site in self.sites:
 			self.log.info ("Generating rules for site %s ..." % site)
 
@@ -90,19 +92,21 @@ class Function (BaseFunction):
 			ruleset.clear_cache ()
 
 			# Execute any pregenerate hooks, if present
-			execute_hooks ("pregenerate", self.config, self.log)
+			execute_hooks ("pregenerate", site, self.config, self.log)
 
 			self._execute_plugins (ruleset, site)
 
 			self._load_user_rules (ruleset)
 
 			# Execute any postgenerate hooks, if present
-			execute_hooks ("postgenerate", self.config, self.log)
+			execute_hooks ("postgenerate", site, self.config, self.log)
 
 			ruleset.save_ruleset (4)
 			ruleset.save_ruleset (6)
 
 			self.log.info ("Successfully generated and save rulesets for site %s." % site)
+
+		execute_hooks ("postgenerate", "ALL", self.config, self.log)
 
 
 	def _setup_plugins (self):

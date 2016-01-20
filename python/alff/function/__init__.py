@@ -28,6 +28,7 @@ import os.path
 
 from   alff.errors import *
 from   alff.utils  import *
+import subprocess
 
 FUNCTION_DIRS = ( "/usr/lib/python2.7/dist-packages/alff/alff/function", "/etc/alff/functions" )
 
@@ -87,12 +88,46 @@ def load_functions (log):
 	return functions
 
 
-def execute_hooks (hookname, config, log):
-	hook_dir = "%s/hook.d/%s" % (config.get_config_dir (), hookname)
+def execute_hooks (hookname, site, config, log):
+	print("Executing hooks: %s, Site: %s" % (hookname, site))
+	hook_dir = "%s/hooks.d/%s/%s" % (config.get_config_dir (), hookname, site)
 
 	# If there is no configuration dirctory for this hook,
 	# there's nothing to do here.
 	if not os.path.isdir (hook_dir):
 		return
 
-	# TODO  actual magic  TODO
+	# only call executeable files
+	# hooks must return either return value 0 if everything went fine or
+	# value > 0 if not. Generation of ruleset will end on any error
+	hooks = [f for f in os.listdir(hook_dir) if os.path.isfile(hook_dir + "/" + f) and os.access(hook_dir + "/" + f, os.X_OK) ]
+	count = len(hooks)
+	i = 0
+	for hook in hooks:
+		i += 1
+		print("[%s/%s] %s" % (i, count, hook))
+		hook_path = hook_dir + "/" + hook
+
+		# execute hooks
+		try:
+			# set some ALFF-specific environment variables and concat environment from the calling shell
+			envvars = {'ALFF_SITE': site, 'ALFF_CONFIG_DIR': config.get_config_dir()}
+			for key, var in os.environ.iteritems():
+				envvars[key] = var
+
+			proc = subprocess.Popen(hook_path, shell=True, env=envvars, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			output = proc.communicate()
+			retcode = proc.returncode
+
+			if retcode > 0:
+				raise AlffError ("Error while executing hook %s: %s" % (hook, output[1]))
+
+			# provide output
+			if output[0]:
+				stdout = output[0]
+				for line in iter(stdout.splitlines(True)):
+					line = line.replace("\n", "")
+					print ("[%s/%s] %s: %s" % (i, count, hook, line))
+
+		except OSError as e:
+			raise AlffError ("Error while executing hook %s: %s" % hook, e)
