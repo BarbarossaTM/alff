@@ -1,5 +1,0 @@
-Place scripts in this file, which should be executed after alff has
-sucessfully generated your ruleset.
-
-All which with executable rigths will be run.
-Files without executable bits set, will not be run.

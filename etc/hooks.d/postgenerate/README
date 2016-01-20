@@ -1,0 +1,14 @@
+Place scripts in this file, which should be executed after alff has
+sucessfully generated your ruleset.
+
+All which with executable rigths will be run.
+Files without executable bits set, will not be run.
+
+Hooks can be called before all sites and per site.
+Therefore the hooks for e.g. pregenerate must resist in 
+<alff-config-dir>/hooks.d/pregenerate/[ ALL | <site> ]
+
+Hooks must end with an exitcode. Hooks ending with exitcode != 0
+cause the rule generation to abort. STDOUT is given on success, STDERR
+will be displayed on termination with exitcode != 0.
+
