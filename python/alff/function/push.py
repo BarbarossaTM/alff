@@ -64,8 +64,14 @@ class Function (BaseFunction):
 		self.sites = self.args.site
 
 	def run (self):
+
+		execute_hooks ("prepush", "ALL", self.config, self.log)
+
 		# TODO Regeln an einzelne Maschinen uebertragen
 		for site in self.sites:
+			# execute hooks
+			execute_hooks ("prepush", site, self.config, self.log)
+
 			self.log.info("Pushing Rules to (specified) Firewalls at site '%s'" % site)
 			machines = self.config.get_machine_ids(site)
 			for machine in machines:
@@ -79,6 +85,11 @@ class Function (BaseFunction):
 			for machine in machines:
 				# finally load the previously pushed rules
 				self._init_and_validate_loading(site, machine)
+
+			#execute hooks
+			execute_hooks ("postpush", site, self.config, self.log)
+
+		execute_hooks ("postpush", "ALL", self.config, self.log)
 
 	def _push_ruleset(self, site, machine):
 		self.log.info("\tPushing ruleset to '%s'" % machine)
