@@ -87,10 +87,11 @@ class Service (object):
 
 	def get_allowed_networks (self):
 		networks = []
-		for key in self.service_config.keys ():
+		for key,val in self.service_config.items ():
 			m = re.search ('allow_from_(\w+)_networks', key)
 			if m:
-				networks.append (m.group (1).title ())
+				if val == "yes":
+					networks.append (m.group (1).title ())
 		return networks
 
 	# internal methods
