@@ -1,3 +1,9 @@
+alff (0.2.2) unstable; urgency=medium
+
+  * Fixed generation of network based rules
+
+ -- Michael Schwarz <mschwar2@math.uni-paderborn.de>  Mon, 15 Aug 2016 11:27:24 +0100
+
 alff (0.2.1) unstable; urgency=medium
 
   * Implement execution of hooks
