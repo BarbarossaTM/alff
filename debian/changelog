@@ -1,3 +1,10 @@
+alff (0.2.3) stable; urgency=medium
+
+  * Accept portranges in service definitions
+  * Checks for portdefinitions in services
+
+ -- Michael Schwarz <mschwar2@math.uni-paderborn.de>  Mon, 16 Oct 2017 12:53:13 +0200
+
 alff (0.2.2) unstable; urgency=medium
 
   * Fixed generation of network based rules
