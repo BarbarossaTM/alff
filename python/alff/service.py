@@ -96,4 +96,18 @@ class Service (object):
 
 	# internal methods
 	def _validate_port (self, port):
-		return True
+		m = re.search("([\d:]+)/(tcp|udp)", port)
+		if m:
+			n = re.search("(\d+):(\d+)", m.group(1))
+			if n:
+				if int(n.group(1)) > 65536 or int(n.group(1)) < 0:
+					return False
+				if int(n.group(2)) > 65536 or int(n.group(2)) < 0:
+					return False
+				if int(n.group(1)) >= int(n.group(2)):
+					return False
+				return True
+			else:
+				if int(m.group(1)) < 65536 and int(m.group(1)) > 0:
+					return True
+		return False
