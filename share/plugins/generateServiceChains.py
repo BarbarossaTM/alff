@@ -79,7 +79,7 @@ class Plugin (BasePlugin):
 			for host in service.get_hosts():
 				for port in service.get_ports():
 
-                                        m = re.search('([\d:]+)/(tcp|udp)', port)
+					m = re.search('([\d:]+)/(tcp|udp)', port)
 					port_number = m.group(1)
 					port_proto = m.group(2)
 
