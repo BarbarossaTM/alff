@@ -38,7 +38,7 @@ def load_module_from_file (module_name, path):
 	except ImportError as i:
 		raise AlffError ("Failed to load module from '%s': %s" % (path, i))
 	except Exception as e:
-		raise AlffError ("Unknowd error while loading module from '%s': %s" % (path, e))
+		raise AlffError ("Unknown error while loading module from '%s': %s" % (path, e))
 
 	return module
 

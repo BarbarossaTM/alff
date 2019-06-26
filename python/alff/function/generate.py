@@ -165,7 +165,7 @@ class Function (BaseFunction):
 			# XXX FunctionError ?
 			raise AlffError ("Failed to load plugin '%s': %s" % (name, i))
 		except Exception as e:
-			raise AlffError ("Unknowd error while loading plugin '%s': %s" % (name, e))
+			raise AlffError ("Unknown error while loading plugin '%s': %s" % (name, e))
 
 		try:
 			constructor = get_class (module, "Plugin")
