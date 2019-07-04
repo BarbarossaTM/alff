@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 #  A Linux Firewall Framework
 #
@@ -30,7 +30,7 @@ from   alff.errors import *
 from   alff.utils  import *
 import subprocess
 
-FUNCTION_DIRS = ( "/usr/lib/python2.7/dist-packages/alff/alff/function", "/etc/alff/functions" )
+FUNCTION_DIRS = ( "/usr/lib/python3/dist-packages/alff/alff/function", "/etc/alff/functions" )
 
 class BaseFunction (object):
 
@@ -112,7 +112,7 @@ def execute_hooks (hookname, site, config, log):
 		try:
 			# set some ALFF-specific environment variables and concat environment from the calling shell
 			envvars = {'ALFF_SITE': site, 'ALFF_CONFIG_DIR': config.get_config_dir()}
-			for key, var in os.environ.iteritems():
+			for key, var in os.environ.items():
 				envvars[key] = var
 
 			proc = subprocess.Popen(hook_path, shell=True, env=envvars, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -120,7 +120,7 @@ def execute_hooks (hookname, site, config, log):
 			retcode = proc.returncode
 
 			if retcode > 0:
-				raise AlffError ("Error while executing hook %s: %s" % (hook, output[1]))
+				raise AlffError ("Error while executing hook %s: %s" % (hook, output[1].decode()))
 
 			# provide output
 			if output[0]:

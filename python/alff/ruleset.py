@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 #  A Linux Firewall Framework
 #
@@ -54,7 +54,7 @@ class Ruleset (object):
 
 		if not os.path.isdir (self.rules_dir):
 			try:
-				os.makedirs (self.rules_dir, 0700)
+				os.makedirs (self.rules_dir, 0o700)
 			except Exception as e:
 				raise RulesetError ("Error while creating rules cache dir '%s': %s" % (self.rules_dir, e))
 
@@ -69,7 +69,7 @@ class Ruleset (object):
 		}
 
 
-		for protocol, ruleset in self.ruleset.iteritems ():
+		for protocol, ruleset in self.ruleset.items ():
 			for table in TABLES:
 				# Do not create nat table for ipv6 unless the user forced this
 				if protocol == 6 and table == "nat" and not self.support_ipv6_nat:
@@ -150,6 +150,8 @@ class Ruleset (object):
 
 
 	def add_rule (self, string):
+		if isinstance(string, bytes):
+			string = string.decode()
 		protocol = ""
 		table = "filter"
 		chain = None
@@ -237,7 +239,7 @@ class Ruleset (object):
 							# There is another parameter, but it isn't an int value, let's see
 							# if it's just another parameter spec, which would be fine, or something
 							# unexpected, which we will treat as an error.
-							if not cmd[i].startswith ("-"):
+							if not cmd[i].startswith ('-'):
 								raise RulesetError ("Bad index parameter to insert rule: %s" % cmd[i+1], string)
 						else:
 							# There was another parameter and it was an int value.
@@ -412,7 +414,6 @@ class Ruleset (object):
 			fh = open (filename, "w")
 		except Exception as i:
 			raise RulesetError ("Error while opening rules file '%s': %s" % (filename, i))
-
 
 		for table in TABLES:
 			# Do not create nat table for ipv6 unless the user forced this

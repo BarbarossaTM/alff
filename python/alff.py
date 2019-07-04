@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 #  A Linux Firewall Framework
 #
@@ -52,7 +52,7 @@ try:
 	if "-v" in sys.argv or "--verbose" in sys.argv:
 		log.setLevel (logging.DEBUG)
 except Exception as e:
-	print >>sys.stderr, "Failed to set up logging: %s" % e
+	print ("Failed to set up logging: %s".format(e), file=sys.stderr)
 
 log.info ("The ALFF Linux Firewall Framework awakes...")
 

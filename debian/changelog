@@ -1,4 +1,16 @@
-alff (0.2.3) stable; urgency=medium
+alff (0.3.0) unstable; urgency=low
+
+  * In 2020 python 2.7 will become unsupported. Move to python3 now.
+
+ -- Michael Schwarz <mschwar2@math.uni-paderborn.de>  Mon, 26 Jun 2019 10:56:18 +0200
+
+alff (0.2.4) unstable; urgency=medium
+
+  * DHCRelay uses port 67 as sourceport
+
+ -- Michael Schwarz <mschwar2@math.uni-paderborn.de>  Mon, 11 Jun 2018 14:46:18 +0200
+
+alff (0.2.3) unstable; urgency=medium
 
   * Accept portranges in service definitions
   * Checks for portdefinitions in services
