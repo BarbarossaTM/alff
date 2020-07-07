@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 #  Linux Firewall Framework
 #
@@ -22,11 +22,9 @@
 #  --  Sat 04 Jan 2014 01:37:53 AM CET
 #
 
-# XXX Python 2.x style, needs update for Python 3.x
-import imp
+from importlib.machinery import SourceFileLoader
 import inspect
-# If we're on Python 3.3 we might want to use module "ipaddress" instead.
-import ipaddr
+import ipaddress
 import os
 
 from alff.errors import *
@@ -34,11 +32,11 @@ from alff.errors import *
 
 def load_module_from_file (module_name, path):
 	try:
-		module = imp.load_source (module_name, path)
+		module = SourceFileLoader(module_name, path).load_module()
 	except ImportError as i:
 		raise AlffError ("Failed to load module from '%s': %s" % (path, i))
 	except Exception as e:
-		raise AlffError ("Unknowd error while loading module from '%s': %s" % (path, e))
+		raise AlffError ("Unknown error while loading module from '%s': %s" % (path, e))
 
 	return module
 
@@ -69,9 +67,6 @@ def join_path (*components):
 
 
 def ip_version (ip):
-	if '/' in ip:
-		obj = ipaddr.IPNetwork (ip)
-	else:
-		obj = ipaddr.IPAddress (ip)
+	obj = ipaddress.ip_interface(ip)
 
 	return obj.version

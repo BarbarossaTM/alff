@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 #  Linux Firewall Framework
 #
@@ -67,9 +67,19 @@ class Plugin (BasePlugin):
 					ruleset.add_rule("iptables -A allowDHCP -d %s -p udp --sport 68 --dport 67 -j ACCEPT" % server)
 					ruleset.add_rule("iptables -A allowDHCP -s %s -p udp --sport 67 --dport 68 -j ACCEPT" % server)
 					ruleset.add_rule("iptables -A allowDHCP -s %s -p udp --sport 67 --dport 67 -j ACCEPT" % server)
+					for relay_site in self.config.get_sites():
+						for machine in self.config.get_machine_ids(relay_site):
+							relay = self.config.get_machine_ip(machine, relay_site)
+							if relay and ip_version (relay) == 4:
+								ruleset.add_rule("iptables -A allowDHCP -s %s -d %s -p udp --sport 67 --dport 67 -j ACCEPT" % (relay, server))
 				elif ip_version (server) == 6:
 					ruleset.add_rule("ip6tables -A allowDHCP -d %s -p udp --sport 546 --dport 547 -j ACCEPT" % server)
 					ruleset.add_rule("ip6tables -A allowDHCP -s %s -p udp --sport 547 --dport 546 -j ACCEPT" % server)
 					ruleset.add_rule("ip6tables -A allowDHCP -s %s -p udp --sport 547 --dport 547 -j ACCEPT" % server)
+					for relay_site in self.config.get_sites():
+						for machine in self.config.get_machine_ids(relay_site):
+							relay = self.config.get_machine_ip6(machine, relay_site)
+							if relay and ip_version (relay) == 6:
+								ruleset.add_rule("ip6tables -A allowDHCP -s %s -d %s -p udp --sport 67 --dport 67 -j ACCEPT" % (relay, server))
 				else:
 					raise ConfigError("Malformed DHCP-Address: %s" % server)

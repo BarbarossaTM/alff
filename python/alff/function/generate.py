@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 #  A Linux Firewall Framework
 #
@@ -113,8 +113,8 @@ class Function (BaseFunction):
 		# Read and plugins in numerical order. Remeber plugins are named 'NNxxxx',
 		# where NN is a two digit number indicating execution order.
 		try:
-			plugins_unsorted = [ f for f in os.listdir (self.plugin_dir) if re.match ("^[0-9]{2}", f) and not f.endswith (".pyc") ]
-			plugins = sorted (plugins_unsorted, cmp = lambda x,y: cmp (int (x[0:1]), int (y[0:1])))
+			plugins = [ f for f in os.listdir (self.plugin_dir) if re.match ("^[0-9]{2}", f) and not f.endswith (".pyc") ]
+			plugins.sort()
 		except (IndexError, IOError, ValueError) as e:
 			raise ConfigError ("Error reading plugins from configuration dir '%s': %s" % (self.plugin_dir, e))
 
@@ -165,7 +165,7 @@ class Function (BaseFunction):
 			# XXX FunctionError ?
 			raise AlffError ("Failed to load plugin '%s': %s" % (name, i))
 		except Exception as e:
-			raise AlffError ("Unknowd error while loading plugin '%s': %s" % (name, e))
+			raise AlffError ("Unknown error while loading plugin '%s': %s" % (name, e))
 
 		try:
 			constructor = get_class (module, "Plugin")
@@ -246,7 +246,7 @@ class Function (BaseFunction):
 		self.log.info ("Loading user rules..")
 
 		try:
-			files = [f for f in os.listdir (rules_d_path) if "_to_" not in f and f != "README" and not f.startswith (".") ]
+			files = [f for f in os.listdir (rules_d_path) if "_to_" not in f and f != "README" and not f.startswith ('.') ]
 		except IOError as i:
 			raise AlffError ("Failed to read user rule files from rules.d/: %s" % i)
 

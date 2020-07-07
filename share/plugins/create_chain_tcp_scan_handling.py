@@ -1,5 +1,5 @@
 
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 #  Linux Firewall Framework
 #
